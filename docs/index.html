@@ -6,90 +6,282 @@
   <title>EC2 Instance Advisor</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 0; color: #111; background: linear-gradient(180deg,#f8fbff 0%, #f5f7ff 100%); }
-    h1 { margin-bottom: 6px; }
-    .muted { color: #666; margin-top: 0; }
-    .page { max-width: 1200px; margin: 24px auto; padding: 0 16px 24px; }
-    .grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
-    .card { border: 1px solid #dbe4ff; border-radius: 14px; padding: 14px; background:#fff; box-shadow: 0 6px 20px rgba(19,49,130,0.06);} 
-    label { font-size: 14px; display: block; margin: 8px 0 4px; }
-    select, input[type='range'] { width: 100%; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1px solid #edf1ff; padding: 8px; text-align: left; }
-    tr:nth-child(even){background:#fafcff;}
-    .top { margin: 12px 0; padding: 12px; background: #f6f9ff; border: 1px solid #d9e7ff; border-radius: 12px; }
-    .error { background: #fff4f4; border-color: #ffcaca; }
+    :root {
+      --bg: #f5f8ff;
+      --card: #ffffff;
+      --ink: #101828;
+      --muted: #667085;
+      --line: #e3eafc;
+      --accent: #3b82f6;
+      --accent-2: #1d4ed8;
+      --success-bg: #effaf3;
+      --success-line: #b8e6c4;
+      --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 0% 0%, #eef4ff 0%, var(--bg) 46%, #f8faff 100%);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px 16px 28px;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .muted { color: var(--muted); margin: 6px 0 0; font-size: 14px; }
+
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      display: inline-block;
+      font-size: 12px;
+      color: #1849a9;
+      background: #eaf2ff;
+      border: 1px solid #cfe0ff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      margin: 10px 0 6px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    select, input[type='range'], button {
+      width: 100%;
+    }
+
+    select {
+      border: 1px solid #d7e3ff;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+      background: #fff;
+      color: #0f172a;
+    }
+
+    input[type='range'] { accent-color: var(--accent); }
+
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+
+    button {
+      border: 1px solid #cfe0ff;
+      background: #eff5ff;
+      color: #1849a9;
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: #e7f0ff; }
+
+    .summary {
+      margin: 0 0 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #d7e7ff;
+      background: #f5f9ff;
+      font-size: 14px;
+    }
+
+    .summary.good {
+      background: var(--success-bg);
+      border-color: var(--success-line);
+    }
+
+    .error {
+      background: #fff2f2;
+      border-color: #ffcaca;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .chart {
+      min-height: 380px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      border: 1px solid #e7ecfb;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead th {
+      background: #f3f7ff;
+      color: #1f2937;
+      font-weight: 700;
+      border-bottom: 1px solid #e0e8ff;
+      padding: 10px 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    td {
+      border-bottom: 1px solid #edf2ff;
+      padding: 9px 8px;
+      color: #243244;
+    }
+
+    tbody tr:nth-child(even) { background: #fbfcff; }
+    tbody tr:hover { background: #f2f7ff; }
+
+    .table-wrap { max-height: 360px; overflow: auto; border-radius: 10px; }
+
     ul { margin: 8px 0; padding-left: 18px; }
-    .pill {display:inline-block;background:#eaf1ff;color:#234; border:1px solid #ccdcff;padding:4px 10px;border-radius:999px;font-size:12px;margin-right:6px;}
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr;} }
+    li { margin: 5px 0; color: #334155; }
+
+    .small { font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .page { padding: 14px 10px 24px; }
+      h1 { font-size: 24px; }
+    }
   </style>
 </head>
 <body>
   <div class="page">
-  <h1>EC2 Instance Advisor</h1>
-  <div><span class="pill">AWS Snapshot</span><span class="pill">GitHub Pages</span><span class="pill">Cost vs Performance</span></div>
-  <p class="muted">Filter by region and instance type (CPU/GPU/Memory/Storage/General), then tune weights.</p>
-  <p class="muted">Data snapshot source: AWS Price List (one-time pull, static CSV).</p>
-
-  <div class="grid">
-    <div class="card">
-      <label><b>Region (with pagination)</b></label>
-      <div style="display:flex; gap:8px; margin-bottom:6px;">
-        <button id="prevRegion" type="button">◀ Prev</button>
-        <button id="nextRegion" type="button">Next ▶</button>
+    <div class="header">
+      <div>
+        <h1>EC2 Instance Advisor</h1>
+        <p class="muted">Production-ready static advisor using one-time AWS snapshot data.</p>
       </div>
-      <select id="region"></select>
-      <div class="muted" id="regionPage" style="font-size:12px; margin-top:4px;"></div>
-
-      <label><b>Category filter (CPU / GPU / Memory / Storage / General)</b></label>
-      <select id="category"></select>
-
-      <label><b>2nd Graph Metric (Y-axis)</b></label>
-      <select id="metric">
-        <option value="vcpus">vCPUs</option>
-        <option value="memory_gib">Memory (GiB)</option>
-        <option value="gpu_count">GPU Count</option>
-        <option value="network_score">Network Score</option>
-        <option value="price_usd_hour">Price (USD/hr)</option>
-      </select>
-
-      <label>Price importance: <span id="wPriceVal">35</span>%</label>
-      <input id="wPrice" type="range" min="0" max="100" value="35" />
-
-      <label>CPU importance: <span id="wCpuVal">25</span>%</label>
-      <input id="wCpu" type="range" min="0" max="100" value="25" />
-
-      <label>Memory importance: <span id="wMemVal">20</span>%</label>
-      <input id="wMem" type="range" min="0" max="100" value="20" />
-
-      <label>Network importance: <span id="wNetVal">10</span>%</label>
-      <input id="wNet" type="range" min="0" max="100" value="10" />
-
-      <label>GPU importance: <span id="wGpuVal">10</span>%</label>
-      <input id="wGpu" type="range" min="0" max="100" value="10" />
+      <div class="chip-row">
+        <span class="chip">AWS Snapshot</span>
+        <span class="chip">GitHub Pages</span>
+        <span class="chip">Cost vs Performance</span>
+      </div>
     </div>
 
-    <div>
-      <div id="best" class="top"></div>
-      <div id="explain" class="top" style="background:#f9fff6;border-color:#d9f0cf"></div>
-      <div id="types" class="top"></div>
-      <div id="chart" class="card" style="min-height: 390px;"></div>
-      <div id="chart2" class="card" style="min-height: 360px; margin-top: 12px;"></div>
-      <div class="card" style="margin-top: 12px;">
-        <h3 style="margin-top:0;">How to choose the right EC2 instance</h3>
-        <ul>
-          <li><b>Step 1 — Choose workload type:</b> CPU for compute-heavy jobs, GPU for ML/AI, Memory for large RAM workloads, Storage for high-IOPS, General for balanced apps.</li>
-          <li><b>Step 2 — Pick region:</b> Keep compute close to users/data to reduce latency and often cost.</li>
-          <li><b>Step 3 — Set priorities:</b> Increase Price weight for cost control; increase CPU/Memory/Network/GPU weights for performance-critical workloads.</li>
-          <li><b>Step 4 — Read the graph:</b> X-axis is price (lower is cheaper), Y-axis is performance index (higher is stronger). Best value often sits toward the upper-left for your selected category.</li>
-          <li><b>Step 5 — Validate in production:</b> Start with a short benchmark, monitor CPU/memory/network/GPU utilization, then right-size.</li>
-        </ul>
-      </div>
+    <div class="layout">
+      <aside class="card">
+        <h3 class="section-title">Filters & Controls</h3>
 
-      <div class="card" style="margin-top: 12px;">
-        <h3 style="margin-top:0;">Top Candidates</h3>
-        <table id="table"></table>
-      </div>
+        <label>Region (with pagination)</label>
+        <div class="btn-row">
+          <button id="prevRegion" type="button">◀ Prev</button>
+          <button id="nextRegion" type="button">Next ▶</button>
+        </div>
+        <select id="region"></select>
+        <div class="small" id="regionPage" style="margin-top:6px"></div>
+
+        <label>Category filter (CPU / GPU / Memory / Storage / General)</label>
+        <select id="category"></select>
+
+        <label>2nd Graph Metric (Y-axis)</label>
+        <select id="metric">
+          <option value="vcpus">vCPUs</option>
+          <option value="memory_gib">Memory (GiB)</option>
+          <option value="gpu_count">GPU Count</option>
+          <option value="network_score">Network Score</option>
+          <option value="price_usd_hour">Price (USD/hr)</option>
+        </select>
+
+        <label>Price importance: <span id="wPriceVal">35</span>%</label>
+        <input id="wPrice" type="range" min="0" max="100" value="35" />
+
+        <label>CPU importance: <span id="wCpuVal">25</span>%</label>
+        <input id="wCpu" type="range" min="0" max="100" value="25" />
+
+        <label>Memory importance: <span id="wMemVal">20</span>%</label>
+        <input id="wMem" type="range" min="0" max="100" value="20" />
+
+        <label>Network importance: <span id="wNetVal">10</span>%</label>
+        <input id="wNet" type="range" min="0" max="100" value="10" />
+
+        <label>GPU importance: <span id="wGpuVal">10</span>%</label>
+        <input id="wGpu" type="range" min="0" max="100" value="10" />
+      </aside>
+
+      <main class="grid-2">
+        <div id="best" class="summary"></div>
+        <div id="explain" class="summary good"></div>
+
+        <div class="card">
+          <h3 class="section-title">Instance Type Guide</h3>
+          <div id="types"></div>
+        </div>
+
+        <div id="chart" class="chart"></div>
+        <div id="chart2" class="chart"></div>
+
+        <div class="card">
+          <h3 class="section-title">How to choose the right EC2 instance</h3>
+          <ul>
+            <li><b>Step 1 — Choose workload type:</b> CPU for compute-heavy jobs, GPU for ML/AI, Memory for large RAM workloads, Storage for high-IOPS, General for balanced apps.</li>
+            <li><b>Step 2 — Pick region:</b> Keep compute close to users/data to reduce latency and often cost.</li>
+            <li><b>Step 3 — Set priorities:</b> Increase Price weight for cost control; increase CPU/Memory/Network/GPU weights for performance-critical workloads.</li>
+            <li><b>Step 4 — Read the graphs:</b> Scatter compares cost vs performance. Bar chart compares instance-level metrics directly.</li>
+            <li><b>Step 5 — Validate in production:</b> Benchmark and monitor utilization before finalizing the instance type.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Top Candidates</h3>
+          <div class="table-wrap"><table id="table"></table></div>
+        </div>
+      </main>
     </div>
   </div>
 
@@ -99,8 +291,6 @@
     const sliders = ['wPrice','wCpu','wMem','wNet','wGpu'];
     const el = id => document.getElementById(id);
 
-    
-
     const metricLabel = {
       vcpus: 'vCPUs',
       memory_gib: 'Memory (GiB)',
@@ -109,25 +299,11 @@
       price_usd_hour: 'Price (USD/hr)',
     };
 
-    function syncRegionPager() {
-      const region = el('region').value;
-      const idx = state.regions.indexOf(region);
-      if (idx >= 0) state.regionIdx = idx;
-      el('regionPage').textContent = `Region ${state.regionIdx + 1} of ${state.regions.length}`;
-    }
-
-    function stepRegion(delta) {
-      if (!state.regions.length) return;
-      state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
-      el('region').value = state.regions[state.regionIdx];
-      syncRegionPager();
-      render();
-    }
-const typeExplain = {
-      CPU: 'Compute-optimized instances for CPU-heavy jobs like builds, encoding, game servers, and high-QPS APIs.',
-      GPU: 'Accelerated instances for ML training/inference, rendering, and workloads that need CUDA/GPUs.',
-      Memory: 'Memory-optimized instances for large caches, analytics, and in-memory databases.',
-      Storage: 'Storage-optimized instances for high IOPS and low-latency local NVMe-intensive workloads.',
+    const typeExplain = {
+      CPU: 'Compute-optimized for CPU-heavy jobs like builds, encoding, high-QPS APIs.',
+      GPU: 'Accelerated instances for ML training/inference, rendering, and CUDA workloads.',
+      Memory: 'Memory-optimized for large caches, in-memory analytics, JVM-heavy services.',
+      Storage: 'Storage-optimized for high IOPS and low-latency local NVMe workloads.',
       General: 'Balanced instances for common web apps, microservices, and mixed workloads.'
     };
 
@@ -158,6 +334,21 @@ const typeExplain = {
       el('best').innerHTML = `<b>Error:</b> ${msg}`;
     }
 
+    function syncRegionPager() {
+      const region = el('region').value;
+      const idx = state.regions.indexOf(region);
+      if (idx >= 0) state.regionIdx = idx;
+      el('regionPage').textContent = `Region ${state.regionIdx + 1} of ${state.regions.length}`;
+    }
+
+    function stepRegion(delta) {
+      if (!state.regions.length) return;
+      state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
+      el('region').value = state.regions[state.regionIdx];
+      syncRegionPager();
+      render();
+    }
+
     function explainWhy(best, rows) {
       const cheapest = rows.reduce((a,b)=> a.price_usd_hour < b.price_usd_hour ? a : b);
       const strongest = rows.reduce((a,b)=> (a.perf || 0) > (b.perf || 0) ? a : b);
@@ -170,7 +361,7 @@ const typeExplain = {
 
     function renderTypeExplanations() {
       const lines = Object.entries(typeExplain).map(([k,v]) => `<li><b>${k}</b>: ${v}</li>`).join('');
-      el('types').innerHTML = `<b>Instance type guide</b><ul>${lines}</ul>`;
+      el('types').innerHTML = `<ul>${lines}</ul>`;
     }
 
     function render() {
@@ -225,13 +416,10 @@ const typeExplain = {
         title: 'Price vs Performance (x = hourly cost, y = computed performance index)',
         xaxis: { title: 'Price (USD/hr)' },
         yaxis: { title: 'Performance index' },
-        margin: { t: 40 }
+        margin: { t: 44 }
       }, {responsive:true});
 
-
-      const pageSize = 10;
-      const start = 0;
-      const pageRows = rows.slice(start, start + pageSize);
+      const pageRows = rows.slice(0, 10);
       Plotly.newPlot('chart2', [{
         x: pageRows.map(r=>r.instance_type),
         y: pageRows.map(r=>r[metric]),
@@ -245,10 +433,10 @@ const typeExplain = {
         margin: { t: 46 }
       }, {responsive:true});
 
-      const head = `<tr><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr>`;
-      const body = rows.slice(0,10).map(r =>
+      const head = `<thead><tr><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr></thead>`;
+      const body = `<tbody>${rows.slice(0,20).map(r =>
         `<tr><td>${r.instance_type}</td><td>${r.instance_category}</td><td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.gpu_count}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
-      ).join('');
+      ).join('')}</tbody>`;
       el('table').innerHTML = head + body;
     }
 
@@ -267,11 +455,18 @@ const typeExplain = {
         state.regionIdx = 0;
         if (regions.length) el('region').value = regions[0];
         syncRegionPager();
+
         el('category').innerHTML = categories.map(v=>`<option>${v}</option>`).join('');
 
-        ['region','category','metric',...sliders].forEach(id => el(id).addEventListener('input', () => { if (id==='region') syncRegionPager(); render(); }));
+        ['region','category','metric',...sliders].forEach(id => {
+          el(id).addEventListener('input', () => {
+            if (id === 'region') syncRegionPager();
+            render();
+          });
+        });
         el('prevRegion').addEventListener('click', () => stepRegion(-1));
         el('nextRegion').addEventListener('click', () => stepRegion(1));
+
         renderTypeExplanations();
         render();
       } catch (e) {
@@ -281,6 +476,5 @@ const typeExplain = {
 
     boot();
   </script>
-  </div>
 </body>
 </html>
