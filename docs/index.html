@@ -674,15 +674,15 @@
         <div class="hero-stats">
           <div>
             <div class="hero-stat-val" id="heroInstances">—</div>
-            <div class="hero-stat-lbl">Instances</div>
+            <div class="hero-stat-lbl">Instance Types</div>
           </div>
           <div>
             <div class="hero-stat-val" id="heroFamilies">—</div>
-            <div class="hero-stat-lbl">Families</div>
+            <div class="hero-stat-lbl">Sub-families</div>
           </div>
           <div>
             <div class="hero-stat-val" id="heroRegions">—</div>
-            <div class="hero-stat-lbl">Regions</div>
+            <div class="hero-stat-lbl">AWS Regions</div>
           </div>
         </div>
 
@@ -1117,37 +1117,37 @@ const FAMILY_INFO = {
   CPU: {
     icon: '⚙️', name: 'Compute Optimized', tag: 'CPU',
     color: '#3b82f6', bg: '#eff6ff',
-    desc: 'High vCPU-to-memory ratio. Best for processor-intensive tasks that need sustained throughput.',
-    useCases: ['Web APIs','Batch processing','Video encoding','HPC'],
-    examples: 'c5, c6i, c7g',
+    desc: 'High vCPU-to-memory ratio. Best for processor-intensive tasks that need sustained throughput. Includes Intel (c5/c6i/c7i), AMD (c6a/c7a), Graviton (c6g/c7g), and HPC (hpc7g) variants.',
+    useCases: ['Web APIs','Batch processing','Video encoding','HPC / MPI'],
+    examples: 'c5, c6i, c6a, c6g, c7i, c7a, c7g, hpc7g',
   },
   GPU: {
-    icon: '🎮', name: 'Accelerated (GPU)', tag: 'GPU',
+    icon: '🎮', name: 'Accelerated (GPU / ML)', tag: 'GPU',
     color: '#8b5cf6', bg: '#f5f3ff',
-    desc: 'NVIDIA/AMD GPUs for massively parallel workloads. Required for serious deep learning.',
-    useCases: ['ML training','AI inference','CUDA apps','3D rendering'],
-    examples: 'p3, g4dn, p4d',
+    desc: 'NVIDIA T4/A10G/L4/V100/A100 GPUs plus AWS-designed ML chips (Trainium, Inferentia). Required for serious deep learning, large-model inference, and rendering.',
+    useCases: ['ML training','AI inference','CUDA workloads','3D rendering'],
+    examples: 'g4dn, g5, g6, p3, p4d, trn1, inf2',
   },
   Memory: {
     icon: '🧠', name: 'Memory Optimized', tag: 'Memory',
     color: '#10b981', bg: '#ecfdf5',
-    desc: 'High RAM-to-vCPU ratio — perfect when your entire dataset must live in memory.',
-    useCases: ['Redis / Memcached','In-memory analytics','SAP HANA','Large JVM'],
-    examples: 'r5, r6i, x1e',
+    desc: 'High RAM-to-vCPU ratio — perfect when your entire dataset must live in memory. Includes Intel (r5/r6i/r7i/z1d), AMD (r6a/r7a), Graviton (r6g/r7g), and ultra-large x2idn (1 TiB+).',
+    useCases: ['Redis / Memcached','In-memory analytics','SAP HANA','Large JVM heaps'],
+    examples: 'r5, r6i, r6a, r6g, r7i, r7a, r7g, z1d, x2idn',
   },
   Storage: {
     icon: '💾', name: 'Storage Optimized', tag: 'Storage',
     color: '#f59e0b', bg: '#fffbeb',
-    desc: 'Local NVMe SSDs for ultra-high IOPS and sequential throughput with minimal latency.',
-    useCases: ['NoSQL databases','Data warehouse','Elasticsearch','Log analytics'],
-    examples: 'i3, i4i, d3',
+    desc: 'Local NVMe SSDs for ultra-high IOPS and sequential throughput with minimal latency. Dense HDD variants (d3) for cost-optimised bulk storage.',
+    useCases: ['NoSQL databases','Data warehouses','Elasticsearch','Log analytics'],
+    examples: 'i3, i4i, im4gn, d3',
   },
   General: {
     icon: '⚖️', name: 'General Purpose', tag: 'General',
     color: '#6b7280', bg: '#f9fafb',
-    desc: 'Balanced compute, memory, and networking. The safe default for most everyday workloads.',
+    desc: 'Balanced compute, memory, and networking — the safe default for most workloads. Includes burstable T-family and standard M-family across Intel, AMD, and Graviton processors.',
     useCases: ['Web servers','Microservices','Dev / test','Small databases'],
-    examples: 'm5, m6i, t3',
+    examples: 't3, t3a, t4g, m5, m6i, m6a, m6g, m7i, m7a, m7g, m8g',
   },
 };
 
@@ -1809,9 +1809,10 @@ async function boot() {
 
     /* Animate hero stats after app fades in */
     setTimeout(() => {
-      animateNum('heroInstances', state.rows.length, v => Math.round(v).toLocaleString(), 800);
-      animateNum('heroFamilies',  families.size,      v => Math.round(v).toString(),       650);
-      animateNum('heroRegions',   regions.length,      v => Math.round(v).toString(),       500);
+      const uniqueTypes = new Set(state.rows.map(r => r.instance_type));
+      animateNum('heroInstances', uniqueTypes.size,   v => Math.round(v).toLocaleString(), 800);
+      animateNum('heroFamilies',  families.size,       v => Math.round(v).toString(),       650);
+      animateNum('heroRegions',   regions.length,       v => Math.round(v).toString(),       500);
     }, 250);
 
     /* ── Scroll spy: highlight current step in nav ── */

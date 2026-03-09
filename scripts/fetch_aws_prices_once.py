@@ -7,10 +7,70 @@ import re
 import urllib.request
 from pathlib import Path
 
-TARGET_REGIONS = ["us-east-1", "us-west-2", "ap-south-1"]
+TARGET_REGIONS = [
+    # North America
+    "us-east-1", "us-east-2", "us-west-1", "us-west-2",
+    "ca-central-1", "ca-west-1", "mx-central-1",
+    # Europe
+    "eu-west-1", "eu-west-2", "eu-west-3",
+    "eu-central-1", "eu-central-2", "eu-north-1", "eu-south-1", "eu-south-2",
+    # Asia Pacific
+    "ap-south-1", "ap-south-2",
+    "ap-southeast-1", "ap-southeast-2", "ap-southeast-3", "ap-southeast-4",
+    "ap-northeast-1", "ap-northeast-2", "ap-northeast-3", "ap-east-1",
+    # South America
+    "sa-east-1",
+    # Middle East
+    "me-south-1", "me-central-1",
+    # Africa / Israel
+    "af-south-1", "il-central-1",
+]
 TARGET_TYPES = [
-    "c7g.large", "c7g.xlarge", "m7g.large", "m7g.xlarge",
-    "r7g.large", "r7g.xlarge", "g5.xlarge", "g5.2xlarge", "i4i.large"
+    # Burstable
+    "t3.small", "t3.medium", "t3.large", "t3.xlarge",
+    "t3a.small", "t3a.medium", "t3a.large", "t3a.xlarge",
+    "t4g.small", "t4g.medium", "t4g.large", "t4g.xlarge",
+    # General Purpose – M family
+    "m5.large", "m5.xlarge", "m5.2xlarge", "m5.4xlarge",
+    "m6i.large", "m6i.xlarge", "m6i.2xlarge", "m6i.4xlarge",
+    "m6a.large", "m6a.xlarge", "m6a.2xlarge",
+    "m6g.large", "m6g.xlarge", "m6g.2xlarge",
+    "m7i.large", "m7i.xlarge", "m7i.2xlarge",
+    "m7a.large", "m7a.xlarge", "m7a.2xlarge",
+    "m7g.large", "m7g.xlarge", "m7g.2xlarge",
+    "m8g.large", "m8g.xlarge", "m8g.2xlarge", "m8g.4xlarge",
+    # Compute Optimized – C family
+    "c5.large", "c5.xlarge", "c5.2xlarge", "c5.4xlarge",
+    "c6i.large", "c6i.xlarge", "c6i.2xlarge",
+    "c6a.large", "c6a.xlarge", "c6a.2xlarge",
+    "c6g.large", "c6g.xlarge", "c6g.2xlarge",
+    "c7i.large", "c7i.xlarge", "c7i.2xlarge",
+    "c7a.large", "c7a.xlarge", "c7a.2xlarge",
+    "c7g.large", "c7g.xlarge", "c7g.2xlarge",
+    "hpc7g.4xlarge",
+    # Memory Optimized – R family
+    "r5.large", "r5.xlarge", "r5.2xlarge", "r5.4xlarge",
+    "r6i.large", "r6i.xlarge", "r6i.2xlarge",
+    "r6a.large", "r6a.xlarge", "r6a.2xlarge",
+    "r6g.large", "r6g.xlarge", "r6g.2xlarge",
+    "r7i.large", "r7i.xlarge", "r7i.2xlarge",
+    "r7a.large", "r7a.xlarge", "r7a.2xlarge",
+    "r7g.large", "r7g.xlarge", "r7g.2xlarge",
+    "z1d.large", "z1d.xlarge", "z1d.2xlarge",
+    "x2idn.16xlarge",
+    # Storage Optimized
+    "i3.large", "i3.xlarge", "i3.2xlarge",
+    "i4i.large", "i4i.xlarge", "i4i.2xlarge",
+    "d3.xlarge", "d3.2xlarge",
+    "im4gn.large", "im4gn.xlarge",
+    # GPU / Accelerated
+    "g4dn.xlarge", "g4dn.2xlarge",
+    "g5.xlarge", "g5.2xlarge", "g5.4xlarge",
+    "g6.xlarge", "g6.2xlarge", "g6.4xlarge",
+    "p3.2xlarge",
+    "p4d.24xlarge",
+    "trn1.2xlarge",
+    "inf2.xlarge", "inf2.8xlarge",
 ]
 BASE = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current"
 
