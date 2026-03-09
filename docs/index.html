@@ -958,21 +958,23 @@
     }
 
     .family-pill:hover:not(.active) {
-      border-color: var(--accent);
-      color: var(--accent);
+      border-color: var(--pill-color, var(--accent));
+      color: var(--pill-color, var(--accent));
       background: var(--accent-bg);
     }
 
     .family-pill.active {
-      background: var(--accent);
+      background: var(--pill-color, var(--accent));
       color: #fff;
-      border-color: var(--accent);
+      border-color: var(--pill-color, var(--accent));
     }
 
-    .family-pill.pill-all.active {
-      background: var(--ink);
-      border-color: var(--ink);
-    }
+    .family-pill.pill-all.active { background: var(--ink); border-color: var(--ink); }
+
+    /* None / clear pill */
+    .family-pill.pill-none { border-style: dashed; margin-left: 4px; }
+    .family-pill.pill-none:hover:not(.active) { border-color: #ef4444; color: #ef4444; background: #fef2f2; border-style: solid; }
+    .family-pill.pill-none.active { background: #64748b; color: #fff; border-color: #64748b; border-style: solid; }
 
     /* ── KPI strip ───────────────────────────────────────── */
     .kpi-strip {
@@ -2924,29 +2926,39 @@
     /* ── Family filter helpers ──────────────────────────────── */
     function getFamily(t) { return t.split('.')[0]; }
 
+    const FILTER_CATS = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
+
     function renderFamilyFilter(rows) {
       const c = el('familyFilter'); if (!c) return;
-      const families = [...new Set(rows.map(r => getFamily(r.instance_type)))].sort();
-      const allActive = families.every(f => state.selectedFamilies.has(f));
+      const available = new Set(rows.map(r => r.instance_category));
+      const cats = FILTER_CATS.filter(f => available.has(f));
+      const allActive = cats.every(f => state.selectedFamilies.has(f));
+      const noneActive = state.selectedFamilies.size === 0;
       c.innerHTML =
-        `<span class="family-filter-lbl">Family:</span>` +
-        `<button class="family-pill pill-all ${allActive ? 'active' : ''}" onclick="selectAllFamilies()">All</button>` +
-        families.map(f =>
-          `<button class="family-pill ${state.selectedFamilies.has(f) ? 'active' : ''}" onclick="toggleFamily('${f}')">${f}</button>`
-        ).join('');
+        `<span class="family-filter-lbl">Category:</span>` +
+        `<button class="family-pill pill-all ${allActive && !noneActive ? 'active' : ''}" onclick="selectAllFamilies()">All</button>` +
+        cats.map(f =>
+          `<button class="family-pill ${state.selectedFamilies.has(f) ? 'active' : ''}"
+                   style="--pill-color:${CAT_COLOR[f] || '#4f46e5'}"
+                   onclick="toggleFamily('${f}')">${f}</button>`
+        ).join('') +
+        `<button class="family-pill pill-none ${noneActive ? 'active' : ''}" onclick="clearAllFamilies()">✕ None</button>`;
     }
     function selectAllFamilies() {
-      [...new Set(state.scoredRows.map(r => getFamily(r.instance_type)))].forEach(f => state.selectedFamilies.add(f));
+      [...new Set(state.scoredRows.map(r => r.instance_category))].forEach(f => state.selectedFamilies.add(f));
       renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
     }
-    function toggleFamily(family) {
-      if (state.selectedFamilies.has(family)) {
-        if (state.selectedFamilies.size > 1) state.selectedFamilies.delete(family); else return;
-      } else { state.selectedFamilies.add(family); }
+    function clearAllFamilies() {
+      state.selectedFamilies.clear();
+      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
+    }
+    function toggleFamily(cat) {
+      if (state.selectedFamilies.has(cat)) { state.selectedFamilies.delete(cat); }
+      else { state.selectedFamilies.add(cat); }
       renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
     }
     function syncFamilyFilter(rows) {
-      const cur = new Set(rows.map(r => getFamily(r.instance_type)));
+      const cur = new Set(rows.map(r => r.instance_category));
       [...state.selectedFamilies].forEach(f => { if (!cur.has(f)) state.selectedFamilies.delete(f); });
       if (state.selectedFamilies.size === 0) cur.forEach(f => state.selectedFamilies.add(f));
     }
@@ -3081,9 +3093,34 @@
 
     /* ── Instance Spec line chart ───────────────────────────── */
     function renderLineChart(rows) {
+      const MAX = 12;
+      /* Filter to selected categories; empty = nothing */
       const filtered = state.selectedFamilies.size
-        ? rows.filter(r => state.selectedFamilies.has(getFamily(r.instance_type))) : rows;
-      const top = filtered.slice(0, Math.min(15, filtered.length));
+        ? rows.filter(r => state.selectedFamilies.has(r.instance_category)) : [];
+
+      if (!filtered.length) {
+        return Plotly.react('chart', [], {
+          ...PLOTLY_BASE, xaxis: { visible: false }, yaxis: { visible: false },
+          annotations: [{ xref: 'paper', yref: 'paper', x: .5, y: .5, showarrow: false,
+            text: 'Select a category above to compare instances', font: { size: 13, color: '#94a3b8' } }],
+          margin: { t: 12, r: 55, b: 40, l: 50 },
+        }, { responsive: true });
+      }
+
+      /* Smart sampling: broad view → 2-3 per category (skip scale-breaking outliers);
+         focused view (1-2 cats) → top MAX for that selection */
+      const activeCats = [...new Set(filtered.map(r => r.instance_category))];
+      let top;
+      if (activeCats.length >= 3) {
+        const sane = filtered.filter(r => r.memory_gib <= 256 && r.price_usd_hour <= 8);
+        const src  = sane.length >= Math.floor(MAX / 2) ? sane : filtered;
+        const perCat = Math.max(2, Math.floor(MAX / activeCats.length));
+        top = activeCats.flatMap(c => src.filter(r => r.instance_category === c).slice(0, perCat)).slice(0, MAX);
+      } else {
+        top = (filtered.filter(r => r.memory_gib <= 512).slice(0, MAX) || filtered.slice(0, MAX));
+        if (!top.length) top = filtered.slice(0, MAX);
+      }
+
       const names = top.map(r => r.instance_type);
       Plotly.react('chart', [
         {
@@ -3117,7 +3154,15 @@
     /* ── Radar chart ────────────────────────────────────────── */
     const RADAR_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
     function renderRadar(rows) {
-      const top5 = rows.slice(0, Math.min(5, rows.length));
+      /* Broad view (3+ categories): 1 best per category for clean comparison.
+         Focused view (1-2 categories): top 5 by score. */
+      const activeCats = [...new Set(rows.map(r => r.instance_category))];
+      let top5;
+      if (activeCats.length >= 3) {
+        top5 = FILTER_CATS.map(cat => rows.find(r => r.instance_category === cat)).filter(Boolean).slice(0, 5);
+      } else {
+        top5 = rows.slice(0, Math.min(5, rows.length));
+      }
       const theta = ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU', 'Price Eff.'];
       Plotly.react('chart3', top5.map((r, i) => ({
         type: 'scatterpolar',
