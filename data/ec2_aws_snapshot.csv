@@ -8,15 +8,6 @@ m7g.large,General purpose,General,ap-south-1,2,8.0,3,0,0.0583,general
 m7g.xlarge,General purpose,General,ap-south-1,4,16.0,3,0,0.1166,general
 r7g.large,Memory optimized,Memory,ap-south-1,2,16.0,3,0,0.0751,memory
 r7g.xlarge,Memory optimized,Memory,ap-south-1,4,32.0,3,0,0.1502,memory
-c7g.large,Compute optimized,CPU,eu-west-1,2,4.0,3,0,0.0775,compute
-c7g.xlarge,Compute optimized,CPU,eu-west-1,4,8.0,3,0,0.155,compute
-g5.2xlarge,GPU instance,GPU,eu-west-1,8,32.0,4,1,1.35296,gpu
-g5.xlarge,GPU instance,GPU,eu-west-1,4,16.0,4,1,1.123,gpu
-i4i.large,Storage optimized,Storage,eu-west-1,2,16.0,4,0,0.189,storage
-m7g.large,General purpose,General,eu-west-1,2,8.0,3,0,0.091,general
-m7g.xlarge,General purpose,General,eu-west-1,4,16.0,3,0,0.1819,general
-r7g.large,Memory optimized,Memory,eu-west-1,2,16.0,3,0,0.1199,memory
-r7g.xlarge,Memory optimized,Memory,eu-west-1,4,32.0,3,0,0.2397,memory
 c7g.large,Compute optimized,CPU,us-east-1,2,4.0,3,0,0.0725,compute
 c7g.xlarge,Compute optimized,CPU,us-east-1,4,8.0,3,0,0.145,compute
 g5.2xlarge,GPU instance,GPU,us-east-1,8,32.0,4,1,1.212,gpu
