@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC2 Instance Advisor</title>
+  <title>EC2 Instance Advisor — Find the right instance for your workload</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    /* ── Design tokens ─────────────────────────────── */
+    /* ── Design tokens ──────────────────────────────────── */
     :root {
-      --bg:        #eef2ff;
+      --bg:        #f1f5f9;
       --card:      #ffffff;
       --ink:       #0f172a;
       --ink-2:     #1e293b;
@@ -37,21 +37,23 @@
       min-height: 100vh; -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Loader ─────────────────────────────────────── */
+    /* ── Loader ─────────────────────────────────────────── */
     #loader {
-      position: fixed; inset: 0; background: var(--bg); z-index: 999;
-      display: flex; flex-direction: column;
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      z-index: 999; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 16px;
     }
     .spinner {
       width: 44px; height: 44px;
-      border: 3px solid #c7d2fe; border-top-color: var(--accent);
+      border: 3px solid rgba(99,102,241,.3); border-top-color: #818cf8;
       border-radius: 50%; animation: spin .7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #loader p { color: var(--muted); font-size: 14px; }
+    #loader strong { color: #818cf8; font-size: 18px; font-weight: 900; letter-spacing: -.02em; }
+    #loader p { color: #64748b; font-size: 13px; }
 
-    /* ── Toast ───────────────────────────────────────── */
+    /* ── Toast ───────────────────────────────────────────── */
     #toastShelf {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       z-index: 9999; display: flex; flex-direction: column; gap: 8px;
@@ -60,127 +62,227 @@
     .toast {
       background: var(--ink); color: #fff;
       padding: 10px 20px; border-radius: 999px;
-      font-size: 13px; font-weight: 600;
-      box-shadow: var(--sh-lg);
+      font-size: 13px; font-weight: 600; box-shadow: var(--sh-lg);
       opacity: 0; transform: translateY(12px);
-      transition: opacity .22s ease, transform .22s ease;
-      pointer-events: none;
+      transition: opacity .22s, transform .22s; pointer-events: none;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* ── Page ────────────────────────────────────────── */
-    #app { max-width: 1360px; margin: 0 auto; padding: 20px 16px 52px; opacity: 0; }
+    /* ── App ─────────────────────────────────────────────── */
+    #app { opacity: 0; }
 
-    /* ── Header ──────────────────────────────────────── */
-    .hdr {
-      display: flex; flex-wrap: wrap;
-      justify-content: space-between; align-items: flex-end;
-      gap: 12px; margin-bottom: 22px;
-      padding-bottom: 16px; border-bottom: 1px solid #c7d2fe;
+    /* ── Site nav ────────────────────────────────────────── */
+    .site-nav {
+      position: sticky; top: 0; z-index: 80;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      padding: 0 28px; height: 54px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .hdr-title {
-      font-size: 28px; font-weight: 900;
-      letter-spacing: -.04em; line-height: 1;
-    }
-    .hdr-title em { font-style: normal; color: var(--accent); }
-    .hdr-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
-    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-    .chip {
+    .nav-brand { font-size: 16px; font-weight: 900; letter-spacing: -.03em; color: var(--ink); }
+    .nav-brand em { font-style: normal; color: var(--accent); }
+    .nav-actions { display: flex; gap: 8px; align-items: center; }
+    .nav-chip {
       font-size: 11px; font-weight: 700; letter-spacing: .03em;
-      color: var(--accent); background: var(--accent-bg);
-      border: 1px solid #c7d2fe; border-radius: 999px; padding: 4px 10px;
+      color: var(--muted); background: var(--bg); border: 1px solid var(--line);
+      border-radius: 999px; padding: 4px 10px;
     }
-    .hdr-btn {
+    .nav-chip.warn { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+    .nav-btn {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; letter-spacing: .03em;
-      color: var(--accent); background: var(--accent-bg);
-      border: 1px solid #c7d2fe; border-radius: 999px;
-      padding: 4px 12px; cursor: pointer;
-      transition: background .15s, border-color .15s;
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      background: var(--accent-bg); border: 1px solid #c7d2fe;
+      border-radius: 999px; padding: 5px 14px; cursor: pointer;
+      transition: background .15s; font-family: inherit;
     }
-    .hdr-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
-    .sb-toggle {
-      display: none; align-items: center; justify-content: center;
-      width: 38px; height: 38px; border-radius: 10px;
-      background: #fff; border: 1px solid var(--line); cursor: pointer;
-      font-size: 18px; color: var(--muted); box-shadow: var(--sh-sm);
-      transition: background .15s;
-    }
-    .sb-toggle:hover { background: var(--accent-bg); color: var(--accent); }
-    @media (max-width: 1060px) { .sb-toggle { display: flex; } }
+    .nav-btn:hover { background: #e0e7ff; }
+    @media (max-width: 600px) { .nav-chip.hide-sm { display: none; } .site-nav { padding: 0 16px; } }
 
-    /* ── Layout ──────────────────────────────────────── */
-    .layout {
-      display: grid; grid-template-columns: 290px 1fr;
-      gap: 16px; align-items: start;
+    /* ── Hero ────────────────────────────────────────────── */
+    .hero-section {
+      background: linear-gradient(140deg, #0f172a 0%, #1e1b4b 55%, #2d2770 100%);
+      padding: 72px 28px 64px; position: relative; overflow: hidden;
     }
-    @media (max-width: 1060px) { .layout { grid-template-columns: 1fr; } }
+    .hero-section::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234f46e5' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-glow {
+      position: absolute; top: -100px; right: -100px;
+      width: 600px; height: 600px; pointer-events: none;
+      background: radial-gradient(circle, rgba(99,102,241,.22) 0%, transparent 65%);
+    }
+    .hero-inner { max-width: 920px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,.2); border: 1px solid rgba(165,180,252,.35);
+      color: #a5b4fc; font-size: 11px; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; padding: 5px 14px; border-radius: 999px; margin-bottom: 22px;
+    }
+    .hero-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(1.35)} }
+    .hero-title {
+      font-size: clamp(28px, 4.5vw, 52px); font-weight: 900;
+      letter-spacing: -.04em; line-height: 1.1; color: #fff; margin-bottom: 18px;
+    }
+    .hero-title em { font-style: normal; color: #818cf8; }
+    .hero-desc {
+      font-size: 15.5px; color: #94a3b8; line-height: 1.75;
+      max-width: 640px; margin-bottom: 38px;
+    }
+    .hero-bottom { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+    .hero-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+    .hero-stat-val { font-size: 32px; font-weight: 900; color: #fff; letter-spacing: -.03em; line-height: 1; }
+    .hero-stat-lbl { font-size: 10.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .07em; margin-top: 4px; }
+    .hero-vdivider { width: 1px; height: 52px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+    .hero-region-wrap {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px; padding: 12px 18px;
+    }
+    .hero-region-lbl { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; flex-shrink: 0; }
+    #region {
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+      color: #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 13px;
+      font-family: inherit; cursor: pointer; min-width: 175px; width: auto;
+    }
+    #region option { background: #1e293b; color: #e2e8f0; }
+    #region:focus { outline: 2px solid rgba(129,140,248,.6); outline-offset: 2px; border-color: transparent; }
+    .hero-icon-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);
+      color: #94a3b8; font-size: 17px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s; flex-shrink: 0; font-family: inherit;
+    }
+    .hero-icon-btn:hover { background: rgba(99,102,241,.4); color: #fff; border-color: rgba(165,180,252,.4); }
+    .hero-icon-btn:active { transform: scale(.92); }
+    .hero-region-hint { font-size: 10.5px; color: #475569; }
+    @media (max-width: 700px) {
+      .hero-section { padding: 48px 20px 48px; }
+      .hero-bottom { gap: 20px; }
+      .hero-vdivider { display: none; }
+    }
 
-    /* ── Sidebar ─────────────────────────────────────── */
-    .sidebar { display: flex; flex-direction: column; gap: 0; padding: 0; }
-    @media (max-width: 1060px) {
-      .sidebar {
-        display: none; position: fixed; inset: 0; z-index: 100;
-        overflow-y: auto; border-radius: 0;
-        box-shadow: var(--sh-lg); padding: 0;
-      }
-      .sidebar.open { display: flex; }
-    }
-    .sb-sec { padding: 14px 16px; }
-    .sb-div { height: 1px; background: var(--line); }
-    .sb-close {
-      display: none; position: absolute; top: 12px; right: 12px;
-      width: 32px; height: 32px; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; color: var(--muted);
-      background: #fff; border: 1px solid var(--line); border-radius: 8px;
-    }
-    @media (max-width: 1060px) { .sidebar { position: fixed; } .sb-close { display: flex; } }
+    /* ── Funnel wrapper ──────────────────────────────────── */
+    .funnel-wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+    @media (max-width: 600px) { .funnel-wrap { padding: 0 14px 60px; } }
 
-    .sec-title {
+    /* ── Funnel step ─────────────────────────────────────── */
+    .funnel-step { padding-top: 60px; scroll-margin-top: 70px; }
+    .step-hdr { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 28px; }
+    .step-num {
+      flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      color: #fff; font-size: 14px; font-weight: 900; letter-spacing: -.01em;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(79,70,229,.32);
+    }
+    .step-title { font-size: 22px; font-weight: 900; letter-spacing: -.03em; color: var(--ink); margin-bottom: 5px; }
+    .step-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; max-width: 700px; }
+
+    /* ── Family cards ────────────────────────────────────── */
+    .family-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 14px;
+    }
+    .family-card {
+      background: #fff; border: 2px solid var(--line); border-radius: 14px;
+      padding: 20px 16px; cursor: pointer; transition: all .22s;
+      position: relative; overflow: hidden;
+    }
+    .family-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--fam-color, var(--accent));
+      transform: scaleX(0); transform-origin: left; transition: transform .25s ease;
+    }
+    .family-card:hover {
+      border-color: var(--fam-color, var(--accent));
+      transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.11);
+    }
+    .family-card:hover::after,
+    .family-card.fc-active::after { transform: scaleX(1); }
+    .family-card.fc-active {
+      border-color: var(--fam-color, var(--accent));
+      background: var(--fam-bg, var(--accent-bg));
+    }
+    .fc-icon { font-size: 30px; line-height: 1; margin-bottom: 12px; display: block; }
+    .fc-name { font-size: 14px; font-weight: 800; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
+    .fc-tag-badge {
+      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+      padding: 2px 8px; border-radius: 999px; margin-bottom: 10px;
+      background: var(--fam-color, var(--accent)); color: #fff;
+    }
+    .fc-desc { font-size: 12px; color: #475569; line-height: 1.55; margin-bottom: 10px; }
+    .fc-uses { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .fc-use {
+      font-size: 10px; padding: 2px 7px; border-radius: 999px;
+      font-weight: 600; white-space: nowrap;
+      background: var(--fam-bg, var(--accent-bg));
+      color: var(--fam-color, var(--accent));
+      border: 1px solid rgba(0,0,0,.07);
+    }
+    .fc-examples { font-size: 10.5px; color: var(--muted); margin-bottom: 8px; }
+    .fc-examples b { color: var(--fam-color, var(--accent)); font-weight: 700; }
+    .fc-count { font-size: 10px; font-weight: 700; color: var(--muted); }
+    .fc-cta {
       font-size: 10.5px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .08em; color: var(--muted); margin-bottom: 12px;
+      letter-spacing: .07em; color: var(--fam-color, var(--accent));
+      margin-top: 12px; opacity: 0; transition: opacity .2s;
     }
-    label { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
-    select {
-      width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm);
-      padding: 8px 10px; font-size: 13px; background: #fff; color: var(--ink); cursor: pointer;
-      transition: border-color .15s;
-    }
-    select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    .family-card:hover .fc-cta,
+    .family-card.fc-active .fc-cta { opacity: 1; }
+    .family-card.fc-active .fc-cta::before { content: '✓ '; }
 
-    /* Region row */
-    .region-row { display: grid; grid-template-columns: 30px 1fr 30px; gap: 5px; align-items: center; }
-    .icon-btn {
-      width: 30px; height: 30px; border: 1px solid var(--line);
-      background: #fff; border-radius: 7px; cursor: pointer;
-      font-size: 15px; display: flex; align-items: center; justify-content: center;
-      color: var(--muted); transition: all .15s; flex-shrink: 0;
-    }
-    .icon-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: #a5b4fc; }
-    .icon-btn:active { transform: scale(.92); }
-    .region-hint { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
-    .kbd-hint { font-size: 10px; opacity: .6; margin-left: 4px; }
-    kbd {
-      display: inline-block; font-size: 9.5px; font-family: inherit;
-      background: rgba(0,0,0,.07); border: 1px solid rgba(0,0,0,.12);
-      border-radius: 4px; padding: 1px 4px;
-    }
+    /* ── Chart card ──────────────────────────────────────── */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); }
+    .chart-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+    .chart-hd { padding: 12px 16px 10px; border-bottom: 1px solid var(--line); }
+    .chart-title { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+    .chart-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .chart-body { padding: 4px; }
 
-    /* Preset grid */
-    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    /* ── Controls card (inline) ──────────────────────────── */
+    .controls-card {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; margin-bottom: 16px;
+    }
+    .controls-top {
+      padding: 12px 18px; border-bottom: 1px solid var(--line); background: #fafbff;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; flex-wrap: wrap;
+    }
+    .controls-top-lbl {
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); flex-shrink: 0;
+    }
+    .controls-body { padding: 18px 20px; }
+
+    /* Preset row */
     .preset-btn {
       border: 1px solid var(--line); background: #fff; color: var(--ink-2);
-      padding: 8px 6px; border-radius: var(--r-sm);
-      font-size: 11px; font-weight: 700; cursor: pointer;
-      text-align: center; transition: all .15s; line-height: 1.3;
+      padding: 6px 13px; border-radius: var(--r-sm);
+      font-size: 11.5px; font-weight: 700; cursor: pointer;
+      transition: all .15s; font-family: inherit; white-space: nowrap;
     }
     .preset-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: #a5b4fc; }
     .preset-btn:active { transform: scale(.96); }
     .preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* Sliders */
-    .slider-row { margin-bottom: 10px; }
-    .sl-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    /* Category select */
+    #category {
+      width: auto; padding: 7px 12px; font-size: 13px;
+      border: 1px solid var(--line); border-radius: var(--r-sm);
+      background: #fff; color: var(--ink); cursor: pointer; font-family: inherit;
+    }
+    #category:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+    /* Sliders grid */
+    .sliders-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 36px; }
+    @media (max-width: 640px) { .sliders-grid { grid-template-columns: 1fr; } }
+    .sl-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .sl-hd span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
     .sl-val {
       font-size: 11px; font-weight: 800; padding: 2px 7px;
@@ -190,129 +292,32 @@
     input[type='range'] { width: 100%; cursor: pointer; accent-color: var(--accent); }
 
     /* Weight bar */
-    .wbar-wrap { margin-top: 12px; }
+    .wbar-wrap { grid-column: 1 / -1; margin-top: 6px; }
     .wbar-hd { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); margin-bottom: 5px; }
     #weightBar { height: 7px; border-radius: 999px; overflow: hidden; background: var(--line); display: flex; }
     .wb-seg { height: 100%; transition: width .25s ease; }
 
-    /* Type guide */
-    .type-grid { display: grid; grid-template-columns: 1fr; gap: 7px; }
-    .type-item { padding: 9px 11px; border-radius: var(--r-sm); border: 1px solid var(--line); }
-    .type-item b { display: block; font-size: 12px; margin-bottom: 2px; }
-    .type-item span { font-size: 11.5px; color: #475569; }
+    /* ── Charts 2-up ─────────────────────────────────────── */
+    .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 900px) { .charts-2 { grid-template-columns: 1fr; } }
 
-    /* Keyboard shortcuts panel */
-    .kbd-panel { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; }
-    .kbd-panel kbd { font-size: 10px; }
-    .kbd-panel span { font-size: 11.5px; color: var(--muted); }
-
-    /* ── Cards ───────────────────────────────────────── */
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); padding: 16px; }
-
-    /* ── Main column ─────────────────────────────────── */
-    .main { display: flex; flex-direction: column; gap: 14px; }
-
-    /* ── Rec hero ────────────────────────────────────── */
-    .rec-hero {
-      background: #fff; border: 1px solid var(--line);
-      border-radius: var(--r); box-shadow: var(--sh-lg); overflow: hidden;
-    }
-    .rec-hero-accent { height: 4px; transition: background .35s; }
-    .rec-hero-inner { display: grid; grid-template-columns: 1fr 210px; }
-    .rec-hero-left { padding: 20px 22px; border-right: 1px solid var(--line); }
-    .rec-hero-right {
-      padding: 20px 16px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 12px;
-      background: linear-gradient(160deg, #fafbff 0%, #eef2ff 100%);
-    }
-    .rec-hero.error-state .rec-hero-accent { background: #ef4444 !important; }
-    .rec-hero.error-state .rec-hero-left   { background: #fff8f8; }
-    .rec-hero.error-state .rec-hero-right  { display: none; }
-
-    .rec-eyebrow {
-      font-size: 10px; font-weight: 800; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted);
+    /* Bar chart header */
+    .bar-hd {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 10px;
+      gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap;
     }
-    .copy-rec-btn {
-      background: var(--accent-bg); border: 1px solid #c7d2fe; color: var(--accent);
-      padding: 4px 11px; border-radius: var(--r-sm);
-      font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;
-      transition: background .15s, border-color .15s;
-    }
-    .copy-rec-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
-    .copy-rec-btn:active { transform: scale(.96); }
-
-    .rec-name {
-      font-size: 34px; font-weight: 900; letter-spacing: -.04em;
-      line-height: 1; color: var(--ink); margin-bottom: 10px;
-    }
-    .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-    .rtag { border-radius: 6px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--line); color: var(--ink-2); background: var(--bg); }
-
-    .rec-stats {
-      display: flex; border: 1px solid var(--line);
-      border-radius: var(--r-sm); overflow: hidden;
-    }
-    .rec-stat {
-      flex: 1; min-width: 0; padding: 10px 8px; text-align: center;
-      border-right: 1px solid var(--line); transition: background .15s;
-    }
-    .rec-stat:last-child { border-right: none; }
-    .rec-stat:hover { background: var(--accent-bg); }
-    .rec-stat-val { font-size: 14px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rec-stat-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 3px; }
-    .rec-why { font-size: 11.5px; color: var(--muted); line-height: 1.65; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
-    .rec-why b { color: var(--ink-2); }
-
-    /* Score ring (right panel) */
-    .score-ring-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
-    .score-ring-val  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .score-ring-num  { font-size: 22px; font-weight: 900; letter-spacing: -.04em; color: var(--ink); line-height: 1; }
-    .score-ring-sub  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: 2px; }
-    .rec-rank-txt { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.6; }
-    .rec-rank-txt strong { display: block; font-size: 16px; font-weight: 900; color: var(--ink); }
-    .rec-cat-label {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; padding: 4px 10px;
-      border-radius: 999px; border: 1px solid transparent;
+    .bar-hd-r { display: flex; align-items: center; gap: 8px; }
+    .bar-hd-r label { margin: 0; font-size: 11.5px; color: var(--muted); white-space: nowrap; font-weight: 600; }
+    .bar-hd-r select {
+      width: auto; padding: 5px 8px; font-size: 12px;
+      border: 1px solid var(--line); border-radius: var(--r-sm);
+      background: #fff; color: var(--ink); cursor: pointer; font-family: inherit;
     }
 
-    @media (max-width: 700px) {
-      .rec-hero-inner { grid-template-columns: 1fr; }
-      .rec-hero-left  { border-right: none; }
-      .rec-hero-right { flex-direction: row; justify-content: flex-start; border-top: 1px solid var(--line); padding: 14px 22px; }
-      .rec-name { font-size: 26px; }
-    }
-
-    /* ── Mobile filter FAB ───────────────────────────── */
-    #filterFab {
-      display: none; position: fixed; bottom: 22px; right: 18px; z-index: 200;
-      background: var(--accent); color: #fff; border: none; border-radius: 999px;
-      padding: 12px 18px 12px 14px; font-size: 13px; font-weight: 700;
-      box-shadow: 0 4px 20px rgba(79,70,229,.45); cursor: pointer;
-      align-items: center; gap: 7px; line-height: 1;
-      transition: transform .15s, box-shadow .15s;
-    }
-    #filterFab:active { transform: scale(.95); }
-    @media (max-width: 1060px) { #filterFab { display: flex; } }
-
-    /* ── Section label ───────────────────────────────── */
-    .section-label {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .08em; color: var(--muted); margin: 4px 0 -4px;
-    }
-    .section-label::after {
-      content: ''; flex: 1; height: 1px; background: var(--line);
-    }
-
-    /* ── Family filter pills ─────────────────────────── */
+    /* ── Family filter pills ─────────────────────────────── */
     .family-filter-bar {
       display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-      padding: 8px 14px 10px; border-bottom: 1px solid var(--line);
-      background: #fafbff;
+      padding: 8px 14px 10px; border-bottom: 1px solid var(--line); background: #fafbff;
     }
     .family-filter-lbl {
       font-size: 10px; font-weight: 800; text-transform: uppercase;
@@ -322,48 +327,15 @@
       font-size: 11px; font-weight: 700; padding: 3px 10px;
       border-radius: 999px; border: 1px solid var(--line);
       background: #fff; color: var(--muted);
-      cursor: pointer; transition: all .15s; user-select: none;
+      cursor: pointer; transition: all .15s; user-select: none; font-family: inherit;
     }
     .family-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
     .family-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .family-pill.pill-all.active { background: var(--ink); border-color: var(--ink); }
 
-    /* ── Instance comparison panel ───────────────────── */
-    .cmp-panel {
-      background: #fff; border: 1px solid var(--line);
-      border-radius: var(--r); box-shadow: var(--sh);
-      overflow: hidden; display: none;
-    }
-    .cmp-panel.visible { display: block; }
-    .cmp-hd {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 12px 16px; border-bottom: 1px solid var(--line);
-      background: linear-gradient(90deg, #f0f4ff 0%, #eef2ff 100%);
-    }
-    .cmp-title { font-size: 13px; font-weight: 700; color: var(--ink); }
-    .cmp-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .cmp-close {
-      width: 26px; height: 26px; border-radius: 6px;
-      border: 1px solid var(--line); background: #fff; cursor: pointer;
-      font-size: 14px; display: flex; align-items: center; justify-content: center;
-      color: var(--muted); transition: all .15s; flex-shrink: 0;
-    }
-    .cmp-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
-    .cmp-body { display: grid; grid-template-columns: 200px 1fr; }
-    .cmp-specs {
-      padding: 14px 16px; border-right: 1px solid var(--line);
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .cmp-spec-lbl { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
-    .cmp-spec-val { font-size: 15px; font-weight: 800; color: var(--ink); }
-    .cmp-spec-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
-    @media (max-width: 768px) {
-      .cmp-body { grid-template-columns: 1fr; }
-      .cmp-specs { border-right: none; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; gap: 10px 20px; }
-    }
-
-    /* ── KPI strip ───────────────────────────────────── */
-    .kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+    /* ── KPI strip ───────────────────────────────────────── */
+    .kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 900px) { .kpi-strip { grid-template-columns: repeat(2,1fr); } }
     .kpi {
       background: #fff; border: 1px solid var(--line); border-radius: var(--r-sm);
       padding: 13px 14px; box-shadow: var(--sh-sm); position: relative; overflow: hidden;
@@ -382,38 +354,87 @@
     .kpi-val { font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -.02em; line-height: 1; }
     .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ── Charts ──────────────────────────────────────── */
-    .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .chart-card {
+    /* ── Rec hero ────────────────────────────────────────── */
+    .rec-hero {
       background: #fff; border: 1px solid var(--line);
-      border-radius: var(--r); box-shadow: var(--sh); overflow: hidden;
+      border-radius: var(--r); box-shadow: var(--sh-lg); overflow: hidden; margin-bottom: 14px;
     }
-    .chart-hd { padding: 12px 14px 10px; border-bottom: 1px solid var(--line); }
-    .chart-title { font-size: 13px; font-weight: 700; color: var(--ink-2); }
-    .chart-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .chart-body { padding: 4px; }
-    .bar-hd {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; padding: 10px 14px 10px; border-bottom: 1px solid var(--line);
+    .rec-hero-accent { height: 4px; transition: background .35s; }
+    .rec-hero-inner { display: grid; grid-template-columns: 1fr 210px; }
+    .rec-hero-left { padding: 20px 22px; border-right: 1px solid var(--line); }
+    .rec-hero-right {
+      padding: 20px 16px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: linear-gradient(160deg, #fafbff 0%, #eef2ff 100%);
     }
-    .bar-hd-r { display: flex; align-items: center; gap: 8px; }
-    .bar-hd-r label { margin: 0; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
-    .bar-hd-r select { width: auto; padding: 5px 8px; font-size: 12px; }
+    .rec-hero.error-state .rec-hero-accent { background: #ef4444 !important; }
+    .rec-hero.error-state .rec-hero-left   { background: #fff8f8; }
+    .rec-hero.error-state .rec-hero-right  { display: none; }
+    .rec-eyebrow {
+      font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .copy-rec-btn {
+      background: var(--accent-bg); border: 1px solid #c7d2fe; color: var(--accent);
+      padding: 4px 11px; border-radius: var(--r-sm);
+      font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;
+      transition: background .15s; font-family: inherit;
+    }
+    .copy-rec-btn:hover { background: #e0e7ff; }
+    .rec-name { font-size: 34px; font-weight: 900; letter-spacing: -.04em; line-height: 1; color: var(--ink); margin-bottom: 10px; }
+    .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .rtag { border-radius: 6px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--line); color: var(--ink-2); background: var(--bg); }
+    .rec-stats { display: flex; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+    .rec-stat { flex: 1; min-width: 0; padding: 10px 8px; text-align: center; border-right: 1px solid var(--line); transition: background .15s; }
+    .rec-stat:last-child { border-right: none; }
+    .rec-stat:hover { background: var(--accent-bg); }
+    .rec-stat-val { font-size: 14px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rec-stat-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 3px; }
+    .rec-why { font-size: 11.5px; color: var(--muted); line-height: 1.65; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .rec-why b { color: var(--ink-2); }
+    .score-ring-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
+    .score-ring-val  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-ring-num  { font-size: 22px; font-weight: 900; letter-spacing: -.04em; color: var(--ink); line-height: 1; }
+    .score-ring-sub  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: 2px; }
+    .rec-rank-txt { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.6; }
+    .rec-rank-txt strong { display: block; font-size: 16px; font-weight: 900; color: var(--ink); }
+    .rec-cat-label { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; }
+    @media (max-width: 700px) {
+      .rec-hero-inner { grid-template-columns: 1fr; }
+      .rec-hero-left  { border-right: none; }
+      .rec-hero-right { flex-direction: row; justify-content: flex-start; border-top: 1px solid var(--line); padding: 14px 22px; }
+      .rec-name { font-size: 26px; }
+    }
 
-    /* ── Table ───────────────────────────────────────── */
-    .table-toolbar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px; border-bottom: 1px solid var(--line);
+    /* ── Compare panel ───────────────────────────────────── */
+    .cmp-panel { background: #fff; border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; display: none; margin-bottom: 14px; }
+    .cmp-panel.visible { display: block; }
+    .cmp-hd { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 16px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg, #f0f4ff 0%, #eef2ff 100%); }
+    .cmp-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .cmp-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .cmp-close { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all .15s; flex-shrink: 0; font-family: inherit; }
+    .cmp-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+    .cmp-body { display: grid; grid-template-columns: 200px 1fr; }
+    .cmp-specs { padding: 14px 16px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+    .cmp-spec-lbl { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
+    .cmp-spec-val { font-size: 15px; font-weight: 800; color: var(--ink); }
+    .cmp-spec-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+    @media (max-width: 768px) {
+      .cmp-body { grid-template-columns: 1fr; }
+      .cmp-specs { border-right: none; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; gap: 10px 20px; }
     }
+
+    /* ── Table ───────────────────────────────────────────── */
+    .table-toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
     .table-search {
       flex: 1; border: 1px solid var(--line); border-radius: var(--r-sm);
       padding: 7px 12px 7px 32px; font-size: 12px; color: var(--ink);
       background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%2394a3b8' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
-      transition: border-color .15s;
+      transition: border-color .15s; font-family: inherit;
     }
     .table-search:focus { outline: none; border-color: var(--accent); background-color: #fff; }
     .table-count { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .table-wrap { max-height: 400px; overflow: auto; }
+    .table-wrap { max-height: 420px; overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead th {
       background: #f8fafc; color: var(--muted);
@@ -426,67 +447,35 @@
     tbody tr:hover { background: #f1f5f9; }
     tbody tr.rank-1 td { background: #fefce8; }
     tbody tr.rank-1:hover td { background: #fef9c3; }
-    .cat-pill {
-      font-size: 10.5px; font-weight: 700; padding: 2px 8px;
-      border-radius: 999px; display: inline-block; white-space: nowrap;
-    }
+    .cat-pill { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; display: inline-block; white-space: nowrap; }
     .score-cell { display: flex; align-items: center; gap: 6px; }
     .score-bar { height: 4px; border-radius: 999px; flex-shrink: 0; transition: width .35s ease; }
     .score-num { font-size: 11px; font-weight: 800; }
 
-    /* ── Calculator ──────────────────────────────────── */
+    /* ── Calculator ──────────────────────────────────────── */
     .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
-    .calc-input-wrap label { font-size: 11px; margin-bottom: 4px; }
-    .calc-inp {
-      width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm);
-      padding: 8px 10px; font-size: 13px; color: var(--ink); transition: border-color .15s;
-    }
+    @media (max-width: 700px) { .calc-grid { grid-template-columns: 1fr 1fr; } }
+    .calc-input-wrap label { font-size: 11px; font-weight: 600; color: var(--ink-2); display: block; margin-bottom: 4px; }
+    .calc-inp { width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 8px 10px; font-size: 13px; color: var(--ink); transition: border-color .15s; font-family: inherit; }
     .calc-inp:focus { outline: none; border-color: var(--accent); }
-    .calc-result {
-      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
-      padding: 14px; border-radius: var(--r-sm); background: var(--accent-bg); border: 1px solid #c7d2fe;
-    }
+    .calc-result { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 14px; border-radius: var(--r-sm); background: var(--accent-bg); border: 1px solid #c7d2fe; }
+    @media (max-width: 500px) { .calc-result { grid-template-columns: 1fr; } }
     .cr-item { text-align: center; }
     .cr-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; }
     .cr-val { font-size: 20px; font-weight: 900; color: var(--accent); transition: color .2s; }
     .cr-val.dark { color: var(--ink); }
 
-    /* ── Guide ───────────────────────────────────────── */
-    details summary {
-      cursor: pointer; list-style: none; display: flex;
-      align-items: center; justify-content: space-between;
-    }
-    details summary::-webkit-details-marker { display: none; }
-    details summary::after { content: '▸'; font-size: 12px; color: var(--muted); transition: transform .2s; }
-    details[open] summary::after { transform: rotate(90deg); }
-    .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    .guide-item { padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: #fafbff; }
-    .guide-step { font-size: 10.5px; font-weight: 800; color: var(--accent); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
-    .guide-txt { font-size: 12px; color: #475569; line-height: 1.55; }
+    /* ── Shared utilities ────────────────────────────────── */
+    .sec-title { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    label { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
+    kbd { display: inline-block; font-size: 9.5px; font-family: inherit; background: rgba(0,0,0,.07); border: 1px solid rgba(0,0,0,.12); border-radius: 4px; padding: 1px 4px; }
 
-    /* ── Animations ──────────────────────────────────── */
-    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-    .fade-up { animation: fadeUp .38s ease both; }
-    .fade-up-1 { animation: fadeUp .38s .06s ease both; }
-    .fade-up-2 { animation: fadeUp .38s .12s ease both; }
-    .fade-up-3 { animation: fadeUp .38s .18s ease both; }
-    .fade-up-4 { animation: fadeUp .38s .24s ease both; }
-    .fade-up-5 { animation: fadeUp .38s .30s ease both; }
-    .fade-up-6 { animation: fadeUp .38s .36s ease both; }
-
-    /* ── Responsive ──────────────────────────────────── */
-    @media (max-width: 1060px) {
-      .charts-2 { grid-template-columns: 1fr; }
-      .kpi-strip { grid-template-columns: repeat(2,1fr); }
-    }
-    @media (max-width: 640px) {
-      .kpi-strip { grid-template-columns: repeat(2,1fr); }
-      .calc-grid { grid-template-columns: 1fr 1fr; }
-      .calc-result { grid-template-columns: 1fr; }
-      .guide-grid { grid-template-columns: 1fr; }
-      .rec-name { font-size: 22px; }
-      .hdr-title { font-size: 22px; }
-    }
+    /* ── Animations ──────────────────────────────────────── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up   { animation: fadeUp .4s ease both; }
+    .fade-up-1 { animation: fadeUp .4s .06s ease both; }
+    .fade-up-2 { animation: fadeUp .4s .14s ease both; }
+    .fade-up-3 { animation: fadeUp .4s .22s ease both; }
   </style>
 </head>
 <body>
@@ -496,160 +485,263 @@
 <!-- Loader -->
 <div id="loader">
   <div class="spinner"></div>
-  <p>Loading EC2 dataset…</p>
+  <strong>EC2 Instance Advisor</strong>
+  <p>Loading instance dataset…</p>
 </div>
 
 <!-- App -->
 <div id="app">
 
-  <!-- Header -->
-  <header class="hdr">
-    <div style="display:flex;align-items:center;gap:12px">
-      <button class="sb-toggle" id="sbToggle" title="Toggle filters" onclick="toggleSidebar()">☰</button>
-      <div>
-        <div class="hdr-title">EC2 Instance <em>Advisor</em></div>
-        <p class="hdr-sub">Not sure which EC2 instance to pick? Set your priorities → get a ranked recommendation instantly.</p>
+  <!-- ── Sticky Nav ── -->
+  <nav class="site-nav">
+    <span class="nav-brand">EC2 <em>Advisor</em></span>
+    <div class="nav-actions">
+      <span class="nav-chip hide-sm">AWS Snapshot</span>
+      <span class="nav-chip warn hide-sm">Not official AWS</span>
+      <button class="nav-btn" onclick="shareURL()">🔗 Share</button>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+
+      <div class="hero-badge">
+        <span class="hero-dot"></span>
+        Interactive EC2 Instance Finder
       </div>
-    </div>
-    <div class="chip-row">
-      <span class="chip">AWS Snapshot</span>
-      <span class="chip">GitHub Pages</span>
-      <button class="hdr-btn" onclick="shareURL()">🔗 Share</button>
-    </div>
-  </header>
 
-  <div class="layout">
+      <h1 class="hero-title">
+        Pick the right <em>EC2 instance</em><br>for your workload — in minutes
+      </h1>
 
-    <!-- ── Sidebar ── -->
-    <aside class="card sidebar" id="sidebar">
-      <button class="sb-close" id="sbClose" onclick="toggleSidebar()">✕</button>
+      <p class="hero-desc">
+        AWS offers 500+ EC2 instance types across compute, memory, GPU, storage, and general-purpose families.
+        This advisor scores every instance on price, CPU, RAM, GPU, and network — weighted by <em>your</em> priorities —
+        and surfaces the best match instantly. Scroll down to explore families, tune your weights, and lock in your pick.
+      </p>
 
-      <!-- Filters -->
-      <div class="sb-sec">
-        <div class="sec-title">Filters</div>
-        <div style="margin-bottom:12px">
-          <label>
-            Region
-            <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> to cycle</span>
-          </label>
-          <div class="region-row">
-            <button class="icon-btn" id="prevRegion" title="Prev region (←)">‹</button>
-            <select id="region"></select>
-            <button class="icon-btn" id="nextRegion" title="Next region (→)">›</button>
+      <div class="hero-bottom">
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-val" id="heroInstances">—</div>
+            <div class="hero-stat-lbl">Instances</div>
           </div>
-          <div class="region-hint" id="regionPage"></div>
+          <div>
+            <div class="hero-stat-val" id="heroFamilies">—</div>
+            <div class="hero-stat-lbl">Families</div>
+          </div>
+          <div>
+            <div class="hero-stat-val" id="heroRegions">—</div>
+            <div class="hero-stat-lbl">Regions</div>
+          </div>
         </div>
+
+        <div class="hero-vdivider"></div>
+
+        <div class="hero-region-wrap">
+          <span class="hero-region-lbl">AWS Region</span>
+          <button class="hero-icon-btn" id="prevRegion" title="Previous region (←)">‹</button>
+          <select id="region"></select>
+          <button class="hero-icon-btn" id="nextRegion" title="Next region (→)">›</button>
+          <span class="hero-region-hint" id="regionPage"></span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Funnel ── -->
+  <div class="funnel-wrap">
+
+    <!-- ═══════════════════════════════════════════════
+         STEP 01 — Family Discovery
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-1" id="step-families">
+      <div class="step-hdr">
+        <div class="step-num">01</div>
         <div>
-          <label>Category</label>
-          <select id="category"></select>
+          <div class="step-title">Understand Instance Families</div>
+          <div class="step-desc">
+            EC2 instances are grouped into families, each optimized for a specific hardware profile.
+            Click a card to filter the entire analysis to that family — or keep <strong>All</strong> to compare across everything.
+            Not sure which? Read the use-cases and examples below, then pick the family closest to your workload.
+          </div>
         </div>
       </div>
+      <div class="family-cards-grid" id="familyCards"></div>
+    </section>
 
-      <div class="sb-div"></div>
-
-      <!-- Presets -->
-      <div class="sb-sec">
-        <div class="sec-title">
-          Weight Presets
-          <span class="kbd-hint"><kbd>B</kbd><kbd>C</kbd><kbd>P</kbd><kbd>M</kbd></span>
-        </div>
-        <div class="preset-grid">
-          <button class="preset-btn" id="pr-balanced"    onclick="setPreset('balanced')">⚖️ Balanced</button>
-          <button class="preset-btn" id="pr-cost"        onclick="setPreset('cost')">💰 Cost First</button>
-          <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
-          <button class="preset-btn" id="pr-ml"          onclick="setPreset('ml')">🤖 ML / AI</button>
+    <!-- ═══════════════════════════════════════════════
+         STEP 02 — Family-Level Aggregate Comparison
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-2" id="step-agg">
+      <div class="step-hdr">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">Family-Level Comparison</div>
+          <div class="step-desc">
+            How do the five families compare on average specs? The bars show typical vCPU count and RAM —
+            the line shows average hourly cost. GPU and Memory families trade raw price for specialized hardware.
+            General Purpose sits in the middle of everything.
+          </div>
         </div>
       </div>
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div class="chart-title">Average Specs per Instance Family</div>
+          <div class="chart-sub">Aggregated across all instances in selected region · bars = vCPUs &amp; RAM (GiB) · line = avg cost ($/hr)</div>
+        </div>
+        <div class="chart-body" id="chart5" style="height:310px"></div>
+      </div>
+    </section>
 
-      <div class="sb-div"></div>
-
-      <!-- Sliders -->
-      <div class="sb-sec">
-        <div class="sec-title">Scoring Weights</div>
-        <div class="slider-row">
-          <div class="sl-hd">
-            <span>💵 Price</span>
-            <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">35</span>
-          </div>
-          <input id="wPrice" type="range" min="0" max="100" value="35" />
-        </div>
-        <div class="slider-row">
-          <div class="sl-hd">
-            <span>⚙️ CPU</span>
-            <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">25</span>
-          </div>
-          <input id="wCpu" type="range" min="0" max="100" value="25" />
-        </div>
-        <div class="slider-row">
-          <div class="sl-hd">
-            <span>🧠 Memory</span>
-            <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">20</span>
-          </div>
-          <input id="wMem" type="range" min="0" max="100" value="20" />
-        </div>
-        <div class="slider-row">
-          <div class="sl-hd">
-            <span>🌐 Network</span>
-            <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">10</span>
-          </div>
-          <input id="wNet" type="range" min="0" max="100" value="10" />
-        </div>
-        <div class="slider-row">
-          <div class="sl-hd">
-            <span>🎮 GPU</span>
-            <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">10</span>
-          </div>
-          <input id="wGpu" type="range" min="0" max="100" value="10" />
-        </div>
-        <div class="wbar-wrap">
-          <div class="wbar-hd">
-            <span>Distribution</span>
-            <span id="weightTotal" style="font-weight:800">100%</span>
-          </div>
-          <div id="weightBar">
-            <div class="wb-seg" id="wb-price" style="background:#3b82f6"></div>
-            <div class="wb-seg" id="wb-cpu"   style="background:#60a5fa"></div>
-            <div class="wb-seg" id="wb-mem"   style="background:#10b981"></div>
-            <div class="wb-seg" id="wb-net"   style="background:#34d399"></div>
-            <div class="wb-seg" id="wb-gpu"   style="background:#8b5cf6"></div>
+    <!-- ═══════════════════════════════════════════════
+         STEP 03 — Configure Priorities & Drill Down
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-2" id="step-drill">
+      <div class="step-hdr">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">Set Your Priorities &amp; Drill Down</div>
+          <div class="step-desc">
+            Adjust the sliders to reflect what matters most for your workload.
+            Start with a preset, then fine-tune. The scoring and charts update live.
+            Use the instance family filter below the spec chart to isolate specific sub-families.
           </div>
         </div>
       </div>
 
-      <div class="sb-div"></div>
-
-      <!-- Keyboard shortcuts -->
-      <div class="sb-sec">
-        <div class="sec-title">Keyboard Shortcuts</div>
-        <div class="kbd-panel">
-          <kbd>← →</kbd> <span>Cycle region</span>
-          <kbd>B</kbd>   <span>Preset: Balanced</span>
-          <kbd>C</kbd>   <span>Preset: Cost First</span>
-          <kbd>P</kbd>   <span>Preset: Performance</span>
-          <kbd>M</kbd>   <span>Preset: ML / AI</span>
-          <kbd>/</kbd>   <span>Focus table search</span>
+      <!-- Inline controls card -->
+      <div class="controls-card">
+        <div class="controls-top">
+          <span class="controls-top-lbl">Quick Presets</span>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="preset-btn" id="pr-balanced"    onclick="setPreset('balanced')">⚖️ Balanced</button>
+            <button class="preset-btn" id="pr-cost"        onclick="setPreset('cost')">💰 Cost First</button>
+            <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
+            <button class="preset-btn" id="pr-ml"          onclick="setPreset('ml')">🤖 ML / AI</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Category:</span>
+            <select id="category"></select>
+          </div>
+        </div>
+        <div class="controls-body">
+          <div class="sliders-grid">
+            <div>
+              <div class="sl-hd">
+                <span>💵 Price</span>
+                <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">35</span>
+              </div>
+              <input id="wPrice" type="range" min="0" max="100" value="35" />
+            </div>
+            <div>
+              <div class="sl-hd">
+                <span>⚙️ CPU</span>
+                <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">25</span>
+              </div>
+              <input id="wCpu" type="range" min="0" max="100" value="25" />
+            </div>
+            <div>
+              <div class="sl-hd">
+                <span>🧠 Memory</span>
+                <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">20</span>
+              </div>
+              <input id="wMem" type="range" min="0" max="100" value="20" />
+            </div>
+            <div>
+              <div class="sl-hd">
+                <span>🌐 Network</span>
+                <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">10</span>
+              </div>
+              <input id="wNet" type="range" min="0" max="100" value="10" />
+            </div>
+            <div>
+              <div class="sl-hd">
+                <span>🎮 GPU</span>
+                <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">10</span>
+              </div>
+              <input id="wGpu" type="range" min="0" max="100" value="10" />
+            </div>
+            <div class="wbar-wrap">
+              <div class="wbar-hd">
+                <span>Weight distribution</span>
+                <span id="weightTotal" style="font-weight:800">100%</span>
+              </div>
+              <div id="weightBar">
+                <div class="wb-seg" id="wb-price" style="background:#3b82f6"></div>
+                <div class="wb-seg" id="wb-cpu"   style="background:#60a5fa"></div>
+                <div class="wb-seg" id="wb-mem"   style="background:#10b981"></div>
+                <div class="wb-seg" id="wb-net"   style="background:#34d399"></div>
+                <div class="wb-seg" id="wb-gpu"   style="background:#8b5cf6"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="sb-div"></div>
-
-      <!-- Instance type guide -->
-      <div class="sb-sec">
-        <details>
-          <summary>
-            <span class="sec-title" style="margin:0">Instance Type Guide</span>
-          </summary>
-          <div class="type-grid" id="types" style="margin-top:10px"></div>
-        </details>
+      <!-- Instance Spec Comparison + Radar -->
+      <div class="charts-2">
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="chart-title">Instance Spec Comparison</div>
+            <div class="chart-sub">vCPUs · RAM (GiB) · Cost ($/hr) — filter by instance family below</div>
+          </div>
+          <div class="family-filter-bar" id="familyFilter"></div>
+          <div class="chart-body" id="chart" style="height:280px"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="chart-title">Dimension Radar — Top 5</div>
+            <div class="chart-sub">Normalized [0–1] scores across all five dimensions</div>
+          </div>
+          <div class="chart-body" id="chart3" style="height:320px"></div>
+        </div>
       </div>
 
-    </aside>
+      <!-- Bar chart -->
+      <div class="chart-card">
+        <div class="bar-hd">
+          <div>
+            <div class="chart-title">Top 10 Instance Comparison</div>
+            <div class="chart-sub">Select a metric to compare side-by-side</div>
+          </div>
+          <div class="bar-hd-r">
+            <label>Metric:</label>
+            <select id="metric">
+              <option value="vcpus">vCPUs</option>
+              <option value="memory_gib">Memory (GiB)</option>
+              <option value="gpu_count">GPU Count</option>
+              <option value="network_score">Network Score</option>
+              <option value="price_usd_hour">Price (USD/hr)</option>
+              <option value="composite">Composite Score</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-body" id="chart2" style="height:280px"></div>
+      </div>
+    </section>
 
-    <!-- ── Main ── -->
-    <main class="main">
+    <!-- ═══════════════════════════════════════════════
+         STEP 04 — Top Recommendation
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-3" id="step-rec">
+      <div class="step-hdr">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">Your Best Match</div>
+          <div class="step-desc">
+            Based on your region, category filter, and scoring weights — here's the #1 ranked instance.
+            The score ring shows its composite score (0–1). See how its price compares across all regions below,
+            then scroll down to browse and click-compare every candidate in the full table.
+          </div>
+        </div>
+      </div>
 
       <!-- KPI strip -->
-      <div class="kpi-strip fade-up-1">
+      <div class="kpi-strip">
         <div class="kpi">
           <div class="kpi-lbl">Matched Instances</div>
           <div class="kpi-val" id="kpiCount">—</div>
@@ -672,59 +764,109 @@
         </div>
       </div>
 
-      <!-- Scatter + Radar -->
-      <div class="charts-2 fade-up-2">
-        <div class="chart-card">
-          <div class="chart-hd">
-            <div class="chart-title">Instance Spec Comparison</div>
-            <div class="chart-sub">vCPUs · RAM (GiB) · Cost ($/hr) — filter by instance family</div>
+      <!-- Rec hero -->
+      <div id="recCard" class="rec-hero">
+        <div id="recAccentBar" class="rec-hero-accent" style="background:var(--accent)"></div>
+        <div class="rec-hero-inner">
+          <div class="rec-hero-left">
+            <div class="rec-eyebrow">
+              <span>Based on your current weights &amp; filters</span>
+              <button class="copy-rec-btn" onclick="copyRecommendation()" title="Copy recommendation">📋 Copy</button>
+            </div>
+            <div id="recName" class="rec-name">—</div>
+            <div id="recTags" class="rec-tags"></div>
+            <div id="recStats" class="rec-stats"></div>
+            <div id="recWhy" class="rec-why"></div>
           </div>
-          <div class="family-filter-bar" id="familyFilter"></div>
-          <div class="chart-body" id="chart" style="height:300px"></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-hd">
-            <div class="chart-title">Dimension Radar — Top 5</div>
-            <div class="chart-sub">Normalized [0–1] scores across all five dimensions</div>
+          <div class="rec-hero-right">
+            <div class="score-ring-wrap">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="38" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                <circle id="recScoreArc" cx="48" cy="48" r="38"
+                  fill="none" stroke="var(--accent)" stroke-width="8"
+                  stroke-dasharray="0 238.76" stroke-linecap="round"
+                  transform="rotate(-90 48 48)"
+                  style="transition:stroke-dasharray .6s cubic-bezier(.4,0,.2,1),stroke .35s"/>
+              </svg>
+              <div class="score-ring-val">
+                <span id="recScoreNum" class="score-ring-num">—</span>
+                <span class="score-ring-sub">Score</span>
+              </div>
+            </div>
+            <div id="recRankTxt" class="rec-rank-txt"></div>
+            <div id="recCatLabel" class="rec-cat-label"></div>
           </div>
-          <div class="chart-body" id="chart3" style="height:320px"></div>
         </div>
       </div>
 
-      <!-- Bar chart -->
-      <div class="chart-card fade-up-3">
-        <div class="bar-hd">
+      <!-- Instance compare panel -->
+      <div id="comparePanel" class="cmp-panel">
+        <div class="cmp-hd">
           <div>
-            <div class="chart-title">Instance Comparison — Top 10</div>
-            <div class="chart-sub">Select a metric to compare side-by-side</div>
+            <div class="cmp-title" id="cmpTitle">Instance Detail View</div>
+            <div class="cmp-sub"   id="cmpSub">vs. top recommendation</div>
           </div>
-          <div class="bar-hd-r">
-            <label>Metric:</label>
-            <select id="metric">
-              <option value="vcpus">vCPUs</option>
-              <option value="memory_gib">Memory (GiB)</option>
-              <option value="gpu_count">GPU Count</option>
-              <option value="network_score">Network Score</option>
-              <option value="price_usd_hour">Price (USD/hr)</option>
-              <option value="composite">Composite Score</option>
-            </select>
-          </div>
+          <button class="cmp-close" onclick="closeCompare()" title="Close">✕</button>
         </div>
-        <div class="chart-body" id="chart2" style="height:290px"></div>
+        <div class="cmp-body">
+          <div class="cmp-specs" id="cmpSpecs"></div>
+          <div style="padding:4px" id="cmpChart"></div>
+        </div>
       </div>
 
       <!-- Regional price chart -->
-      <div class="chart-card fade-up-4">
+      <div class="chart-card">
         <div class="chart-hd">
           <div class="chart-title" id="regionalTitle">Regional Price Comparison</div>
-          <div class="chart-sub">Top recommendation's on-demand price across all available regions</div>
+          <div class="chart-sub">Top recommendation's on-demand price across all available AWS regions</div>
         </div>
         <div class="chart-body" id="chart4" style="height:240px"></div>
       </div>
+    </section>
 
-      <!-- Calculator -->
-      <div class="card fade-up-5">
-        <div class="sec-title">Pricing Calculator</div>
+    <!-- ═══════════════════════════════════════════════
+         STEP 05 — Browse All Candidates
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-3" id="step-browse">
+      <div class="step-hdr">
+        <div class="step-num">05</div>
+        <div>
+          <div class="step-title">Browse All Candidates</div>
+          <div class="step-desc">
+            The full ranked list for your current filters. Search by instance name, category, or region.
+            <strong>Click any row</strong> to open a head-to-head spec and score comparison against the #1 pick.
+            Use <kbd>/</kbd> to focus the search field.
+          </div>
+        </div>
+      </div>
+      <div class="chart-card" style="padding:0;overflow:hidden">
+        <div class="table-toolbar">
+          <span class="sec-title" style="white-space:nowrap">Top Candidates</span>
+          <input type="search" id="tableSearch" class="table-search" placeholder="Search instances, categories, regions…" />
+          <span class="table-count" id="tableCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="table"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════
+         STEP 06 — Cost Estimator
+    ════════════════════════════════════════════════ -->
+    <section class="funnel-step fade-up-3" id="step-calc">
+      <div class="step-hdr">
+        <div class="step-num">06</div>
+        <div>
+          <div class="step-title">Estimate Your Monthly Costs</div>
+          <div class="step-desc">
+            Model real spend based on usage hours, fleet size, and optional EBS storage.
+            Uses the top recommendation's on-demand price. Great for quick budget sanity checks
+            before heading to the AWS Pricing Calculator.
+          </div>
+        </div>
+      </div>
+      <div class="chart-card" style="padding:20px">
         <div class="calc-grid">
           <div class="calc-input-wrap">
             <label>Hours / month</label>
@@ -757,80 +899,34 @@
             <div class="cr-val dark" id="crAnnual">—</div>
           </div>
         </div>
-        <p style="font-size:11px;color:var(--muted);margin-top:8px">
-          Uses top recommendation's price. Storage is optional (e.g. gp3 ≈ $0.08/GB-mo).
+        <p style="font-size:11px;color:var(--muted);margin-top:10px">
+          On-demand pricing only. Excludes data transfer, support plans, and other AWS service charges.
+          Storage rate example: gp3 ≈ $0.08/GB-mo.
         </p>
       </div>
+    </section>
 
-      <!-- Table -->
-      <div class="card fade-up-5" style="padding:0;overflow:hidden">
-        <div class="table-toolbar">
-          <div class="sec-title" style="margin:0;white-space:nowrap">Top Candidates</div>
-          <input type="search" id="tableSearch" class="table-search" placeholder="Search instances, categories, regions…" />
-          <span class="table-count" id="tableCount"></span>
-        </div>
-        <div class="table-wrap">
-          <table id="table"></table>
-        </div>
-      </div>
-
-      <!-- Guide -->
-      <div class="card fade-up-6">
-        <details open>
-          <summary>
-            <span class="sec-title" style="margin:0">How to choose the right instance</span>
-          </summary>
-          <div class="guide-grid">
-            <div class="guide-item">
-              <div class="guide-step">Step 1 — Workload type</div>
-              <div class="guide-txt">CPU for builds &amp; APIs, GPU for ML/AI, Memory for large caches &amp; JVM, Storage for high-IOPS NVMe, General for balanced apps.</div>
-            </div>
-            <div class="guide-item">
-              <div class="guide-step">Step 2 — Pick region</div>
-              <div class="guide-txt">Keep compute close to users and data. Use the Regional Price chart to compare costs across AWS regions.</div>
-            </div>
-            <div class="guide-item">
-              <div class="guide-step">Step 3 — Use presets</div>
-              <div class="guide-txt">Jump-start with Balanced, Cost First, Performance, or ML/AI — then fine-tune sliders for your exact priorities.</div>
-            </div>
-            <div class="guide-item">
-              <div class="guide-step">Step 4 — Read the charts</div>
-              <div class="guide-txt">Line chart = price-performance curves per category. Radar = dimension strengths of top 5. Bar = metric comparison. Regional = cheapest region for #1. Click any table row to see a detailed comparison.</div>
-            </div>
-            <div class="guide-item">
-              <div class="guide-step">Step 5 — Check the score breakdown</div>
-              <div class="guide-txt">Bars in the recommendation card show each dimension's raw normalized score — see exactly why an instance ranked #1.</div>
-            </div>
-            <div class="guide-item">
-              <div class="guide-step">Step 6 — Validate in production</div>
-              <div class="guide-txt">Benchmark with your real workload and monitor utilization before committing to an instance family.</div>
-            </div>
-          </div>
-        </details>
-      </div>
-
-    </main>
-  </div>
+  </div><!-- /.funnel-wrap -->
 
   <!-- Footer disclaimer -->
-  <footer style="text-align:center;padding:22px 16px 6px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);margin-top:12px;line-height:1.8">
+  <footer style="text-align:center;padding:28px 16px 14px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);background:#fff;line-height:1.9;margin-top:8px">
     ⚠️ This tool is <strong>not affiliated with, endorsed by, or an official channel of Amazon Web Services (AWS)</strong>.<br>
-    It is an independent personal project built for educational &amp; portfolio purposes only. Pricing data may be outdated — always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">aws.amazon.com</a>.
+    Independent personal project for educational &amp; portfolio purposes only. Pricing data may be outdated —
+    always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
   </footer>
 
 </div><!-- /#app -->
 
 <script>
-/* ── Constants & state ─────────────────────────────── */
-const CSV_URL = './data/ec2_aws_snapshot.csv';
-const state   = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set() };
-const SLIDERS = ['wPrice','wCpu','wMem','wNet','wGpu'];
+/* ── Constants & state ──────────────────────────────────── */
+const CSV_URL   = './data/ec2_aws_snapshot.csv';
+const state     = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set() };
+const SLIDERS   = ['wPrice','wCpu','wMem','wNet','wGpu'];
 const HASH_KEYS = ['region','category','metric',...SLIDERS];
 const el = id => document.getElementById(id);
 
 const CAT_COLOR = { CPU:'#3b82f6', GPU:'#8b5cf6', Memory:'#10b981', Storage:'#f59e0b', General:'#6b7280' };
 const CAT_BG    = { CPU:'#eff6ff', GPU:'#f5f3ff', Memory:'#ecfdf5', Storage:'#fffbeb', General:'#f9fafb' };
-
 const METRIC_LABEL = {
   vcpus:'vCPUs', memory_gib:'Memory (GiB)', gpu_count:'GPU Count',
   network_score:'Network Score', price_usd_hour:'Price (USD/hr)', composite:'Composite Score',
@@ -849,29 +945,68 @@ const PRESETS = {
   ml:          { wPrice:15, wCpu:20, wMem:20, wNet:10, wGpu:35 },
 };
 
-/* ── Toast ─────────────────────────────────────────── */
-function toast(msg, duration = 2200) {
+/* Family card metadata */
+const FAMILY_INFO = {
+  All: {
+    icon: '🌐', name: 'All Families', tag: 'All',
+    color: '#4f46e5', bg: '#eef2ff',
+    desc: 'Compare every instance type simultaneously with no category filter applied.',
+    useCases: ['Full comparison','Research','Exploratory work'],
+    examples: null,
+  },
+  CPU: {
+    icon: '⚙️', name: 'Compute Optimized', tag: 'CPU',
+    color: '#3b82f6', bg: '#eff6ff',
+    desc: 'High vCPU-to-memory ratio. Best for processor-intensive tasks that need sustained throughput.',
+    useCases: ['Web APIs','Batch processing','Video encoding','HPC'],
+    examples: 'c5, c6i, c7g',
+  },
+  GPU: {
+    icon: '🎮', name: 'Accelerated (GPU)', tag: 'GPU',
+    color: '#8b5cf6', bg: '#f5f3ff',
+    desc: 'NVIDIA/AMD GPUs for massively parallel workloads. Required for serious deep learning.',
+    useCases: ['ML training','AI inference','CUDA apps','3D rendering'],
+    examples: 'p3, g4dn, p4d',
+  },
+  Memory: {
+    icon: '🧠', name: 'Memory Optimized', tag: 'Memory',
+    color: '#10b981', bg: '#ecfdf5',
+    desc: 'High RAM-to-vCPU ratio — perfect when your entire dataset must live in memory.',
+    useCases: ['Redis / Memcached','In-memory analytics','SAP HANA','Large JVM'],
+    examples: 'r5, r6i, x1e',
+  },
+  Storage: {
+    icon: '💾', name: 'Storage Optimized', tag: 'Storage',
+    color: '#f59e0b', bg: '#fffbeb',
+    desc: 'Local NVMe SSDs for ultra-high IOPS and sequential throughput with minimal latency.',
+    useCases: ['NoSQL databases','Data warehouse','Elasticsearch','Log analytics'],
+    examples: 'i3, i4i, d3',
+  },
+  General: {
+    icon: '⚖️', name: 'General Purpose', tag: 'General',
+    color: '#6b7280', bg: '#f9fafb',
+    desc: 'Balanced compute, memory, and networking. The safe default for most everyday workloads.',
+    useCases: ['Web servers','Microservices','Dev / test','Small databases'],
+    examples: 'm5, m6i, t3',
+  },
+};
+
+/* ── Toast ──────────────────────────────────────────────── */
+function toast(msg, dur = 2200) {
   const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
+  t.className = 'toast'; t.textContent = msg;
   el('toastShelf').appendChild(t);
-  requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 300);
-  }, duration);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
 }
 
-/* ── Sidebar toggle (mobile) ───────────────────────── */
-function toggleSidebar() {
-  const sb = el('sidebar');
-  sb.classList.toggle('open');
-}
+/* No sidebar in this layout */
+function toggleSidebar() {}
 
-/* ── URL hash state ────────────────────────────────── */
+/* ── URL hash state ─────────────────────────────────────── */
 function saveHash() {
   const p = new URLSearchParams();
-  HASH_KEYS.forEach(k => { const node = el(k); if (node) p.set(k, node.value); });
+  HASH_KEYS.forEach(k => { const n = el(k); if (n) p.set(k, n.value); });
   history.replaceState(null, '', '#' + p.toString());
 }
 function loadHash() {
@@ -879,7 +1014,7 @@ function loadHash() {
   try {
     const p = new URLSearchParams(window.location.hash.slice(1));
     HASH_KEYS.forEach(k => { const v = p.get(k); if (v !== null && el(k)) el(k).value = v; });
-  } catch (_) {}
+  } catch(_) {}
 }
 function shareURL() {
   saveHash();
@@ -888,7 +1023,7 @@ function shareURL() {
     .catch(() => toast('Copy the URL from your address bar'));
 }
 
-/* ── Copy recommendation ───────────────────────────── */
+/* ── Copy recommendation ────────────────────────────────── */
 function copyRecommendation() {
   const name = el('recName').textContent;
   const tags = el('recTags')?.textContent?.trim() || '';
@@ -898,10 +1033,9 @@ function copyRecommendation() {
     .catch(() => toast('Could not access clipboard'));
 }
 
-/* ── Preset ────────────────────────────────────────── */
+/* ── Preset ─────────────────────────────────────────────── */
 function setPreset(name) {
-  const p = PRESETS[name];
-  if (!p) return;
+  const p = PRESETS[name]; if (!p) return;
   Object.entries(p).forEach(([id, val]) => { el(id).value = val; });
   ['balanced','cost','performance','ml'].forEach(k =>
     el(`pr-${k}`)?.classList.toggle('active', k === name));
@@ -909,18 +1043,15 @@ function setPreset(name) {
   render();
 }
 
-/* ── Data helpers ──────────────────────────────────── */
+/* ── Data helpers ───────────────────────────────────────── */
 function parseCSV(text) {
   const [header, ...lines] = text.trim().split('\n');
   const cols = header.split(',');
   return lines.filter(Boolean).map(line => {
-    const vals = line.split(',');
-    const obj  = {};
+    const vals = line.split(','); const obj = {};
     cols.forEach((c, i) => obj[c] = vals[i]);
-    obj.vcpus          = +obj.vcpus;
-    obj.memory_gib     = +obj.memory_gib;
-    obj.network_score  = +obj.network_score;
-    obj.gpu_count      = +obj.gpu_count;
+    obj.vcpus = +obj.vcpus; obj.memory_gib = +obj.memory_gib;
+    obj.network_score = +obj.network_score; obj.gpu_count = +obj.gpu_count;
     obj.price_usd_hour = +obj.price_usd_hour;
     return obj;
   });
@@ -932,29 +1063,28 @@ function norm(values, reverse = false) {
   return values.map(v => reverse ? 1 - (v - min) / (max - min) : (v - min) / (max - min));
 }
 
-/* ── Region pager ──────────────────────────────────── */
+/* ── Region pager ───────────────────────────────────────── */
 function syncRegionPager() {
   const idx = state.regions.indexOf(el('region').value);
   if (idx >= 0) state.regionIdx = idx;
-  el('regionPage').textContent = `${state.regionIdx + 1} of ${state.regions.length} regions`;
+  el('regionPage').textContent = `${state.regionIdx + 1} of ${state.regions.length}`;
 }
 function stepRegion(delta) {
   if (!state.regions.length) return;
   state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
   el('region').value = state.regions[state.regionIdx];
-  syncRegionPager();
-  render();
+  syncRegionPager(); render();
 }
 
-/* ── Animated number counter ───────────────────────── */
+/* ── Animated number counter ────────────────────────────── */
 function animateNum(elId, to, fmt = v => v.toFixed(0), dur = 380) {
-  const node = el(elId);
+  const node = el(elId); if (!node) return;
   const from = parseFloat(node.dataset.raw ?? '0') || 0;
   if (from === to) { node.textContent = fmt(to); node.dataset.raw = to; return; }
   node.dataset.raw = to;
   const t0 = performance.now();
   const tick = t => {
-    const p    = Math.min((t - t0) / dur, 1);
+    const p = Math.min((t - t0) / dur, 1);
     const ease = 1 - Math.pow(1 - p, 3);
     node.textContent = fmt(from + (to - from) * ease);
     if (p < 1) requestAnimationFrame(tick);
@@ -962,7 +1092,7 @@ function animateNum(elId, to, fmt = v => v.toFixed(0), dur = 380) {
   requestAnimationFrame(tick);
 }
 
-/* ── Weight bar ────────────────────────────────────── */
+/* ── Weight bar ─────────────────────────────────────────── */
 function renderWeightBar(w, sum) {
   Object.entries(w).forEach(([k, val]) => {
     const seg = el(`wb-${k}`);
@@ -971,180 +1101,203 @@ function renderWeightBar(w, sum) {
   el('weightTotal').textContent = sum > 0 ? '100%' : '0% ⚠️';
 }
 
-/* ── KPI strip ─────────────────────────────────────── */
+/* ── KPI strip ──────────────────────────────────────────── */
 function renderKPIs(rows) {
   const regions = new Set(rows.map(r => r.region));
   animateNum('kpiCount', rows.length, v => Math.round(v).toString());
   el('kpiCountSub').textContent = `${regions.size} region${regions.size > 1 ? 's' : ''}`;
-
   const cheapest = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
   animateNum('kpiCheap', cheapest.price_usd_hour, v => `$${v.toFixed(4)}`);
   el('kpiCheapSub').textContent = cheapest.instance_type;
-
   const bestPerf = rows.reduce((a, b) => (a.perf || 0) > (b.perf || 0) ? a : b);
   animateNum('kpiBestPerf', bestPerf.perf || 0, v => v.toFixed(3));
   el('kpiBestPerfSub').textContent = bestPerf.instance_type;
-
   const bestVal = rows.reduce((a, b) => {
     const va = (a.perf || 0) / Math.max(a.price_usd_hour, 1e-4);
     const vb = (b.perf || 0) / Math.max(b.price_usd_hour, 1e-4);
     return va > vb ? a : b;
   });
   el('kpiBestVal').textContent    = bestVal.instance_type;
-  el('kpiBestValSub').textContent = `${((bestVal.perf || 0) / Math.max(bestVal.price_usd_hour, 1e-4)).toFixed(1)} perf / dollar`;
+  el('kpiBestValSub').textContent = `${((bestVal.perf||0)/Math.max(bestVal.price_usd_hour,1e-4)).toFixed(1)} perf/dollar`;
 }
 
-/* ── Rec card ──────────────────────────────────────── */
+/* ── Rec card ───────────────────────────────────────────── */
 function renderRecCard(best, rows) {
   el('recCard').classList.remove('error-state');
   const catColor = CAT_COLOR[best.instance_category] || '#4f46e5';
   const catBg    = CAT_BG[best.instance_category]    || '#f9fafb';
-
-  // Accent bar & score arc color
   el('recAccentBar').style.background = catColor;
   const arc = el('recScoreArc');
   if (arc) {
     arc.style.stroke = catColor;
-    const circ = 238.76;
-    arc.setAttribute('stroke-dasharray', `${(best.composite * circ).toFixed(2)} ${circ}`);
+    arc.setAttribute('stroke-dasharray', `${(best.composite * 238.76).toFixed(2)} 238.76`);
   }
-
   el('recName').textContent = best.instance_type;
-
-  // Tags: category (colored) + region
   el('recTags').innerHTML =
     `<span class="rtag" style="background:${catBg};color:${catColor};border-color:${catColor}40">${best.instance_category}</span>` +
     `<span class="rtag">${best.region}</span>`;
-
-  // Stat strip
   el('recStats').innerHTML = [
     { val: `$${best.price_usd_hour.toFixed(4)}`, lbl: 'Per Hour' },
     { val: best.vcpus,                            lbl: 'vCPUs' },
     { val: `${best.memory_gib} GiB`,              lbl: 'RAM' },
     { val: best.gpu_count > 0 ? best.gpu_count : '—', lbl: 'GPUs' },
     { val: `${best.network_score}/5`,             lbl: 'Network' },
-  ].map(s => `
-    <div class="rec-stat">
-      <div class="rec-stat-val">${s.val}</div>
-      <div class="rec-stat-lbl">${s.lbl}</div>
-    </div>`).join('');
-
-  // Score ring text
+  ].map(s => `<div class="rec-stat"><div class="rec-stat-val">${s.val}</div><div class="rec-stat-lbl">${s.lbl}</div></div>`).join('');
   el('recScoreNum').textContent = best.composite.toFixed(3);
-  el('recRankTxt').innerHTML = `<strong>#1</strong> of ${rows.length} candidates`;
-  el('recCatLabel').innerHTML =
+  el('recRankTxt').innerHTML    = `<strong>#1</strong> of ${rows.length} candidates`;
+  el('recCatLabel').innerHTML   =
     `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${catColor};margin-right:4px"></span>` +
     `<span style="color:${catColor}">${best.instance_category}</span>`;
-  el('recCatLabel').style.cssText =
-    `background:${catBg};border-color:${catColor}30;color:${catColor}`;
-
-  // Insight
+  el('recCatLabel').style.cssText = `background:${catBg};border-color:${catColor}30;color:${catColor}`;
   const cheapest  = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
-  const strongest = rows.reduce((a, b) => (a.perf || 0) > (b.perf || 0) ? a : b);
+  const strongest = rows.reduce((a, b) => (a.perf||0) > (b.perf||0) ? a : b);
   const pd = ((best.price_usd_hour - cheapest.price_usd_hour) / Math.max(cheapest.price_usd_hour, 1e-4)) * 100;
   const pg = ((strongest.perf - best.perf) / Math.max(strongest.perf, 1)) * 100;
   el('recWhy').innerHTML =
     `${TYPE_EXPLAIN[best.instance_category] || ''} ` +
     `Cost is ${pd <= 1 ? `<b style="color:var(--success)">near-cheapest</b>` : `<b>${pd.toFixed(1)}%</b> above cheapest`} in filter. ` +
-    `Performance within <b>${Math.max(0, pg).toFixed(1)}%</b> of the top performer. ` +
-    `<span style="color:var(--accent);cursor:pointer" onclick="document.getElementById('table').scrollIntoView({behavior:'smooth'})">Compare instances ↓</span>`;
+    `Performance within <b>${Math.max(0,pg).toFixed(1)}%</b> of the top performer. ` +
+    `<span style="color:var(--accent);cursor:pointer" onclick="el('step-browse').scrollIntoView({behavior:'smooth'})">Browse all candidates ↓</span>`;
 }
 
-/* ── Charts ────────────────────────────────────────── */
+/* ── Plotly base ────────────────────────────────────────── */
 const PLOTLY_BASE = {
-  paper_bgcolor: 'transparent',
-  plot_bgcolor: '#fafbff',
+  paper_bgcolor: 'transparent', plot_bgcolor: '#fafbff',
   font: { family: 'Inter,sans-serif', size: 11, color: '#64748b' },
 };
 
-/* ── Family filter ─────────────────────────────────── */
-function getFamily(instanceType) {
-  return instanceType.split('.')[0];
-}
+/* ── Family filter helpers ──────────────────────────────── */
+function getFamily(t) { return t.split('.')[0]; }
 
 function renderFamilyFilter(rows) {
-  const container = el('familyFilter');
-  if (!container) return;
-  const families = [...new Set(rows.map(r => getFamily(r.instance_type)))].sort();
+  const c = el('familyFilter'); if (!c) return;
+  const families  = [...new Set(rows.map(r => getFamily(r.instance_type)))].sort();
   const allActive = families.every(f => state.selectedFamilies.has(f));
-
-  container.innerHTML =
+  c.innerHTML =
     `<span class="family-filter-lbl">Family:</span>` +
-    `<button class="family-pill pill-all ${allActive ? 'active' : ''}"
-       onclick="selectAllFamilies()">All</button>` +
+    `<button class="family-pill pill-all ${allActive?'active':''}" onclick="selectAllFamilies()">All</button>` +
     families.map(f =>
-      `<button class="family-pill ${state.selectedFamilies.has(f) ? 'active' : ''}"
-         onclick="toggleFamily('${f}')">${f}</button>`
+      `<button class="family-pill ${state.selectedFamilies.has(f)?'active':''}" onclick="toggleFamily('${f}')">${f}</button>`
     ).join('');
 }
-
 function selectAllFamilies() {
-  const families = [...new Set(state.scoredRows.map(r => getFamily(r.instance_type)))];
-  families.forEach(f => state.selectedFamilies.add(f));
-  renderFamilyFilter(state.scoredRows);
-  renderLineChart(state.scoredRows);
+  [...new Set(state.scoredRows.map(r => getFamily(r.instance_type)))].forEach(f => state.selectedFamilies.add(f));
+  renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
 }
-
 function toggleFamily(family) {
   if (state.selectedFamilies.has(family)) {
-    if (state.selectedFamilies.size > 1) state.selectedFamilies.delete(family);
-    else return; // keep at least one selected
-  } else {
-    state.selectedFamilies.add(family);
-  }
-  renderFamilyFilter(state.scoredRows);
-  renderLineChart(state.scoredRows);
+    if (state.selectedFamilies.size > 1) state.selectedFamilies.delete(family); else return;
+  } else { state.selectedFamilies.add(family); }
+  renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
 }
-
 function syncFamilyFilter(rows) {
-  const current = new Set(rows.map(r => getFamily(r.instance_type)));
-  // Remove stale selections
-  [...state.selectedFamilies].forEach(f => { if (!current.has(f)) state.selectedFamilies.delete(f); });
-  // If nothing left selected, select all
-  if (state.selectedFamilies.size === 0) current.forEach(f => state.selectedFamilies.add(f));
+  const cur = new Set(rows.map(r => getFamily(r.instance_type)));
+  [...state.selectedFamilies].forEach(f => { if (!cur.has(f)) state.selectedFamilies.delete(f); });
+  if (state.selectedFamilies.size === 0) cur.forEach(f => state.selectedFamilies.add(f));
 }
 
-function renderLineChart(rows) {
-  /* Filter by selected families, then take top 15 by composite score */
-  const filtered = state.selectedFamilies.size
-    ? rows.filter(r => state.selectedFamilies.has(getFamily(r.instance_type)))
-    : rows;
-  const top = filtered.slice(0, Math.min(15, filtered.length));
-  const names = top.map(r => r.instance_type);
+/* ── Family discovery cards ─────────────────────────────── */
+function renderFamilyCards(regionRows) {
+  const c = el('familyCards'); if (!c) return;
+  const sel = el('category').value || 'All';
+  c.innerHTML = Object.entries(FAMILY_INFO).map(([key, info]) => {
+    const count = key === 'All'
+      ? regionRows.length
+      : regionRows.filter(r => r.instance_category === key).length;
+    return `
+      <div class="family-card${sel === key ? ' fc-active' : ''}"
+           style="--fam-color:${info.color};--fam-bg:${info.bg}"
+           onclick="selectFamilyCard('${key}')">
+        <span class="fc-icon">${info.icon}</span>
+        <div class="fc-name">${info.name}</div>
+        <span class="fc-tag-badge">${info.tag}</span>
+        <div class="fc-desc">${info.desc}</div>
+        <div class="fc-uses">${info.useCases.map(u => `<span class="fc-use">${u}</span>`).join('')}</div>
+        ${info.examples ? `<div class="fc-examples">e.g. <b>${info.examples}</b></div>` : ''}
+        <div class="fc-count">${count.toLocaleString()} instance${count !== 1 ? 's' : ''}</div>
+        <div class="fc-cta">Filter &amp; analyze →</div>
+      </div>`;
+  }).join('');
+}
 
-  const traces = [
+function selectFamilyCard(category) {
+  el('category').value = category;
+  render();
+  setTimeout(() => el('step-drill').scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+}
+
+/* ── Family aggregate chart ─────────────────────────────── */
+function renderFamilyAggChart(regionRows) {
+  if (!regionRows || !regionRows.length) return;
+  const cats = ['CPU','GPU','Memory','Storage','General'];
+  const agg  = cats.map(cat => {
+    const r = regionRows.filter(x => x.instance_category === cat);
+    if (!r.length) return { avgVcpu: 0, avgMem: 0, avgPrice: 0 };
+    return {
+      avgVcpu:  r.reduce((s, x) => s + x.vcpus, 0)          / r.length,
+      avgMem:   r.reduce((s, x) => s + x.memory_gib, 0)     / r.length,
+      avgPrice: r.reduce((s, x) => s + x.price_usd_hour, 0) / r.length,
+    };
+  });
+  const colors = cats.map(c => CAT_COLOR[c] || '#4f46e5');
+  Plotly.react('chart5', [
     {
-      name: 'vCPUs',
-      type: 'scatter', mode: 'lines+markers',
-      x: names, y: top.map(r => r.vcpus),
-      line:   { color: '#3b82f6', width: 2.5, shape: 'spline' },
-      marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } },
-      yaxis: 'y',
+      name: 'Avg vCPUs', type: 'bar', x: cats,
+      y: agg.map(d => +d.avgVcpu.toFixed(1)),
+      marker: { color: colors, opacity: .88 }, yaxis: 'y',
+      hovertemplate: '<b>%{x}</b><br>Avg vCPUs: <b>%{y}</b><extra></extra>',
+    },
+    {
+      name: 'Avg RAM (GiB)', type: 'bar', x: cats,
+      y: agg.map(d => +d.avgMem.toFixed(1)),
+      marker: { color: colors, opacity: .42 }, yaxis: 'y',
+      hovertemplate: '<b>%{x}</b><br>Avg RAM: <b>%{y} GiB</b><extra></extra>',
+    },
+    {
+      name: 'Avg Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: cats,
+      y: agg.map(d => +d.avgPrice.toFixed(4)),
+      marker: { color: '#f59e0b', size: 10, line: { color: '#fff', width: 2 } },
+      line: { color: '#f59e0b', width: 2.5, shape: 'spline' }, yaxis: 'y2',
+      hovertemplate: '<b>%{x}</b><br>Avg Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
+    },
+  ], {
+    ...PLOTLY_BASE, barmode: 'group',
+    xaxis:  { gridcolor: '#e2e8f0' },
+    yaxis:  { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
+    yaxis2: { title: 'Avg Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
+    legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
+    margin: { t: 16, r: 65, b: 70, l: 55 }, hovermode: 'x unified',
+  }, { responsive: true });
+}
+
+/* ── Instance Spec line chart ───────────────────────────── */
+function renderLineChart(rows) {
+  const filtered = state.selectedFamilies.size
+    ? rows.filter(r => state.selectedFamilies.has(getFamily(r.instance_type))) : rows;
+  const top   = filtered.slice(0, Math.min(15, filtered.length));
+  const names = top.map(r => r.instance_type);
+  Plotly.react('chart', [
+    {
+      name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.vcpus),
+      line: { color: '#3b82f6', width: 2.5, shape: 'spline' },
+      marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
       hovertemplate: '<b>%{x}</b><br>vCPUs: <b>%{y}</b><extra></extra>',
     },
     {
-      name: 'RAM (GiB)',
-      type: 'scatter', mode: 'lines+markers',
-      x: names, y: top.map(r => r.memory_gib),
-      line:   { color: '#10b981', width: 2.5, shape: 'spline' },
-      marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } },
-      yaxis: 'y',
+      name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.memory_gib),
+      line: { color: '#10b981', width: 2.5, shape: 'spline' },
+      marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
       hovertemplate: '<b>%{x}</b><br>RAM: <b>%{y} GiB</b><extra></extra>',
     },
     {
-      name: 'Cost ($/hr)',
-      type: 'scatter', mode: 'lines+markers',
-      x: names, y: top.map(r => r.price_usd_hour),
-      line:   { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
-      marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } },
-      yaxis: 'y2',
+      name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.price_usd_hour),
+      line: { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
+      marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
       hovertemplate: '<b>%{x}</b><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
     },
-  ];
-
-  Plotly.react('chart', traces, {
+  ], {
     ...PLOTLY_BASE,
-    xaxis: { tickangle: -35, gridcolor: '#e2e8f0', automargin: true },
+    xaxis:  { tickangle: -35, gridcolor: '#e2e8f0', automargin: true },
     yaxis:  { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
     yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
     legend: { orientation: 'h', y: -0.32, x: 0, font: { size: 11 } },
@@ -1152,263 +1305,184 @@ function renderLineChart(rows) {
   }, { responsive: true });
 }
 
+/* ── Radar chart ────────────────────────────────────────── */
 function renderRadar(rows) {
   const top5  = rows.slice(0, Math.min(5, rows.length));
   const theta = ['Price Eff.','CPU','Memory','Network','GPU','Price Eff.'];
-  const traces = top5.map(r => ({
+  Plotly.react('chart3', top5.map(r => ({
     type: 'scatterpolar',
     r: [r.scoreP, r.scoreC, r.scoreM, r.scoreN, r.scoreG, r.scoreP],
-    theta,
-    fill: 'toself',
-    name: r.instance_type,
+    theta, fill: 'toself', name: r.instance_type,
     line: { color: CAT_COLOR[r.instance_category] || '#4f46e5', width: 2 },
     fillcolor: (CAT_COLOR[r.instance_category] || '#4f46e5') + '22',
     hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
-  }));
-
-  Plotly.react('chart3', traces, {
+  })), {
     ...PLOTLY_BASE,
     polar: {
       bgcolor: '#fafbff',
-      radialaxis: { visible:true, range:[0,1], gridcolor:'#e2e8f0', tickfont:{size:9}, tickformat:'.1f' },
-      angularaxis: { gridcolor:'#e2e8f0', tickfont:{size:10} },
+      radialaxis: { visible: true, range: [0,1], gridcolor: '#e2e8f0', tickfont: { size: 9 }, tickformat: '.1f' },
+      angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: 10 } },
     },
-    legend: { orientation:'h', y:-0.2, x:0, font:{size:10} },
-    margin: { t:12, r:12, b:50, l:12 },
+    legend: { orientation: 'h', y: -0.2, x: 0, font: { size: 10 } },
+    margin: { t: 12, r: 12, b: 50, l: 12 },
   }, { responsive: true });
 }
 
+/* ── Bar chart ──────────────────────────────────────────── */
 function renderBar(rows, metric) {
   const top10  = rows.slice(0, 10);
   const yvals  = top10.map(r => metric === 'composite' ? +r.composite.toFixed(4) : r[metric]);
-  const colors = top10.map(r => CAT_COLOR[r.instance_category] || '#4f46e5');
   Plotly.react('chart2', [{
-    x: top10.map(r => r.instance_type), y: yvals,
-    type: 'bar', marker: { color: colors, opacity: .85 },
+    x: top10.map(r => r.instance_type), y: yvals, type: 'bar',
+    marker: { color: top10.map(r => CAT_COLOR[r.instance_category] || '#4f46e5'), opacity: .85 },
     hovertemplate: '<b>%{x}</b><br>' + METRIC_LABEL[metric] + ': %{y}<extra></extra>',
   }], {
     ...PLOTLY_BASE,
-    xaxis: { title:'Instance Type', tickangle:-28, gridcolor:'#e2e8f0' },
-    yaxis: { title: METRIC_LABEL[metric], gridcolor:'#e2e8f0', zeroline:false },
-    margin: { t:12, r:12, b:80, l:52 },
+    xaxis: { title: 'Instance Type', tickangle: -28, gridcolor: '#e2e8f0' },
+    yaxis: { title: METRIC_LABEL[metric], gridcolor: '#e2e8f0', zeroline: false },
+    margin: { t: 12, r: 12, b: 80, l: 52 },
   }, { responsive: true });
 }
 
+/* ── Regional price chart ───────────────────────────────── */
 function renderRegional(bestType) {
-  const regionRows = state.rows
-    .filter(r => r.instance_type === bestType)
+  const rows = state.rows.filter(r => r.instance_type === bestType)
     .sort((a, b) => a.price_usd_hour - b.price_usd_hour);
-
-  el('regionalTitle').textContent =
-    `${bestType} — Regional Price Comparison`;
-
-  if (regionRows.length < 2) {
+  el('regionalTitle').textContent = `${bestType} — Regional Price Comparison`;
+  if (rows.length < 2) {
     Plotly.react('chart4', [{
-      type:'bar', x:[regionRows[0]?.price_usd_hour || 0], y:[regionRows[0]?.region || ''],
-      orientation:'h', marker:{ color:'#4f46e5' },
-    }], { ...PLOTLY_BASE, margin:{t:12,r:60,b:36,l:90} }, { responsive:true });
+      type: 'bar', x: [rows[0]?.price_usd_hour || 0], y: [rows[0]?.region || ''],
+      orientation: 'h', marker: { color: '#4f46e5' },
+    }], { ...PLOTLY_BASE, margin: { t:12, r:60, b:36, l:90 } }, { responsive: true });
     return;
   }
-
-  const minPrice = regionRows[0].price_usd_hour;
-  const colors   = regionRows.map(r =>
-    r.price_usd_hour === minPrice ? '#10b981' : '#4f46e5');
-
+  const minP = rows[0].price_usd_hour;
   Plotly.react('chart4', [{
     type: 'bar', orientation: 'h',
-    x: regionRows.map(r => r.price_usd_hour),
-    y: regionRows.map(r => r.region),
-    marker: { color: colors, opacity: .85 },
-    text: regionRows.map(r => `$${r.price_usd_hour.toFixed(4)}`),
-    textposition: 'outside',
+    x: rows.map(r => r.price_usd_hour), y: rows.map(r => r.region),
+    marker: { color: rows.map(r => r.price_usd_hour === minP ? '#10b981' : '#4f46e5'), opacity: .85 },
+    text: rows.map(r => `$${r.price_usd_hour.toFixed(4)}`), textposition: 'outside',
     hovertemplate: '%{y}<br>$%{x:.4f}/hr<extra></extra>',
   }], {
     ...PLOTLY_BASE,
-    xaxis: { title:'Price (USD/hr)', gridcolor:'#e2e8f0', zeroline:false },
+    xaxis: { title: 'Price (USD/hr)', gridcolor: '#e2e8f0', zeroline: false },
     yaxis: { automargin: true },
-    margin: { t:12, r:70, b:40, l:10 },
+    margin: { t: 12, r: 70, b: 40, l: 10 },
     annotations: [{
-      x: minPrice, y: regionRows[0].region,
-      xanchor: 'left', yanchor: 'middle',
-      text: ' ✅ cheapest', showarrow: false,
-      font: { size: 10, color: '#059669' }, xshift: 4,
+      x: minP, y: rows[0].region, xanchor: 'left', yanchor: 'middle',
+      text: ' ✅ cheapest', showarrow: false, font: { size: 10, color: '#059669' }, xshift: 4,
     }],
   }, { responsive: true });
 }
 
-/* ── Instance compare panel ────────────────────────── */
+/* ── Instance compare panel ─────────────────────────────── */
 function renderInstanceCompare(row) {
   const best = state.scoredRows[0];
-  if (!best || row.instance_type === best.instance_type) {
-    closeCompare(); return;
-  }
-
-  el('cmpTitle').textContent = `${row.instance_type}`;
+  if (!best || row.instance_type === best.instance_type) { closeCompare(); return; }
+  el('cmpTitle').textContent = row.instance_type;
   el('cmpSub').textContent   = `${row.instance_category} · ${row.region} · vs. top pick ${best.instance_type}`;
-
   el('cmpSpecs').innerHTML = [
-    { lbl: 'Price/hr',   val: `$${row.price_usd_hour.toFixed(4)}`, sub: `vs $${best.price_usd_hour.toFixed(4)}` },
-    { lbl: 'vCPUs',      val: row.vcpus,   sub: `vs ${best.vcpus}` },
-    { lbl: 'Memory',     val: `${row.memory_gib} GiB`, sub: `vs ${best.memory_gib} GiB` },
-    { lbl: 'GPU Count',  val: row.gpu_count > 0 ? row.gpu_count : '—', sub: `vs ${best.gpu_count > 0 ? best.gpu_count : '—'}` },
-    { lbl: 'Network',    val: `${row.network_score}/5`,  sub: `vs ${best.network_score}/5` },
-    { lbl: 'Score',      val: row.composite.toFixed(3),  sub: `vs ${best.composite.toFixed(3)}` },
-  ].map(s => `
-    <div class="cmp-spec-item">
-      <div class="cmp-spec-lbl">${s.lbl}</div>
-      <div class="cmp-spec-val">${s.val}</div>
-      <div class="cmp-spec-sub">${s.sub}</div>
-    </div>`).join('');
-
-  /* Grouped bar chart: selected vs top pick across 5 normalized dimensions */
-  const dims   = ['Price Eff.','CPU','Memory','Network','GPU'];
-  const selScores = [row.scoreP, row.scoreC, row.scoreM, row.scoreN, row.scoreG];
-  const topScores = [best.scoreP, best.scoreC, best.scoreM, best.scoreN, best.scoreG];
-  const catColor  = CAT_COLOR[row.instance_category]  || '#4f46e5';
-  const topColor  = CAT_COLOR[best.instance_category] || '#4f46e5';
-
+    { lbl: 'Price/hr',  val: `$${row.price_usd_hour.toFixed(4)}`, sub: `vs $${best.price_usd_hour.toFixed(4)}` },
+    { lbl: 'vCPUs',     val: row.vcpus,   sub: `vs ${best.vcpus}` },
+    { lbl: 'Memory',    val: `${row.memory_gib} GiB`, sub: `vs ${best.memory_gib} GiB` },
+    { lbl: 'GPU Count', val: row.gpu_count > 0 ? row.gpu_count : '—', sub: `vs ${best.gpu_count > 0 ? best.gpu_count : '—'}` },
+    { lbl: 'Network',   val: `${row.network_score}/5`, sub: `vs ${best.network_score}/5` },
+    { lbl: 'Score',     val: row.composite.toFixed(3), sub: `vs ${best.composite.toFixed(3)}` },
+  ].map(s => `<div class="cmp-spec-item"><div class="cmp-spec-lbl">${s.lbl}</div><div class="cmp-spec-val">${s.val}</div><div class="cmp-spec-sub">${s.sub}</div></div>`).join('');
+  const dims = ['Price Eff.','CPU','Memory','Network','GPU'];
+  const catC = CAT_COLOR[row.instance_category]  || '#4f46e5';
+  const topC = CAT_COLOR[best.instance_category] || '#4f46e5';
   Plotly.react('cmpChart', [
-    {
-      name: row.instance_type, type: 'bar',
-      x: dims, y: selScores,
-      marker: { color: catColor, opacity: .85 },
-      hovertemplate: '%{x}: %{y:.2f}<extra>' + row.instance_type + '</extra>',
-    },
-    {
-      name: best.instance_type + ' (top)', type: 'bar',
-      x: dims, y: topScores,
-      marker: { color: topColor, opacity: .5, pattern: { shape: '/' } },
-      hovertemplate: '%{x}: %{y:.2f}<extra>' + best.instance_type + '</extra>',
-    },
+    { name: row.instance_type,          type: 'bar', x: dims, y: [row.scoreP, row.scoreC, row.scoreM, row.scoreN, row.scoreG],  marker: { color: catC, opacity: .85 }, hovertemplate: '%{x}: %{y:.2f}<extra>' + row.instance_type + '</extra>' },
+    { name: best.instance_type+' (top)', type: 'bar', x: dims, y: [best.scoreP, best.scoreC, best.scoreM, best.scoreN, best.scoreG], marker: { color: topC, opacity: .5, pattern: { shape: '/' } }, hovertemplate: '%{x}: %{y:.2f}<extra>' + best.instance_type + '</extra>' },
   ], {
-    ...PLOTLY_BASE,
-    barmode: 'group',
-    yaxis: { range: [0, 1], gridcolor: '#e2e8f0', zeroline: false, title: 'Normalized score' },
+    ...PLOTLY_BASE, barmode: 'group',
+    yaxis: { range: [0,1], gridcolor: '#e2e8f0', zeroline: false, title: 'Normalized score' },
     xaxis: { gridcolor: '#e2e8f0' },
     legend: { orientation: 'h', y: -0.26, x: 0, font: { size: 11 } },
     margin: { t: 10, r: 12, b: 60, l: 50 },
   }, { responsive: true });
-
   const panel = el('comparePanel');
   panel.classList.add('visible');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+function closeCompare() { el('comparePanel').classList.remove('visible'); }
 
-function closeCompare() {
-  el('comparePanel').classList.remove('visible');
-}
-
-/* ── Calculator ────────────────────────────────────── */
+/* ── Calculator ─────────────────────────────────────────── */
 function renderCalculator(best) {
-  const hours       = Math.max(1, +el('calcHours').value     || 730);
-  const count       = Math.max(1, +el('calcCount').value     || 1);
-  const storageGb   = Math.max(0, +el('calcStorageGb').value || 0);
-  const storageRate = Math.max(0, +el('calcStorageRate').value|| .08);
+  const hours = Math.max(1, +el('calcHours').value     || 730);
+  const count = Math.max(1, +el('calcCount').value     || 1);
+  const sgb   = Math.max(0, +el('calcStorageGb').value || 0);
+  const srate = Math.max(0, +el('calcStorageRate').value || .08);
   const compute = best.price_usd_hour * hours * count;
-  const total   = compute + storageGb * storageRate * count;
-  animateNum('crCompute', compute, v => `$${v.toFixed(2)}`);
-  animateNum('crTotal',   total,   v => `$${v.toFixed(2)}`);
+  const total   = compute + sgb * srate * count;
+  animateNum('crCompute', compute,    v => `$${v.toFixed(2)}`);
+  animateNum('crTotal',   total,      v => `$${v.toFixed(2)}`);
   animateNum('crAnnual',  total * 12, v => `$${v.toFixed(2)}`);
 }
 
-/* ── Type guide ────────────────────────────────────── */
-function renderTypes() {
-  el('types').innerHTML = Object.entries(TYPE_EXPLAIN).map(([k, v]) => `
-    <div class="type-item" style="border-left:3px solid ${CAT_COLOR[k]}">
-      <b style="color:${CAT_COLOR[k]}">${k}</b>
-      <span>${v}</span>
-    </div>`).join('');
-}
-
-/* ── Table (with search) ───────────────────────────── */
+/* ── Table ──────────────────────────────────────────────── */
 function renderTable(rows, query = '') {
   const q = query.toLowerCase().trim();
-  const filtered = q
-    ? rows.filter(r =>
-        r.instance_type.toLowerCase().includes(q) ||
-        r.instance_category.toLowerCase().includes(q) ||
-        r.region.toLowerCase().includes(q))
-    : rows;
-
+  const filtered = q ? rows.filter(r =>
+    r.instance_type.toLowerCase().includes(q) ||
+    r.instance_category.toLowerCase().includes(q) ||
+    r.region.toLowerCase().includes(q)) : rows;
   const shown = filtered.slice(0, 20);
   el('tableCount').textContent = q
     ? `${shown.length} of ${filtered.length} match`
     : `${Math.min(rows.length, 20)} of ${rows.length}`;
-
   if (!shown.length) {
     el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match "${query}"</td></tr></tbody>`;
     return;
   }
-
-  const head = `<thead><tr>
-    <th>#</th><th>Instance</th><th>Category</th><th>Region</th>
-    <th>vCPU</th><th>Mem (GiB)</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th>
-  </tr><tr><td colspan="10" style="font-size:10px;color:var(--muted);padding:4px 10px 5px;background:#fafbff;font-weight:600">
-    💡 Click any row to compare specs &amp; performance vs the top pick
-  </td></tr></thead>`;
-
-  const body = `<tbody>${shown.map((r, i) => {
-    const cc  = CAT_COLOR[r.instance_category] || '#6b7280';
-    const cbg = CAT_BG[r.instance_category]    || '#f9fafb';
-    const origIdx = rows.indexOf(r);
-    return `<tr class="${origIdx === 0 ? 'rank-1' : ''}" style="cursor:pointer" onclick="handleRowClick(${rows.indexOf(r)})" title="Click to compare with top pick">
-      <td style="color:var(--muted);font-weight:800;font-size:11px">${origIdx === 0 ? '🥇' : origIdx + 1}</td>
-      <td style="font-weight:700">${r.instance_type}</td>
-      <td><span class="cat-pill" style="background:${cbg};color:${cc}">${r.instance_category}</span></td>
-      <td>${r.region}</td>
-      <td>${r.vcpus}</td>
-      <td>${r.memory_gib}</td>
-      <td>${r.gpu_count}</td>
-      <td>${r.network_score}</td>
-      <td>$${r.price_usd_hour.toFixed(4)}</td>
-      <td>
-        <div class="score-cell">
-          <div class="score-bar" style="width:${(r.composite * 58).toFixed(0)}px;background:${cc}"></div>
-          <span class="score-num">${r.composite.toFixed(3)}</span>
-        </div>
-      </td>
-    </tr>`;
-  }).join('')}</tbody>`;
-
-  el('table').innerHTML = head + body;
+  el('table').innerHTML =
+    `<thead><tr><th>#</th><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem (GiB)</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr>
+     <tr><td colspan="10" style="font-size:10px;color:var(--muted);padding:4px 10px 5px;background:#fafbff;font-weight:600">💡 Click any row to compare specs &amp; scores vs the top pick</td></tr></thead>` +
+    `<tbody>${shown.map(r => {
+      const cc = CAT_COLOR[r.instance_category] || '#6b7280';
+      const cbg = CAT_BG[r.instance_category] || '#f9fafb';
+      const idx = rows.indexOf(r);
+      return `<tr class="${idx===0?'rank-1':''}" style="cursor:pointer" onclick="handleRowClick(${idx})">
+        <td style="color:var(--muted);font-weight:800;font-size:11px">${idx===0?'🥇':idx+1}</td>
+        <td style="font-weight:700">${r.instance_type}</td>
+        <td><span class="cat-pill" style="background:${cbg};color:${cc}">${r.instance_category}</span></td>
+        <td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td>
+        <td>${r.gpu_count}</td><td>${r.network_score}</td>
+        <td>$${r.price_usd_hour.toFixed(4)}</td>
+        <td><div class="score-cell"><div class="score-bar" style="width:${(r.composite*58).toFixed(0)}px;background:${cc}"></div><span class="score-num">${r.composite.toFixed(3)}</span></div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
 }
+function handleRowClick(idx) { const row = state.scoredRows[idx]; if (row) renderInstanceCompare(row); }
 
-/* ── Table row click ───────────────────────────────── */
-function handleRowClick(idx) {
-  const row = state.scoredRows[idx];
-  if (!row) return;
-  renderInstanceCompare(row);
-}
-
-/* ── Main render ───────────────────────────────────── */
+/* ── Main render ────────────────────────────────────────── */
 function render() {
-  SLIDERS.forEach(s => el(s + 'Val').textContent = el(s).value);
-
+  SLIDERS.forEach(s => { const v = el(s+'Val'); if(v) v.textContent = el(s).value; });
   const region   = el('region').value;
   const category = el('category').value;
   const metric   = el('metric').value;
 
-  let rows = state.rows.filter(r =>
-    (region   === 'All' || r.region             === region) &&
-    (category === 'All' || r.instance_category  === category));
+  /* Region-only rows for family cards and agg chart */
+  const regionRows = state.rows.filter(r => region === 'All' || r.region === region);
+  renderFamilyCards(regionRows);
+  renderFamilyAggChart(regionRows);
+
+  /* Fully filtered rows for scoring */
+  let rows = regionRows.filter(r => category === 'All' || r.instance_category === category);
 
   if (!rows.length) {
     el('recCard').classList.add('error-state');
     el('recName').textContent = 'No instances match your filters.';
-    ['recTags','recStats','recWhy','recRankTxt','recCatLabel'].forEach(id => { if(el(id)) el(id).innerHTML = ''; });
+    ['recTags','recStats','recWhy','recRankTxt','recCatLabel'].forEach(id => { if(el(id)) el(id).innerHTML=''; });
     if(el('recScoreNum')) el('recScoreNum').textContent = '—';
-    el('table').innerHTML = '';
-    el('tableCount').textContent = '';
-    closeCompare();
-    return;
+    el('table').innerHTML = ''; el('tableCount').textContent = '';
+    closeCompare(); return;
   }
   el('recCard').classList.remove('error-state');
 
-  const w = {
-    price: +el('wPrice').value, cpu: +el('wCpu').value,
-    mem:   +el('wMem').value,   net: +el('wNet').value, gpu: +el('wGpu').value,
-  };
-  const sum = Object.values(w).reduce((a, b) => a + b, 0) || 1;
+  const w = { price:+el('wPrice').value, cpu:+el('wCpu').value, mem:+el('wMem').value, net:+el('wNet').value, gpu:+el('wGpu').value };
+  const sum = Object.values(w).reduce((a, b) => a+b, 0) || 1;
   renderWeightBar(w, sum);
 
   const p = norm(rows.map(r => r.price_usd_hour), true);
@@ -1440,7 +1514,7 @@ function render() {
   saveHash();
 }
 
-/* ── Boot ──────────────────────────────────────────── */
+/* ── Boot ───────────────────────────────────────────────── */
 async function boot() {
   try {
     const resp = await fetch(CSV_URL);
@@ -1449,6 +1523,7 @@ async function boot() {
 
     const regions    = [...new Set(state.rows.map(r => r.region))];
     const categories = ['All', ...new Set(state.rows.map(r => r.instance_category))];
+    const families   = new Set(state.rows.map(r => getFamily(r.instance_type)));
 
     el('region').innerHTML   = regions.map(v => `<option>${v}</option>`).join('');
     el('category').innerHTML = categories.map(v => `<option>${v}</option>`).join('');
@@ -1457,27 +1532,26 @@ async function boot() {
     if (regions.length) el('region').value = regions[0];
     syncRegionPager();
 
-    // Restore URL state, then render
+    /* Hero live stats */
+    el('heroInstances').textContent = state.rows.length.toLocaleString();
+    el('heroFamilies').textContent  = families.size;
+    el('heroRegions').textContent   = regions.length;
+
     loadHash();
     syncRegionPager();
 
-    // Event listeners
+    /* Event listeners */
     ['region','category','metric',...SLIDERS].forEach(id => {
-      el(id).addEventListener('input', () => {
-        if (id === 'region') syncRegionPager();
-        render();
-      });
+      el(id).addEventListener('input', () => { if (id === 'region') syncRegionPager(); render(); });
     });
     el('prevRegion').addEventListener('click', () => stepRegion(-1));
     el('nextRegion').addEventListener('click', () => stepRegion(1));
     ['calcHours','calcCount','calcStorageGb','calcStorageRate'].forEach(id =>
       el(id).addEventListener('input', render));
-
-    // Table search — no need to re-score, just re-filter
     el('tableSearch').addEventListener('input', () =>
       renderTable(state.scoredRows, el('tableSearch').value));
 
-    // Keyboard shortcuts
+    /* Keyboard shortcuts */
     document.addEventListener('keydown', e => {
       const tag = e.target.tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
@@ -1490,20 +1564,18 @@ async function boot() {
       if (e.key === '/') { e.preventDefault(); el('tableSearch').focus(); }
     });
 
-    renderTypes();
     render();
 
-    // Reveal app
     el('loader').style.display = 'none';
     const app = el('app');
-    app.style.transition = 'opacity .45s ease';
+    app.style.transition = 'opacity .5s ease';
     app.style.opacity    = '1';
 
   } catch (e) {
     el('loader').innerHTML =
-      `<div style="text-align:center;padding:24px;color:#dc2626">
-         <b style="font-size:16px">Failed to load dataset</b><br>
-         <span style="font-size:13px;color:#64748b">${e.message}</span>
+      `<div style="text-align:center;padding:24px;color:#f87171">
+         <b style="font-size:18px">Failed to load dataset</b><br>
+         <span style="font-size:13px;color:#64748b;margin-top:8px;display:block">${e.message}</span>
        </div>`;
   }
 }
