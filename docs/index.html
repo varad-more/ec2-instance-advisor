@@ -54,6 +54,17 @@
       <div id="types" class="top"></div>
       <div id="chart" class="card" style="min-height: 390px;"></div>
       <div class="card" style="margin-top: 12px;">
+        <h3 style="margin-top:0;">How to choose the right EC2 instance</h3>
+        <ul>
+          <li><b>Step 1 — Choose workload type:</b> CPU for compute-heavy jobs, GPU for ML/AI, Memory for large RAM workloads, Storage for high-IOPS, General for balanced apps.</li>
+          <li><b>Step 2 — Pick region:</b> Keep compute close to users/data to reduce latency and often cost.</li>
+          <li><b>Step 3 — Set priorities:</b> Increase Price weight for cost control; increase CPU/Memory/Network/GPU weights for performance-critical workloads.</li>
+          <li><b>Step 4 — Read the graph:</b> X-axis is price (lower is cheaper), Y-axis is performance index (higher is stronger). Best value often sits toward the upper-left for your selected category.</li>
+          <li><b>Step 5 — Validate in production:</b> Start with a short benchmark, monitor CPU/memory/network/GPU utilization, then right-size.</li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top: 12px;">
         <h3 style="margin-top:0;">Top Candidates</h3>
         <table id="table"></table>
       </div>
@@ -161,10 +172,10 @@
         text: rows.map(r=>r.instance_type),
         textposition: 'top center',
         marker: { size: rows.map(r=>12 + r.composite*20), color: rows.map(r=>r.composite), colorscale: 'Blues' },
-        hovertemplate: '%{text}<br>Category: %{customdata[0]}<br>Region: %{customdata[1]}<br>Price: $%{x}/hr<br>Perf: %{y:.2f}<extra></extra>',
-        customdata: rows.map(r => [r.instance_category, r.region])
+        hovertemplate: '%{text}<br>Category: %{customdata[0]}<br>Region: %{customdata[1]}<br>vCPU: %{customdata[2]}<br>Memory: %{customdata[3]} GiB<br>GPU: %{customdata[4]}<br>Price: $%{x}/hr<br>Perf Index: %{y:.2f}<extra></extra>',
+        customdata: rows.map(r => [r.instance_category, r.region, r.vcpus, r.memory_gib, r.gpu_count])
       }], {
-        title: 'Price vs Performance',
+        title: 'Price vs Performance (x = hourly cost, y = computed performance index)',
         xaxis: { title: 'Price (USD/hr)' },
         yaxis: { title: 'Performance index' },
         margin: { t: 40 }

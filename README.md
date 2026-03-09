@@ -63,3 +63,29 @@ This repo now includes a static web app at `docs/index.html` so it can be hosted
 Once Pages is enabled for this repo (source: `main` branch, `/docs`), the app is available at:
 
 `http://varadmore.me/ec2-instance-advisor/`
+
+
+## How to Select an EC2 Instance for Your Needs
+
+A practical method:
+
+1. **Identify workload shape**
+   - CPU-heavy (builds, APIs, encoding) → CPU instances
+   - ML/AI or graphics workloads → GPU instances
+   - Big caches / in-memory databases → Memory instances
+   - High disk throughput / low latency storage tasks → Storage instances
+   - Mixed/general workloads → General instances
+
+2. **Select region first**
+   Pick the closest region to users/data to reduce latency and transfer costs.
+
+3. **Set priorities with weights**
+   Increase price weight for cost-sensitive workloads; increase CPU/memory/network/GPU weights for performance-sensitive workloads.
+
+4. **Interpret the plot correctly**
+   - **X-axis:** hourly cost (USD/hr)
+   - **Y-axis:** performance index (derived from CPU, memory, network, GPU)
+   - Better value usually appears where performance is high for acceptable price.
+
+5. **Benchmark before committing**
+   Always run a small production-like load test and monitor utilization before finalizing instance type.
