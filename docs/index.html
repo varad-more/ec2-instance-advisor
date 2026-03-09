@@ -527,11 +527,15 @@
     }
 
     @media (max-width: 1100px) {
-      .family-cards-grid { grid-template-columns: repeat(3, 1fr); }
+      .family-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
     @media (max-width: 600px) {
-      .family-cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .family-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     /* Card shell */
@@ -553,7 +557,9 @@
     .family-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 3px;
       background: var(--fam-color, var(--accent));
       transform: scaleX(0);
@@ -561,9 +567,21 @@
       transition: transform .25s ease;
     }
 
-    .family-card:hover { border-color: var(--fam-color, var(--accent)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.10); }
-    .family-card:hover::before, .family-card.fc-active::before { transform: scaleX(1); }
-    .family-card.fc-active { border-color: var(--fam-color, var(--accent)); background: var(--fam-bg, var(--accent-bg)); }
+    .family-card:hover {
+      border-color: var(--fam-color, var(--accent));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .10);
+    }
+
+    .family-card:hover::before,
+    .family-card.fc-active::before {
+      transform: scaleX(1);
+    }
+
+    .family-card.fc-active {
+      border-color: var(--fam-color, var(--accent));
+      background: var(--fam-bg, var(--accent-bg));
+    }
 
     /* Header row: icon + name + badge */
     .fc-hdr {
@@ -580,7 +598,10 @@
       margin-top: 1px;
     }
 
-    .fc-hdr-text { flex: 1; min-width: 0; }
+    .fc-hdr-text {
+      flex: 1;
+      min-width: 0;
+    }
 
     .fc-name {
       font-size: 13px;
@@ -632,14 +653,14 @@
       white-space: nowrap;
       background: var(--fam-bg, var(--accent-bg));
       color: var(--fam-color, var(--accent));
-      border: 1px solid rgba(0,0,0,.07);
+      border: 1px solid rgba(0, 0, 0, .07);
     }
 
     /* Footer row: examples left, count+cta right */
     .fc-footer {
       margin-top: auto;
       padding-top: 8px;
-      border-top: 1px solid rgba(0,0,0,.06);
+      border-top: 1px solid rgba(0, 0, 0, .06);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -656,7 +677,10 @@
       white-space: nowrap;
     }
 
-    .fc-examples b { color: var(--fam-color, var(--accent)); font-weight: 700; }
+    .fc-examples b {
+      color: var(--fam-color, var(--accent));
+      font-weight: 700;
+    }
 
     .fc-count {
       font-size: 9.5px;
@@ -678,8 +702,14 @@
       flex-shrink: 0;
     }
 
-    .family-card:hover .fc-cta, .family-card.fc-active .fc-cta { opacity: 1; }
-    .family-card.fc-active .fc-cta::before { content: '✓ '; }
+    .family-card:hover .fc-cta,
+    .family-card.fc-active .fc-cta {
+      opacity: 1;
+    }
+
+    .family-card.fc-active .fc-cta::before {
+      content: '✓ ';
+    }
 
     /* ── Chart card ──────────────────────────────────────── */
     .card {
@@ -969,12 +999,30 @@
       border-color: var(--pill-color, var(--accent));
     }
 
-    .family-pill.pill-all.active { background: var(--ink); border-color: var(--ink); }
+    .family-pill.pill-all.active {
+      background: var(--ink);
+      border-color: var(--ink);
+    }
 
     /* None / clear pill */
-    .family-pill.pill-none { border-style: dashed; margin-left: 4px; }
-    .family-pill.pill-none:hover:not(.active) { border-color: #ef4444; color: #ef4444; background: #fef2f2; border-style: solid; }
-    .family-pill.pill-none.active { background: #64748b; color: #fff; border-color: #64748b; border-style: solid; }
+    .family-pill.pill-none {
+      border-style: dashed;
+      margin-left: 4px;
+    }
+
+    .family-pill.pill-none:hover:not(.active) {
+      border-color: #ef4444;
+      color: #ef4444;
+      background: #fef2f2;
+      border-style: solid;
+    }
+
+    .family-pill.pill-none.active {
+      background: #64748b;
+      color: #fff;
+      border-color: #64748b;
+      border-style: solid;
+    }
 
     /* ── KPI strip ───────────────────────────────────────── */
     .kpi-strip {
@@ -1814,6 +1862,242 @@
 
     @media (max-width: 720px) {
       .nav-steps {
+        display: none;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       COMPREHENSIVE MOBILE STYLES
+    ═══════════════════════════════════════════════════════ */
+
+    /* Small phones (≤480px) */
+    @media (max-width: 480px) {
+
+      /* Hero */
+      .hero-section {
+        padding: 40px 16px 36px;
+      }
+
+      .hero-title {
+        font-size: clamp(22px, 8vw, 34px);
+        letter-spacing: -.02em;
+      }
+
+      .hero-desc {
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+
+      .hero-stats {
+        gap: 18px;
+      }
+
+      .hero-stat-val {
+        font-size: 24px;
+      }
+
+      /* Steps */
+      .funnel-step {
+        padding-top: 40px;
+        scroll-margin-top: 60px;
+      }
+
+      .step-hdr {
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .step-title {
+        font-size: 18px;
+      }
+
+      .step-desc {
+        font-size: 13px;
+      }
+
+      .step-num {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+        border-radius: 10px;
+      }
+
+      /* Family cards */
+      .family-cards-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Controls */
+      .controls-body {
+        padding: 14px 14px;
+      }
+
+      /* Chart bodies - shorter on mobile */
+      #chart5 {
+        height: 220px !important;
+      }
+
+      #chart {
+        height: 220px !important;
+      }
+
+      #chart2 {
+        height: 220px !important;
+      }
+
+      #chart3 {
+        height: 240px !important;
+      }
+
+      #chart4 {
+        height: 200px !important;
+      }
+
+      #chart6 {
+        height: 240px !important;
+      }
+
+      /* Family highlights - 2 cols */
+      .fh-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .fh-card {
+        padding: 10px;
+      }
+
+      .fh-row-badge {
+        font-size: 7.5px;
+      }
+
+      /* KPI strip */
+      .kpi-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Calc result */
+      .calc-result {
+        grid-template-columns: 1fr;
+      }
+
+      /* Table */
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .table-toolbar input {
+        font-size: 13px;
+        min-width: 0;
+      }
+
+      /* Footer */
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .footer-disclaimer {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      /* Compare panel */
+      .cmp-body {
+        grid-template-columns: 1fr;
+      }
+
+      /* Navbar */
+      .site-nav {
+        padding: 0 14px;
+        height: 52px;
+      }
+
+      .nav-actions {
+        gap: 8px;
+      }
+    }
+
+    /* Mid-size phones (481px–600px) */
+    @media (min-width: 481px) and (max-width: 600px) {
+      .hero-title {
+        font-size: clamp(26px, 6vw, 38px);
+      }
+
+      .hero-desc {
+        font-size: 14.5px;
+      }
+
+      .fh-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      #chart5 {
+        height: 250px !important;
+      }
+
+      #chart3 {
+        height: 270px !important;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .footer-bottom {
+        flex-wrap: wrap;
+      }
+    }
+
+    /* All phones (≤600px) generic */
+    @media (max-width: 600px) {
+
+      /* Prevent horizontal overflow */
+      body {
+        overflow-x: hidden;
+      }
+
+      .funnel-wrap {
+        padding: 0 14px 50px;
+      }
+
+      /* Table scrollable */
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #table {
+        min-width: 560px;
+      }
+
+      /* Ensure charts don't overflow */
+      .chart-card {
+        overflow: hidden;
+      }
+
+      .charts-2 {
+        grid-template-columns: 1fr;
+      }
+
+      /* Navbar chips hidden */
+      .nav-chip.hide-sm {
+        display: none;
+      }
+
+      .nav-brand span.text {
         display: none;
       }
     }
@@ -2986,7 +3270,7 @@
         <div class="fc-uses">${info.useCases.map(u => `<span class="fc-use">${u}</span>`).join('')}</div>
         <div class="fc-footer">
           ${info.examples
-            ? `<div class="fc-examples"><b>${info.examples.split(',').slice(0,3).map(s=>s.trim()).join(', ')}</b></div>`
+            ? `<div class="fc-examples"><b>${info.examples.split(',').slice(0, 3).map(s => s.trim()).join(', ')}</b></div>`
             : `<div class="fc-examples"></div>`}
           <span class="fc-count">${count} types</span>
           <span class="fc-cta">Filter →</span>
@@ -3101,8 +3385,10 @@
       if (!filtered.length) {
         return Plotly.react('chart', [], {
           ...PLOTLY_BASE, xaxis: { visible: false }, yaxis: { visible: false },
-          annotations: [{ xref: 'paper', yref: 'paper', x: .5, y: .5, showarrow: false,
-            text: 'Select a category above to compare instances', font: { size: 13, color: '#94a3b8' } }],
+          annotations: [{
+            xref: 'paper', yref: 'paper', x: .5, y: .5, showarrow: false,
+            text: 'Select a category above to compare instances', font: { size: 13, color: '#94a3b8' }
+          }],
           margin: { t: 12, r: 55, b: 40, l: 50 },
         }, { responsive: true });
       }
@@ -3113,7 +3399,7 @@
       let top;
       if (activeCats.length >= 3) {
         const sane = filtered.filter(r => r.memory_gib <= 256 && r.price_usd_hour <= 8);
-        const src  = sane.length >= Math.floor(MAX / 2) ? sane : filtered;
+        const src = sane.length >= Math.floor(MAX / 2) ? sane : filtered;
         const perCat = Math.max(2, Math.floor(MAX / activeCats.length));
         top = activeCats.flatMap(c => src.filter(r => r.instance_category === c).slice(0, perCat)).slice(0, MAX);
       } else {
