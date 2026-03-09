@@ -7,7 +7,7 @@ import re
 import urllib.request
 from pathlib import Path
 
-TARGET_REGIONS = ["us-east-1", "us-west-2", "eu-west-1", "ap-south-1"]
+TARGET_REGIONS = ["us-east-1", "us-west-2", "ap-south-1"]
 TARGET_TYPES = [
     "c7g.large", "c7g.xlarge", "m7g.large", "m7g.xlarge",
     "r7g.large", "r7g.xlarge", "g5.xlarge", "g5.2xlarge", "i4i.large"

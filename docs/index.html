@@ -699,10 +699,10 @@
             <div class="chart-sub">Select a metric to compare side-by-side</div>
           </div>
           <div class="bar-hd-r">
-            <label>Metric:</label>
-            <select id="metric">
-              <option value="vcpus">vCPUs</option>
-              <option value="memory_gib">Memory (GiB)</option>
+            <label>Metrics (multi):</label>
+            <select id="metrics" multiple size="4" style="min-width:220px">
+              <option value="vcpus" selected>vCPUs</option>
+              <option value="memory_gib" selected>Memory (GiB)</option>
               <option value="gpu_count">GPU Count</option>
               <option value="network_score">Network Score</option>
               <option value="price_usd_hour">Price (USD/hr)</option>
@@ -825,7 +825,7 @@
 const CSV_URL = './data/ec2_aws_snapshot.csv';
 const state   = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set() };
 const SLIDERS = ['wPrice','wCpu','wMem','wNet','wGpu'];
-const HASH_KEYS = ['region','category','metric',...SLIDERS];
+const HASH_KEYS = ['region','category',...SLIDERS];
 const el = id => document.getElementById(id);
 
 const CAT_COLOR = { CPU:'#3b82f6', GPU:'#8b5cf6', Memory:'#10b981', Storage:'#f59e0b', General:'#6b7280' };
