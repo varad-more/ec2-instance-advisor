@@ -33,11 +33,25 @@
 
   <div class="grid">
     <div class="card">
-      <label>Region</label>
+      <label><b>Region (with pagination)</b></label>
+      <div style="display:flex; gap:8px; margin-bottom:6px;">
+        <button id="prevRegion" type="button">◀ Prev</button>
+        <button id="nextRegion" type="button">Next ▶</button>
+      </div>
       <select id="region"></select>
+      <div class="muted" id="regionPage" style="font-size:12px; margin-top:4px;"></div>
 
-      <label>Instance type category</label>
+      <label><b>Category filter (CPU / GPU / Memory / Storage / General)</b></label>
       <select id="category"></select>
+
+      <label><b>2nd Graph Metric (Y-axis)</b></label>
+      <select id="metric">
+        <option value="vcpus">vCPUs</option>
+        <option value="memory_gib">Memory (GiB)</option>
+        <option value="gpu_count">GPU Count</option>
+        <option value="network_score">Network Score</option>
+        <option value="price_usd_hour">Price (USD/hr)</option>
+      </select>
 
       <label>Price importance: <span id="wPriceVal">35</span>%</label>
       <input id="wPrice" type="range" min="0" max="100" value="35" />
@@ -60,6 +74,7 @@
       <div id="explain" class="top" style="background:#f9fff6;border-color:#d9f0cf"></div>
       <div id="types" class="top"></div>
       <div id="chart" class="card" style="min-height: 390px;"></div>
+      <div id="chart2" class="card" style="min-height: 360px; margin-top: 12px;"></div>
       <div class="card" style="margin-top: 12px;">
         <h3 style="margin-top:0;">How to choose the right EC2 instance</h3>
         <ul>
@@ -80,11 +95,35 @@
 
   <script>
     const csvUrl = './data/ec2_aws_snapshot.csv';
-    const state = { rows: [] };
+    const state = { rows: [], regions: [], regionIdx: 0 };
     const sliders = ['wPrice','wCpu','wMem','wNet','wGpu'];
     const el = id => document.getElementById(id);
 
-    const typeExplain = {
+    
+
+    const metricLabel = {
+      vcpus: 'vCPUs',
+      memory_gib: 'Memory (GiB)',
+      gpu_count: 'GPU Count',
+      network_score: 'Network Score',
+      price_usd_hour: 'Price (USD/hr)',
+    };
+
+    function syncRegionPager() {
+      const region = el('region').value;
+      const idx = state.regions.indexOf(region);
+      if (idx >= 0) state.regionIdx = idx;
+      el('regionPage').textContent = `Region ${state.regionIdx + 1} of ${state.regions.length}`;
+    }
+
+    function stepRegion(delta) {
+      if (!state.regions.length) return;
+      state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
+      el('region').value = state.regions[state.regionIdx];
+      syncRegionPager();
+      render();
+    }
+const typeExplain = {
       CPU: 'Compute-optimized instances for CPU-heavy jobs like builds, encoding, game servers, and high-QPS APIs.',
       GPU: 'Accelerated instances for ML training/inference, rendering, and workloads that need CUDA/GPUs.',
       Memory: 'Memory-optimized instances for large caches, analytics, and in-memory databases.',
@@ -138,6 +177,7 @@
       sliders.forEach(s => el(s+'Val').textContent = el(s).value);
       const region = el('region').value;
       const category = el('category').value;
+      const metric = el('metric').value;
 
       let rows = state.rows.filter(r => (region === 'All' || r.region === region) && (category === 'All' || r.instance_category === category));
       if (!rows.length) {
@@ -188,6 +228,23 @@
         margin: { t: 40 }
       }, {responsive:true});
 
+
+      const pageSize = 10;
+      const start = 0;
+      const pageRows = rows.slice(start, start + pageSize);
+      Plotly.newPlot('chart2', [{
+        x: pageRows.map(r=>r.instance_type),
+        y: pageRows.map(r=>r[metric]),
+        type: 'bar',
+        marker: { color: '#4f7cff' },
+        hovertemplate: 'Instance: %{x}<br>'+metricLabel[metric]+': %{y}<extra></extra>'
+      }], {
+        title: `Instance-wise ${metricLabel[metric]} (current region/category)`,
+        xaxis: { title: 'EC2 Instance Type' },
+        yaxis: { title: metricLabel[metric] },
+        margin: { t: 46 }
+      }, {responsive:true});
+
       const head = `<tr><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr>`;
       const body = rows.slice(0,10).map(r =>
         `<tr><td>${r.instance_type}</td><td>${r.instance_category}</td><td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.gpu_count}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
@@ -202,13 +259,19 @@
         const txt = await resp.text();
         state.rows = parseCSV(txt);
 
-        const regions = ['All', ...new Set(state.rows.map(r=>r.region))];
+        const regions = [...new Set(state.rows.map(r=>r.region))];
         const categories = ['All', ...new Set(state.rows.map(r=>r.instance_category))];
 
         el('region').innerHTML = regions.map(v=>`<option>${v}</option>`).join('');
+        state.regions = regions;
+        state.regionIdx = 0;
+        if (regions.length) el('region').value = regions[0];
+        syncRegionPager();
         el('category').innerHTML = categories.map(v=>`<option>${v}</option>`).join('');
 
-        ['region','category',...sliders].forEach(id => el(id).addEventListener('input', render));
+        ['region','category','metric',...sliders].forEach(id => el(id).addEventListener('input', () => { if (id==='region') syncRegionPager(); render(); }));
+        el('prevRegion').addEventListener('click', () => stepRegion(-1));
+        el('nextRegion').addEventListener('click', () => stepRegion(1));
         renderTypeExplanations();
         render();
       } catch (e) {
