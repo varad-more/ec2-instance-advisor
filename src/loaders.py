@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 
-def load_instances(path: str = "data/ec2_samples.csv") -> pd.DataFrame:
+def load_instances(path: str = "data/ec2_aws_snapshot.csv") -> pd.DataFrame:
     """Load EC2 instance catalog with regional prices and performance features."""
     df = pd.read_csv(path)
     required = {

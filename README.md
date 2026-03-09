@@ -45,7 +45,7 @@ Open the URL shown by Streamlit (usually `http://localhost:8501`).
 
 ## Data Notes
 
-- `data/ec2_samples.csv` includes sample EC2 instance metadata + regional pricing.
+- `data/ec2_aws_snapshot.csv` includes sample EC2 instance metadata + regional pricing.
 - Prices are **illustrative** for MVP/demo and should be refreshed before production use.
 
 ## Next Steps
@@ -89,3 +89,18 @@ A practical method:
 
 5. **Benchmark before committing**
    Always run a small production-like load test and monitor utilization before finalizing instance type.
+
+
+## One-time AWS Data Pull
+
+This project now uses a static snapshot generated once from the AWS Price List endpoints.
+
+```bash
+python3 scripts/fetch_aws_prices_once.py
+```
+
+Output files:
+- `data/ec2_aws_snapshot.csv`
+- `docs/data/ec2_aws_snapshot.csv`
+
+No dynamic loading is required for the website.
