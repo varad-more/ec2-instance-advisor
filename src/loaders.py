@@ -9,10 +9,12 @@ def load_instances(path: str = "data/ec2_samples.csv") -> pd.DataFrame:
     required = {
         "instance_type",
         "family",
+        "instance_category",
         "region",
         "vcpus",
         "memory_gib",
         "network_score",
+        "gpu_count",
         "price_usd_hour",
         "workload_tag",
     }

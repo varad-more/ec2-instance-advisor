@@ -9,10 +9,11 @@ This project provides a simple scoring engine + Streamlit UI to guide users towa
 
 ## Features
 
-- Region + workload filters
+- Region + instance category filters (CPU/GPU/Memory/Storage/General)
 - Weight sliders (price vs CPU vs memory vs network)
 - Composite score ranking
 - Automatic best-fit explainer card (why this instance is recommended)
+- Built-in instance-type guide that explains where each category fits
 - Interactive scatter plot (price vs performance)
 - Quick recommendations and top candidates table
 
@@ -61,4 +62,4 @@ This repo now includes a static web app at `docs/index.html` so it can be hosted
 
 Once Pages is enabled for this repo (source: `main` branch, `/docs`), the app is available at:
 
-`https://varad-more.github.io/ec2-instance-advisor/`
+`http://varadmore.me/ec2-instance-advisor/`

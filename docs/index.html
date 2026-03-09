@@ -9,43 +9,49 @@
     body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; color: #111; }
     h1 { margin-bottom: 6px; }
     .muted { color: #666; margin-top: 0; }
-    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 18px; }
+    .grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
     .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; }
     label { font-size: 14px; display: block; margin: 8px 0 4px; }
     select, input[type='range'] { width: 100%; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
     .top { margin: 12px 0; padding: 10px; background: #f6f9ff; border: 1px solid #d9e7ff; border-radius: 10px; }
+    .error { background: #fff4f4; border-color: #ffcaca; }
+    ul { margin: 8px 0; padding-left: 18px; }
   </style>
 </head>
 <body>
   <h1>EC2 Instance Advisor</h1>
-  <p class="muted">Choose region/workload and tune weights to find the best-fit instance.</p>
+  <p class="muted">Filter by region and instance type (CPU/GPU/Memory/Storage/General), then tune weights.</p>
 
   <div class="grid">
     <div class="card">
       <label>Region</label>
       <select id="region"></select>
 
-      <label>Workload</label>
-      <select id="workload"></select>
+      <label>Instance type category</label>
+      <select id="category"></select>
 
-      <label>Price importance: <span id="wPriceVal">40</span>%</label>
-      <input id="wPrice" type="range" min="0" max="100" value="40" />
+      <label>Price importance: <span id="wPriceVal">35</span>%</label>
+      <input id="wPrice" type="range" min="0" max="100" value="35" />
 
-      <label>CPU importance: <span id="wCpuVal">30</span>%</label>
-      <input id="wCpu" type="range" min="0" max="100" value="30" />
+      <label>CPU importance: <span id="wCpuVal">25</span>%</label>
+      <input id="wCpu" type="range" min="0" max="100" value="25" />
 
       <label>Memory importance: <span id="wMemVal">20</span>%</label>
       <input id="wMem" type="range" min="0" max="100" value="20" />
 
       <label>Network importance: <span id="wNetVal">10</span>%</label>
       <input id="wNet" type="range" min="0" max="100" value="10" />
+
+      <label>GPU importance: <span id="wGpuVal">10</span>%</label>
+      <input id="wGpu" type="range" min="0" max="100" value="10" />
     </div>
 
     <div>
       <div id="best" class="top"></div>
       <div id="explain" class="top" style="background:#f9fff6;border-color:#d9f0cf"></div>
+      <div id="types" class="top"></div>
       <div id="chart" class="card" style="min-height: 390px;"></div>
       <div class="card" style="margin-top: 12px;">
         <h3 style="margin-top:0;">Top Candidates</h3>
@@ -55,22 +61,30 @@
   </div>
 
   <script>
-    const csvUrl = '../data/ec2_samples.csv';
+    const csvUrl = './data/ec2_samples.csv';
     const state = { rows: [] };
-
+    const sliders = ['wPrice','wCpu','wMem','wNet','wGpu'];
     const el = id => document.getElementById(id);
-    const sliders = ['wPrice','wCpu','wMem','wNet'];
+
+    const typeExplain = {
+      CPU: 'Compute-optimized instances for CPU-heavy jobs like builds, encoding, game servers, and high-QPS APIs.',
+      GPU: 'Accelerated instances for ML training/inference, rendering, and workloads that need CUDA/GPUs.',
+      Memory: 'Memory-optimized instances for large caches, analytics, and in-memory databases.',
+      Storage: 'Storage-optimized instances for high IOPS and low-latency local NVMe-intensive workloads.',
+      General: 'Balanced instances for common web apps, microservices, and mixed workloads.'
+    };
 
     function parseCSV(text) {
       const [header, ...lines] = text.trim().split('\n');
       const cols = header.split(',');
-      return lines.map(line => {
+      return lines.filter(Boolean).map(line => {
         const vals = line.split(',');
         const obj = {};
         cols.forEach((c, i) => obj[c] = vals[i]);
         obj.vcpus = +obj.vcpus;
         obj.memory_gib = +obj.memory_gib;
         obj.network_score = +obj.network_score;
+        obj.gpu_count = +obj.gpu_count;
         obj.price_usd_hour = +obj.price_usd_hour;
         return obj;
       });
@@ -82,43 +96,44 @@
       return values.map(v => reverse ? 1 - ((v-min)/(max-min)) : (v-min)/(max-min));
     }
 
-
-    function useCaseFromWorkload(tag) {
-      if (tag === 'compute') return 'CPU-heavy services, build runners, game servers, encoding jobs';
-      if (tag === 'memory') return 'In-memory caches, analytics engines, JVM services with large heaps';
-      return 'Balanced web apps, APIs, microservices, and general-purpose workloads';
+    function showError(msg) {
+      el('best').classList.add('error');
+      el('best').innerHTML = `<b>Error:</b> ${msg}`;
     }
 
     function explainWhy(best, rows) {
       const cheapest = rows.reduce((a,b)=> a.price_usd_hour < b.price_usd_hour ? a : b);
-      const strongest = rows.reduce((a,b)=> (a.vcpus+a.memory_gib+a.network_score) > (b.vcpus+b.memory_gib+b.network_score) ? a : b);
-      const priceDelta = ((best.price_usd_hour - cheapest.price_usd_hour)/cheapest.price_usd_hour)*100;
-      const perfBest = best.vcpus*0.45 + best.memory_gib*0.35 + best.network_score*0.2;
-      const perfStrong = strongest.vcpus*0.45 + strongest.memory_gib*0.35 + strongest.network_score*0.2;
-      const perfGap = ((perfStrong - perfBest)/Math.max(perfStrong, 1))*100;
+      const strongest = rows.reduce((a,b)=> (a.perf || 0) > (b.perf || 0) ? a : b);
+      const priceDelta = ((best.price_usd_hour - cheapest.price_usd_hour)/Math.max(cheapest.price_usd_hour, 0.0001))*100;
+      const perfGap = ((strongest.perf - best.perf)/Math.max(strongest.perf, 1))*100;
+      return `<b>Best fit for:</b> ${typeExplain[best.instance_category] || best.instance_category}. ` +
+             `<b>Cost position:</b> ${priceDelta <= 1 ? 'near-cheapest' : `${priceDelta.toFixed(1)}% above cheapest`} in this filter. ` +
+             `<b>Performance position:</b> within ${Math.max(0, perfGap).toFixed(1)}% of the strongest candidate.`;
+    }
 
-      const bits = [];
-      bits.push(`<b>Best fit for:</b> ${useCaseFromWorkload(best.workload_tag)}.`);
-      bits.push(`<b>Why this was picked:</b> it balances cost and performance under your weight settings.`);
-      bits.push(`<b>Cost position:</b> ${priceDelta <= 1 ? 'near-cheapest' : `${priceDelta.toFixed(1)}% above the cheapest option`} in this filtered set.`);
-      bits.push(`<b>Performance position:</b> within ${perfGap.toFixed(1)}% of the strongest candidate here.`);
-      bits.push(`<b>Specs:</b> ${best.vcpus} vCPU, ${best.memory_gib} GiB RAM, network score ${best.network_score}.`);
-      return bits.join(' ');
+    function renderTypeExplanations() {
+      const lines = Object.entries(typeExplain).map(([k,v]) => `<li><b>${k}</b>: ${v}</li>`).join('');
+      el('types').innerHTML = `<b>Instance type guide</b><ul>${lines}</ul>`;
     }
 
     function render() {
       sliders.forEach(s => el(s+'Val').textContent = el(s).value);
-
       const region = el('region').value;
-      const workload = el('workload').value;
-      let rows = state.rows.filter(r => r.region === region && r.workload_tag === workload);
-      if (!rows.length) return;
+      const category = el('category').value;
+
+      let rows = state.rows.filter(r => (region === 'All' || r.region === region) && (category === 'All' || r.instance_category === category));
+      if (!rows.length) {
+        showError('No rows match selected filters.');
+        el('table').innerHTML = '';
+        return;
+      }
 
       const w = {
         price: +el('wPrice').value,
         cpu: +el('wCpu').value,
         mem: +el('wMem').value,
         net: +el('wNet').value,
+        gpu: +el('wGpu').value,
       };
       const sum = Object.values(w).reduce((a,b)=>a+b,0) || 1;
 
@@ -126,15 +141,17 @@
       const c = norm(rows.map(r=>r.vcpus));
       const m = norm(rows.map(r=>r.memory_gib));
       const n = norm(rows.map(r=>r.network_score));
+      const g = norm(rows.map(r=>r.gpu_count));
 
-      rows = rows.map((r, i) => ({
-        ...r,
-        composite: (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i],
-        perf: r.vcpus*0.45 + r.memory_gib*0.35 + r.network_score*0.2,
-      })).sort((a,b)=>b.composite-a.composite);
+      rows = rows.map((r, i) => {
+        const perf = r.vcpus*0.35 + r.memory_gib*0.30 + r.network_score*0.20 + r.gpu_count*0.15;
+        const composite = (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i] + (w.gpu/sum)*g[i];
+        return { ...r, perf, composite };
+      }).sort((a,b)=>b.composite-a.composite);
 
       const best = rows[0];
-      el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
+      el('best').classList.remove('error');
+      el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.instance_category}, ${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
       el('explain').innerHTML = explainWhy(best, rows);
 
       Plotly.newPlot('chart', [{
@@ -144,7 +161,8 @@
         text: rows.map(r=>r.instance_type),
         textposition: 'top center',
         marker: { size: rows.map(r=>12 + r.composite*20), color: rows.map(r=>r.composite), colorscale: 'Blues' },
-        hovertemplate: '%{text}<br>Price: $%{x}/hr<br>Perf: %{y:.2f}<extra></extra>'
+        hovertemplate: '%{text}<br>Category: %{customdata[0]}<br>Region: %{customdata[1]}<br>Price: $%{x}/hr<br>Perf: %{y:.2f}<extra></extra>',
+        customdata: rows.map(r => [r.instance_category, r.region])
       }], {
         title: 'Price vs Performance',
         xaxis: { title: 'Price (USD/hr)' },
@@ -152,25 +170,32 @@
         margin: { t: 40 }
       }, {responsive:true});
 
-      const head = `<tr><th>Instance</th><th>vCPU</th><th>Mem (GiB)</th><th>Net</th><th>$/hr</th><th>Score</th></tr>`;
+      const head = `<tr><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr>`;
       const body = rows.slice(0,10).map(r =>
-        `<tr><td>${r.instance_type}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
+        `<tr><td>${r.instance_type}</td><td>${r.instance_category}</td><td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.gpu_count}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
       ).join('');
       el('table').innerHTML = head + body;
     }
 
     async function boot() {
-      const txt = await fetch(csvUrl).then(r=>r.text());
-      state.rows = parseCSV(txt);
+      try {
+        const resp = await fetch(csvUrl, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`Failed to load dataset (${resp.status}).`);
+        const txt = await resp.text();
+        state.rows = parseCSV(txt);
 
-      const regions = [...new Set(state.rows.map(r=>r.region))];
-      const workloads = [...new Set(state.rows.map(r=>r.workload_tag))];
+        const regions = ['All', ...new Set(state.rows.map(r=>r.region))];
+        const categories = ['All', ...new Set(state.rows.map(r=>r.instance_category))];
 
-      el('region').innerHTML = regions.map(r=>`<option>${r}</option>`).join('');
-      el('workload').innerHTML = workloads.map(w=>`<option>${w}</option>`).join('');
+        el('region').innerHTML = regions.map(v=>`<option>${v}</option>`).join('');
+        el('category').innerHTML = categories.map(v=>`<option>${v}</option>`).join('');
 
-      ['region','workload',...sliders].forEach(id => el(id).addEventListener('input', render));
-      render();
+        ['region','category',...sliders].forEach(id => el(id).addEventListener('input', render));
+        renderTypeExplanations();
+        render();
+      } catch (e) {
+        showError(e.message || 'Unknown error while starting app.');
+      }
     }
 
     boot();
