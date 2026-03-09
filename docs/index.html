@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EC2 Instance Advisor</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; color: #111; }
+    h1 { margin-bottom: 6px; }
+    .muted { color: #666; margin-top: 0; }
+    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 18px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; }
+    label { font-size: 14px; display: block; margin: 8px 0 4px; }
+    select, input[type='range'] { width: 100%; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+    .top { margin: 12px 0; padding: 10px; background: #f6f9ff; border: 1px solid #d9e7ff; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h1>EC2 Instance Advisor</h1>
+  <p class="muted">Choose region/workload and tune weights to find the best-fit instance.</p>
+
+  <div class="grid">
+    <div class="card">
+      <label>Region</label>
+      <select id="region"></select>
+
+      <label>Workload</label>
+      <select id="workload"></select>
+
+      <label>Price importance: <span id="wPriceVal">40</span>%</label>
+      <input id="wPrice" type="range" min="0" max="100" value="40" />
+
+      <label>CPU importance: <span id="wCpuVal">30</span>%</label>
+      <input id="wCpu" type="range" min="0" max="100" value="30" />
+
+      <label>Memory importance: <span id="wMemVal">20</span>%</label>
+      <input id="wMem" type="range" min="0" max="100" value="20" />
+
+      <label>Network importance: <span id="wNetVal">10</span>%</label>
+      <input id="wNet" type="range" min="0" max="100" value="10" />
+    </div>
+
+    <div>
+      <div id="best" class="top"></div>
+      <div id="chart" class="card" style="min-height: 390px;"></div>
+      <div class="card" style="margin-top: 12px;">
+        <h3 style="margin-top:0;">Top Candidates</h3>
+        <table id="table"></table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const csvUrl = '../data/ec2_samples.csv';
+    const state = { rows: [] };
+
+    const el = id => document.getElementById(id);
+    const sliders = ['wPrice','wCpu','wMem','wNet'];
+
+    function parseCSV(text) {
+      const [header, ...lines] = text.trim().split('\n');
+      const cols = header.split(',');
+      return lines.map(line => {
+        const vals = line.split(',');
+        const obj = {};
+        cols.forEach((c, i) => obj[c] = vals[i]);
+        obj.vcpus = +obj.vcpus;
+        obj.memory_gib = +obj.memory_gib;
+        obj.network_score = +obj.network_score;
+        obj.price_usd_hour = +obj.price_usd_hour;
+        return obj;
+      });
+    }
+
+    function norm(values, reverse=false) {
+      const min = Math.min(...values), max = Math.max(...values);
+      if (max === min) return values.map(() => 1);
+      return values.map(v => reverse ? 1 - ((v-min)/(max-min)) : (v-min)/(max-min));
+    }
+
+    function render() {
+      sliders.forEach(s => el(s+'Val').textContent = el(s).value);
+
+      const region = el('region').value;
+      const workload = el('workload').value;
+      let rows = state.rows.filter(r => r.region === region && r.workload_tag === workload);
+      if (!rows.length) return;
+
+      const w = {
+        price: +el('wPrice').value,
+        cpu: +el('wCpu').value,
+        mem: +el('wMem').value,
+        net: +el('wNet').value,
+      };
+      const sum = Object.values(w).reduce((a,b)=>a+b,0) || 1;
+
+      const p = norm(rows.map(r=>r.price_usd_hour), true);
+      const c = norm(rows.map(r=>r.vcpus));
+      const m = norm(rows.map(r=>r.memory_gib));
+      const n = norm(rows.map(r=>r.network_score));
+
+      rows = rows.map((r, i) => ({
+        ...r,
+        composite: (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i],
+        perf: r.vcpus*0.45 + r.memory_gib*0.35 + r.network_score*0.2,
+      })).sort((a,b)=>b.composite-a.composite);
+
+      const best = rows[0];
+      el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
+
+      Plotly.newPlot('chart', [{
+        x: rows.map(r=>r.price_usd_hour),
+        y: rows.map(r=>r.perf),
+        mode: 'markers+text',
+        text: rows.map(r=>r.instance_type),
+        textposition: 'top center',
+        marker: { size: rows.map(r=>12 + r.composite*20), color: rows.map(r=>r.composite), colorscale: 'Blues' },
+        hovertemplate: '%{text}<br>Price: $%{x}/hr<br>Perf: %{y:.2f}<extra></extra>'
+      }], {
+        title: 'Price vs Performance',
+        xaxis: { title: 'Price (USD/hr)' },
+        yaxis: { title: 'Performance index' },
+        margin: { t: 40 }
+      }, {responsive:true});
+
+      const head = `<tr><th>Instance</th><th>vCPU</th><th>Mem (GiB)</th><th>Net</th><th>$/hr</th><th>Score</th></tr>`;
+      const body = rows.slice(0,10).map(r =>
+        `<tr><td>${r.instance_type}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
+      ).join('');
+      el('table').innerHTML = head + body;
+    }
+
+    async function boot() {
+      const txt = await fetch(csvUrl).then(r=>r.text());
+      state.rows = parseCSV(txt);
+
+      const regions = [...new Set(state.rows.map(r=>r.region))];
+      const workloads = [...new Set(state.rows.map(r=>r.workload_tag))];
+
+      el('region').innerHTML = regions.map(r=>`<option>${r}</option>`).join('');
+      el('workload').innerHTML = workloads.map(w=>`<option>${w}</option>`).join('');
+
+      ['region','workload',...sliders].forEach(id => el(id).addEventListener('input', render));
+      render();
+    }
+
+    boot();
+  </script>
+</body>
+</html>

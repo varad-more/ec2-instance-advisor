@@ -52,3 +52,12 @@ Open the URL shown by Streamlit (usually `http://localhost:8501`).
 - Add Spot price + reserved instance support
 - Add architecture filters (x86/ARM)
 - Add storage performance metrics (EBS throughput)
+
+
+## GitHub Pages Hosting
+
+This repo now includes a static web app at `docs/index.html` so it can be hosted on **GitHub Pages**.
+
+Once Pages is enabled for this repo (source: `main` branch, `/docs`), the app is available at:
+
+`https://varad-more.github.io/ec2-instance-advisor/`
