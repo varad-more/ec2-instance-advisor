@@ -1,106 +1,112 @@
 # EC2 Instance Advisor
 
-Find the best AWS EC2 instance for your use case by comparing:
-- **Region-wise on-demand prices**
-- **Performance profile** (vCPU, memory, network baseline)
-- **Workload fit** (general, compute, memory)
+A **zero-dependency static web app** for finding the best-fit AWS EC2 instance for your workload.
+Compare on-demand pricing across **24 AWS regions**, rank 42+ instance types by a weighted composite score, and explore interactive visualisations — all in a single HTML file.
 
-This project provides a simple scoring engine + Streamlit UI to guide users toward the best-fit instance based on their priorities.
+Live demo → **[varadmore.me/ec2-instance-advisor/](http://varadmore.me/ec2-instance-advisor/)**
+
+---
 
 ## Features
 
-- Region + instance category filters (CPU/GPU/Memory/Storage/General)
-- Weight sliders (price vs CPU vs memory vs network)
-- Composite score ranking
-- Automatic best-fit explainer card (why this instance is recommended)
-- Built-in instance-type guide that explains where each category fits
-- Interactive scatter plot (price vs performance)
-- Quick recommendations and top candidates table
+| | |
+|---|---|
+| **6-step guided funnel** | Understand families → compare → set weights → get recommendation → browse → estimate cost |
+| **24 AWS regions** | All major regions across US, EU, AP, SA, ME & Africa |
+| **42+ instance types** | c7g, m7g, r7g, g5, i4i, t3, m6i, c6g, … |
+| **Weighted scoring** | Sliders for Price / CPU / Memory / Network / GPU |
+| **Interactive charts** | Family comparison bar, performance radar, cost trend, value-map scatter (Plotly.js) |
+| **Best-fit explainer** | Animated score ring + plain-English reasoning card |
+| **Cost estimator** | Monthly cost calculator for up to 4 instances side-by-side |
+| **Responsive UI** | Works on desktop & mobile; step-jump nav + back-to-top |
+
+---
 
 ## Project Structure
 
 ```
 .
-├── app.py
+├── docs/                        # Static web app (served via GitHub Pages)
+│   ├── index.html               # Single-file app (HTML + CSS + JS + Plotly)
+│   └── data/
+│       └── ec2_aws_snapshot.csv # Pricing & metadata snapshot (946 rows)
 ├── data/
-│   └── ec2_samples.csv
-├── src/
-│   ├── __init__.py
-│   ├── advisor.py
-│   └── loaders.py
-├── requirements.txt
+│   └── ec2_aws_snapshot.csv     # Mirror of docs/data/ (for local scripts)
+├── scripts/
+│   └── fetch_aws_prices_once.py # One-time AWS Price List fetcher
 └── README.md
 ```
 
-## Quickstart
+---
+
+## Running Locally
+
+No build step, no dependencies — just a Python standard-library HTTP server:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app.py
+# Clone the repo
+git clone https://github.com/varadmore/ec2-instance-advisor.git
+cd ec2-instance-advisor
+
+# Serve the docs/ folder
+python3 -m http.server 8080 --directory docs
 ```
 
-Open the URL shown by Streamlit (usually `http://localhost:8501`).
+Open **[http://localhost:8080](http://localhost:8080)** in your browser.
 
-## Data Notes
+> **Why a server?** The app fetches `data/ec2_aws_snapshot.csv` via `fetch()`, which requires HTTP (not `file://`).
 
-- `data/ec2_aws_snapshot.csv` includes sample EC2 instance metadata + regional pricing.
-- Prices are **illustrative** for MVP/demo and should be refreshed before production use.
+---
 
-## Next Steps
+## Refreshing Pricing Data
 
-- Add automated pricing refresh from AWS Price List API
-- Add Spot price + reserved instance support
-- Add architecture filters (x86/ARM)
-- Add storage performance metrics (EBS throughput)
-
-
-## GitHub Pages Hosting
-
-This repo now includes a static web app at `docs/index.html` so it can be hosted on **GitHub Pages**.
-
-Once Pages is enabled for this repo (source: `main` branch, `/docs`), the app is available at:
-
-`http://varadmore.me/ec2-instance-advisor/`
-
-
-## How to Select an EC2 Instance for Your Needs
-
-A practical method:
-
-1. **Identify workload shape**
-   - CPU-heavy (builds, APIs, encoding) → CPU instances
-   - ML/AI or graphics workloads → GPU instances
-   - Big caches / in-memory databases → Memory instances
-   - High disk throughput / low latency storage tasks → Storage instances
-   - Mixed/general workloads → General instances
-
-2. **Select region first**
-   Pick the closest region to users/data to reduce latency and transfer costs.
-
-3. **Set priorities with weights**
-   Increase price weight for cost-sensitive workloads; increase CPU/memory/network/GPU weights for performance-sensitive workloads.
-
-4. **Interpret the plot correctly**
-   - **X-axis:** hourly cost (USD/hr)
-   - **Y-axis:** performance index (derived from CPU, memory, network, GPU)
-   - Better value usually appears where performance is high for acceptable price.
-
-5. **Benchmark before committing**
-   Always run a small production-like load test and monitor utilization before finalizing instance type.
-
-
-## One-time AWS Data Pull
-
-This project now uses a static snapshot generated once from the AWS Price List endpoints.
+The CSV snapshot was generated from the [AWS Price List API](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/price-changes.html).
+To regenerate it (pulls live data for `us-east-1`, `us-west-2`, `ap-south-1`):
 
 ```bash
 python3 scripts/fetch_aws_prices_once.py
 ```
 
-Output files:
+Output files updated:
 - `data/ec2_aws_snapshot.csv`
 - `docs/data/ec2_aws_snapshot.csv`
 
-No dynamic loading is required for the website.
+> The script fetches the AWS pricing JSON index (~500 MB per region), so expect a few minutes to complete.
+> No AWS credentials required — the Price List API is public.
+
+---
+
+## GitHub Pages Deployment
+
+Enable GitHub Pages in your repo settings:
+- **Source:** `main` branch, `/docs` folder
+
+The app will be available at `https://<your-username>.github.io/ec2-instance-advisor/`
+(or a custom domain if configured — see [varadmore.me/ec2-instance-advisor/](http://varadmore.me/ec2-instance-advisor/)).
+
+---
+
+## How to Pick an EC2 Instance
+
+1. **Identify workload shape**
+   - CPU-heavy (builds, APIs, batch encoding) → `c` family (CPU instances)
+   - ML / AI / graphics → `g`, `p`, `trn`, `inf` families (GPU instances)
+   - Large in-memory datasets / caches → `r` family (Memory instances)
+   - High-throughput / low-latency disk → `i`, `d`, `h` families (Storage instances)
+   - Mixed / general purpose → `t`, `m` families (General instances)
+
+2. **Pick your region first** — choose the region closest to your users or data to minimise latency and data-transfer costs.
+
+3. **Tune the weight sliders** — raise Price weight for cost-sensitive workloads; raise CPU / Memory / GPU weights for performance-sensitive ones.
+
+4. **Read the Value Map** — top-left quadrant (low price, high score) is the sweet spot.
+
+5. **Benchmark before committing** — run a representative load test and check CloudWatch utilisation before locking in an instance type.
+
+---
+
+## Data Notes
+
+- Prices are **on-demand Linux/UNIX, Shared tenancy** — no Spot or Reserved pricing.
+- Regional prices use verified multipliers relative to `us-east-1` baselines; spot-check against the [AWS Pricing Calculator](https://calculator.aws/) for production decisions.
+- The snapshot covers a curated set of modern instance families (Graviton3, Intel Ice Lake, AMD, GPU).

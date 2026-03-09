@@ -470,12 +470,152 @@
     label { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
     kbd { display: inline-block; font-size: 9.5px; font-family: inherit; background: rgba(0,0,0,.07); border: 1px solid rgba(0,0,0,.12); border-radius: 4px; padding: 1px 4px; }
 
+    /* ── Nav step jumps ──────────────────────────────────── */
+    .nav-steps { display: flex; gap: 3px; align-items: center; }
+    .nav-step-btn {
+      width: 30px; height: 26px; border-radius: 7px;
+      border: 1px solid var(--line); background: transparent;
+      color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .03em;
+      cursor: pointer; transition: all .15s;
+      font-family: inherit; display: flex; align-items: center; justify-content: center;
+    }
+    .nav-step-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: #c7d2fe; }
+    .nav-step-btn.ns-active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(79,70,229,.3); }
+    @media (max-width: 720px) { .nav-steps { display: none; } }
+
+    /* ── Back to top ─────────────────────────────────────── */
+    #backToTop {
+      position: fixed; bottom: 28px; right: 24px; z-index: 70;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--accent); color: #fff; border: none;
+      font-size: 20px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(79,70,229,.38);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transform: translateY(10px);
+      transition: opacity .25s, transform .25s; font-family: inherit;
+    }
+    #backToTop.btt-visible { opacity: 1; pointer-events: all; transform: translateY(0); }
+    #backToTop:hover { background: #4338ca; transform: translateY(-2px) !important; }
+
+    /* ── Load more btn ───────────────────────────────────── */
+    .load-more-btn {
+      display: block; width: 100%; padding: 11px;
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      background: var(--accent-bg); border: none; border-top: 1px solid #c7d2fe;
+      cursor: pointer; transition: background .15s; font-family: inherit; letter-spacing: .02em;
+    }
+    .load-more-btn:hover { background: #e0e7ff; }
+
     /* ── Animations ──────────────────────────────────────── */
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
     .fade-up   { animation: fadeUp .4s ease both; }
     .fade-up-1 { animation: fadeUp .4s .06s ease both; }
     .fade-up-2 { animation: fadeUp .4s .14s ease both; }
     .fade-up-3 { animation: fadeUp .4s .22s ease both; }
+
+    /* ── Site Footer ─────────────────────────────────── */
+    .site-footer {
+      background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%);
+      border-top: 1px solid rgba(99,102,241,.18);
+      padding: 64px 28px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-footer::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234f46e5' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .footer-glow {
+      position: absolute; bottom: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 300px; pointer-events: none;
+      background: radial-gradient(ellipse, rgba(99,102,241,.14) 0%, transparent 70%);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
+      gap: 48px;
+      padding-bottom: 48px;
+    }
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+    }
+    @media (max-width: 540px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+      .site-footer { padding: 48px 20px 0; }
+    }
+    /* Brand column */
+    .footer-brand { font-size: 20px; font-weight: 900; letter-spacing: -.04em; color: #fff; margin-bottom: 12px; }
+    .footer-brand em { font-style: normal; color: #818cf8; }
+    .footer-tagline { font-size: 13px; color: #64748b; line-height: 1.7; max-width: 260px; margin-bottom: 20px; }
+    .footer-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(99,102,241,.15); border: 1px solid rgba(165,180,252,.25);
+      color: #a5b4fc; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      padding: 5px 13px; border-radius: 999px;
+    }
+    .footer-badge-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+    /* Section headings */
+    .footer-section-title {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .1em; color: #475569; margin-bottom: 16px;
+    }
+    /* Links */
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      font-size: 13px; color: #94a3b8; text-decoration: none;
+      display: flex; align-items: center; gap: 7px;
+      transition: color .15s;
+    }
+    .footer-links a:hover { color: #818cf8; }
+    .footer-links a .fl-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: rgba(255,255,255,.05); display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0;
+    }
+    /* Stat pills */
+    .footer-stats { display: flex; flex-direction: column; gap: 10px; }
+    .footer-stat {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 13px; border-radius: 8px;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+    }
+    .footer-stat-label { font-size: 11.5px; font-weight: 600; color: #64748b; }
+    .footer-stat-val { font-size: 13px; font-weight: 800; color: #e2e8f0; }
+    /* Keyboard shortcuts */
+    .footer-kbds { display: flex; flex-direction: column; gap: 8px; }
+    .footer-kbd-row { display: flex; align-items: center; gap: 8px; }
+    .footer-kbd-key {
+      font-size: 10px; font-family: inherit; background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 5px;
+      padding: 3px 7px; color: #94a3b8; font-weight: 700; letter-spacing: .03em;
+      flex-shrink: 0;
+    }
+    .footer-kbd-desc { font-size: 12px; color: #64748b; }
+    /* Divider */
+    .footer-divider {
+      border: none; border-top: 1px solid rgba(255,255,255,.07);
+      margin: 0;
+    }
+    /* Bottom bar */
+    .footer-bottom {
+      padding: 18px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy { font-size: 12px; color: #334155; }
+    .footer-copy a { color: #475569; text-decoration: none; }
+    .footer-copy a:hover { color: #818cf8; }
+    .footer-disclaimer {
+      font-size: 11px; color: #1e293b;
+      background: rgba(234,179,8,.08); border: 1px solid rgba(234,179,8,.15);
+      padding: 5px 12px; border-radius: 999px; font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -495,6 +635,14 @@
   <!-- ── Sticky Nav ── -->
   <nav class="site-nav">
     <span class="nav-brand">EC2 <em>Advisor</em></span>
+    <div class="nav-steps" id="navSteps">
+      <button class="nav-step-btn" data-step="step-families" onclick="scrollToStep('step-families')" title="Understand Instance Families">01</button>
+      <button class="nav-step-btn" data-step="step-agg"      onclick="scrollToStep('step-agg')"      title="Family-Level Comparison">02</button>
+      <button class="nav-step-btn" data-step="step-drill"    onclick="scrollToStep('step-drill')"    title="Set Priorities &amp; Drill Down">03</button>
+      <button class="nav-step-btn" data-step="step-rec"      onclick="scrollToStep('step-rec')"      title="Your Best Match">04</button>
+      <button class="nav-step-btn" data-step="step-browse"   onclick="scrollToStep('step-browse')"   title="Browse All Candidates">05</button>
+      <button class="nav-step-btn" data-step="step-calc"     onclick="scrollToStep('step-calc')"     title="Estimate Monthly Costs">06</button>
+    </div>
     <div class="nav-actions">
       <span class="nav-chip hide-sm">AWS Snapshot</span>
       <span class="nav-chip warn hide-sm">Not official AWS</span>
@@ -702,7 +850,7 @@
       </div>
 
       <!-- Bar chart -->
-      <div class="chart-card">
+      <div class="chart-card" style="margin-bottom:14px">
         <div class="bar-hd">
           <div>
             <div class="chart-title">Top 10 Instance Comparison</div>
@@ -721,6 +869,15 @@
           </div>
         </div>
         <div class="chart-body" id="chart2" style="height:280px"></div>
+      </div>
+
+      <!-- Value Map scatter -->
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div class="chart-title">Value Map — Price vs Score</div>
+          <div class="chart-sub">Each dot = one instance · x = hourly cost · y = composite score · top-left = best value · star = #1 recommendation</div>
+        </div>
+        <div class="chart-body" id="chart6" style="height:320px"></div>
       </div>
     </section>
 
@@ -848,6 +1005,7 @@
         <div class="table-wrap">
           <table id="table"></table>
         </div>
+        <div id="tableLoadMoreWrap"></div>
       </div>
     </section>
 
@@ -915,12 +1073,14 @@
     always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
   </footer>
 
+  <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
 </div><!-- /#app -->
 
 <script>
 /* ── Constants & state ──────────────────────────────────── */
 const CSV_URL   = './data/ec2_aws_snapshot.csv';
-const state     = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set() };
+const state     = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set(), tableLimit: 30 };
 const SLIDERS   = ['wPrice','wCpu','wMem','wNet','wGpu'];
 const HASH_KEYS = ['region','category','metric',...SLIDERS];
 const el = id => document.getElementById(id);
@@ -1002,6 +1162,17 @@ function toast(msg, dur = 2200) {
 
 /* No sidebar in this layout */
 function toggleSidebar() {}
+
+/* ── Scroll to step ─────────────────────────────────────── */
+function scrollToStep(id) {
+  el(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── Table load more ─────────────────────────────────────── */
+function tableLoadMore() {
+  state.tableLimit += 30;
+  renderTable(state.scoredRows, el('tableSearch').value);
+}
 
 /* ── URL hash state ─────────────────────────────────────── */
 function saveHash() {
@@ -1143,7 +1314,7 @@ function renderRecCard(best, rows) {
     { val: best.gpu_count > 0 ? best.gpu_count : '—', lbl: 'GPUs' },
     { val: `${best.network_score}/5`,             lbl: 'Network' },
   ].map(s => `<div class="rec-stat"><div class="rec-stat-val">${s.val}</div><div class="rec-stat-lbl">${s.lbl}</div></div>`).join('');
-  el('recScoreNum').textContent = best.composite.toFixed(3);
+  animateNum('recScoreNum', best.composite, v => v.toFixed(3), 600);
   el('recRankTxt').innerHTML    = `<strong>#1</strong> of ${rows.length} candidates`;
   el('recCatLabel').innerHTML   =
     `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${catColor};margin-right:4px"></span>` +
@@ -1344,6 +1515,55 @@ function renderBar(rows, metric) {
   }, { responsive: true });
 }
 
+/* ── Value Map scatter chart ────────────────────────────── */
+function renderScatterChart(rows) {
+  if (!rows || !rows.length) return;
+  const cats = ['CPU','GPU','Memory','Storage','General'];
+  const best = rows[0];
+  const traces = cats.map(cat => {
+    const r = rows.filter(x => x.instance_category === cat);
+    return {
+      name: cat, type: 'scatter', mode: 'markers',
+      x: r.map(d => d.price_usd_hour),
+      y: r.map(d => +d.composite.toFixed(4)),
+      text: r.map(d => d.instance_type),
+      customdata: r.map(d => d.vcpus),
+      marker: {
+        color: CAT_COLOR[cat] || '#6b7280',
+        size: r.map(d => 6 + d.vcpus * 1.2),
+        opacity: .82,
+        line: { color: '#fff', width: 1 },
+      },
+      hovertemplate: '<b>%{text}</b><br>Price: $%{x:.4f}/hr<br>Score: %{y:.3f}<br>vCPUs: %{customdata}<extra></extra>',
+    };
+  });
+  // Star marker for #1 recommendation
+  traces.push({
+    name: '★ #1 pick', type: 'scatter', mode: 'markers+text',
+    x: [best.price_usd_hour], y: [+best.composite.toFixed(4)],
+    text: [best.instance_type], textposition: 'top center',
+    marker: { symbol: 'star', size: 18, color: '#f59e0b', line: { color: '#fff', width: 2 } },
+    hovertemplate: '<b>★ ' + best.instance_type + '</b><br>$%{x:.4f}/hr · Score %{y:.3f}<extra></extra>',
+  });
+  Plotly.react('chart6', traces, {
+    ...PLOTLY_BASE,
+    xaxis: { title: 'Price ($/hr)', gridcolor: '#e2e8f0', zeroline: false, tickformat: '$.3f' },
+    yaxis: { title: 'Composite Score', gridcolor: '#e2e8f0', zeroline: false, range: [-0.05, 1.1] },
+    legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
+    margin: { t: 16, r: 20, b: 70, l: 60 }, hovermode: 'closest',
+    shapes: [{
+      type: 'rect', xref: 'paper', yref: 'paper',
+      x0: 0, y0: 0.6, x1: 0.35, y1: 1,
+      fillcolor: 'rgba(16,185,129,.06)', line: { color: 'rgba(16,185,129,.2)', width: 1, dash: 'dot' },
+    }],
+    annotations: [{
+      xref: 'paper', yref: 'paper', x: 0.01, y: 0.98,
+      text: '⬆ Best value zone', showarrow: false,
+      font: { size: 10, color: '#059669' }, xanchor: 'left',
+    }],
+  }, { responsive: true });
+}
+
 /* ── Regional price chart ───────────────────────────────── */
 function renderRegional(bestType) {
   const rows = state.rows.filter(r => r.instance_type === bestType)
@@ -1428,12 +1648,15 @@ function renderTable(rows, query = '') {
     r.instance_type.toLowerCase().includes(q) ||
     r.instance_category.toLowerCase().includes(q) ||
     r.region.toLowerCase().includes(q)) : rows;
-  const shown = filtered.slice(0, 20);
+  const lim   = state.tableLimit || 30;
+  const shown = filtered.slice(0, lim);
   el('tableCount').textContent = q
     ? `${shown.length} of ${filtered.length} match`
-    : `${Math.min(rows.length, 20)} of ${rows.length}`;
+    : `Showing ${shown.length} of ${rows.length}`;
+  const lmw = el('tableLoadMoreWrap');
   if (!shown.length) {
     el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match "${query}"</td></tr></tbody>`;
+    if (lmw) lmw.innerHTML = '';
     return;
   }
   el('table').innerHTML =
@@ -1453,6 +1676,15 @@ function renderTable(rows, query = '') {
         <td><div class="score-cell"><div class="score-bar" style="width:${(r.composite*58).toFixed(0)}px;background:${cc}"></div><span class="score-num">${r.composite.toFixed(3)}</span></div></td>
       </tr>`;
     }).join('')}</tbody>`;
+  /* ── Load more button ── */
+  if (lmw) {
+    if (filtered.length > shown.length) {
+      const rem = Math.min(filtered.length - shown.length, 30);
+      lmw.innerHTML = `<button class="load-more-btn" onclick="tableLoadMore()">Show ${rem} more  (${filtered.length - shown.length} remaining) ↓</button>`;
+    } else {
+      lmw.innerHTML = '';
+    }
+  }
 }
 function handleRowClick(idx) { const row = state.scoredRows[idx]; if (row) renderInstanceCompare(row); }
 
@@ -1499,6 +1731,7 @@ function render() {
   })).sort((a, b) => b.composite - a.composite);
 
   state.scoredRows = rows;
+  state.tableLimit = 30;   // reset to first page on filter change
   const best = rows[0];
 
   renderRecCard(best, rows);
@@ -1508,6 +1741,7 @@ function render() {
   renderLineChart(rows);
   renderRadar(rows);
   renderBar(rows, metric);
+  renderScatterChart(rows);
   renderRegional(best.instance_type);
   renderCalculator(best);
   renderTable(rows, el('tableSearch').value);
@@ -1528,14 +1762,16 @@ async function boot() {
     el('region').innerHTML   = regions.map(v => `<option>${v}</option>`).join('');
     el('category').innerHTML = categories.map(v => `<option>${v}</option>`).join('');
     state.regions   = regions;
-    state.regionIdx = 0;
-    if (regions.length) el('region').value = regions[0];
+    /* Default to us-east-1 if available, else first region */
+    const defaultRegion = regions.includes('us-east-1') ? 'us-east-1' : regions[0];
+    state.regionIdx = regions.indexOf(defaultRegion);
+    if (regions.length) el('region').value = defaultRegion;
     syncRegionPager();
 
-    /* Hero live stats */
-    el('heroInstances').textContent = state.rows.length.toLocaleString();
-    el('heroFamilies').textContent  = families.size;
-    el('heroRegions').textContent   = regions.length;
+    /* Hero live stats — set raw=0 so animation counts from 0 */
+    ['heroInstances','heroFamilies','heroRegions'].forEach(id => {
+      const n = el(id); if (n) { n.textContent = '0'; n.dataset.raw = '0'; }
+    });
 
     loadHash();
     syncRegionPager();
@@ -1571,6 +1807,28 @@ async function boot() {
     app.style.transition = 'opacity .5s ease';
     app.style.opacity    = '1';
 
+    /* Animate hero stats after app fades in */
+    setTimeout(() => {
+      animateNum('heroInstances', state.rows.length, v => Math.round(v).toLocaleString(), 800);
+      animateNum('heroFamilies',  families.size,      v => Math.round(v).toString(),       650);
+      animateNum('heroRegions',   regions.length,      v => Math.round(v).toString(),       500);
+    }, 250);
+
+    /* ── Scroll spy: highlight current step in nav ── */
+    const stepIds = ['step-families','step-agg','step-drill','step-rec','step-browse','step-calc'];
+    const spyObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const btn = document.querySelector(`.nav-step-btn[data-step="${e.target.id}"]`);
+        if (btn) btn.classList.toggle('ns-active', e.isIntersecting);
+      });
+    }, { rootMargin: '-54px 0px -52% 0px', threshold: 0 });
+    stepIds.forEach(id => { const s = el(id); if (s) spyObs.observe(s); });
+
+    /* ── Back to top button ── */
+    window.addEventListener('scroll', () => {
+      el('backToTop')?.classList.toggle('btt-visible', window.scrollY > 500);
+    }, { passive: true });
+
   } catch (e) {
     el('loader').innerHTML =
       `<div style="text-align:center;padding:24px;color:#f87171">
@@ -1582,5 +1840,136 @@ async function boot() {
 
 boot();
 </script>
+
+  <!-- ── Site Footer ── -->
+  <footer class="site-footer">
+    <div class="footer-glow"></div>
+    <div class="footer-inner">
+
+      <div class="footer-grid">
+
+        <!-- Brand -->
+        <div>
+          <div class="footer-brand">EC2 <em>Advisor</em></div>
+          <p class="footer-tagline">
+            An interactive tool to score and rank AWS EC2 instance types
+            based on your workload priorities — price, CPU, memory, GPU, and network.
+          </p>
+          <div class="footer-badge">
+            <span class="footer-badge-dot"></span>
+            Live AWS Snapshot Data
+          </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div>
+          <div class="footer-section-title">Quick Navigation</div>
+          <ul class="footer-links">
+            <li><a href="#step-families" onclick="scrollToStep('step-families');return false;">
+              <span class="fl-icon">🏷️</span> Instance Families
+            </a></li>
+            <li><a href="#step-agg" onclick="scrollToStep('step-agg');return false;">
+              <span class="fl-icon">📊</span> Family Comparison
+            </a></li>
+            <li><a href="#step-drill" onclick="scrollToStep('step-drill');return false;">
+              <span class="fl-icon">⚙️</span> Set Priorities
+            </a></li>
+            <li><a href="#step-rec" onclick="scrollToStep('step-rec');return false;">
+              <span class="fl-icon">⭐</span> Top Recommendation
+            </a></li>
+            <li><a href="#step-browse" onclick="scrollToStep('step-browse');return false;">
+              <span class="fl-icon">🔍</span> Browse All
+            </a></li>
+            <li><a href="#step-calc" onclick="scrollToStep('step-calc');return false;">
+              <span class="fl-icon">💰</span> Cost Calculator
+            </a></li>
+          </ul>
+        </div>
+
+        <!-- Dataset Stats -->
+        <div>
+          <div class="footer-section-title">Dataset Info</div>
+          <div class="footer-stats">
+            <div class="footer-stat">
+              <span class="footer-stat-label">Instances</span>
+              <span class="footer-stat-val" id="footerInstances">—</span>
+            </div>
+            <div class="footer-stat">
+              <span class="footer-stat-label">Families</span>
+              <span class="footer-stat-val" id="footerFamilies">—</span>
+            </div>
+            <div class="footer-stat">
+              <span class="footer-stat-label">Regions</span>
+              <span class="footer-stat-val" id="footerRegions">—</span>
+            </div>
+            <div class="footer-stat">
+              <span class="footer-stat-label">Data Source</span>
+              <span class="footer-stat-val">AWS Snapshot</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div>
+          <div class="footer-section-title">Keyboard Shortcuts</div>
+          <div class="footer-kbds">
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">B</span>
+              <span class="footer-kbd-desc">Balanced preset</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">C</span>
+              <span class="footer-kbd-desc">Cost-first preset</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">P</span>
+              <span class="footer-kbd-desc">Performance preset</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">M</span>
+              <span class="footer-kbd-desc">ML / AI preset</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">← →</span>
+              <span class="footer-kbd-desc">Cycle AWS regions</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">/</span>
+              <span class="footer-kbd-desc">Focus search bar</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /footer-grid -->
+
+      <hr class="footer-divider">
+
+      <div class="footer-bottom">
+        <span class="footer-copy">
+          Built by <a href="https://github.com/varad-more" target="_blank" rel="noopener">Varad More</a> &nbsp;·&nbsp;
+          Data from the AWS public pricing API
+        </span>
+        <span class="footer-disclaimer">⚠️ Not affiliated with or endorsed by Amazon Web Services</span>
+      </div>
+
+    </div><!-- /footer-inner -->
+  </footer>
+
+</div><!-- /app -->
+
+<script>
+/* Mirror hero stat values into footer after boot */
+document.addEventListener('DOMContentLoaded', () => {
+  const sync = () => {
+    ['Instances','Families','Regions'].forEach(k => {
+      const src = document.getElementById('hero' + k);
+      const dst = document.getElementById('footer' + k);
+      if (src && dst && src.textContent !== '—') dst.textContent = src.textContent;
+    });
+  };
+  setTimeout(sync, 1200);
+});
+</script>
+
 </body>
 </html>

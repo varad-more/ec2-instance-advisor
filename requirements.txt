@@ -1,3 +1,0 @@
-# Runtime deps for scripts/fetch_aws_prices_once.py
-pandas==2.2.2
-numpy==1.26.4
