@@ -45,6 +45,7 @@
 
     <div>
       <div id="best" class="top"></div>
+      <div id="explain" class="top" style="background:#f9fff6;border-color:#d9f0cf"></div>
       <div id="chart" class="card" style="min-height: 390px;"></div>
       <div class="card" style="margin-top: 12px;">
         <h3 style="margin-top:0;">Top Candidates</h3>
@@ -81,6 +82,30 @@
       return values.map(v => reverse ? 1 - ((v-min)/(max-min)) : (v-min)/(max-min));
     }
 
+
+    function useCaseFromWorkload(tag) {
+      if (tag === 'compute') return 'CPU-heavy services, build runners, game servers, encoding jobs';
+      if (tag === 'memory') return 'In-memory caches, analytics engines, JVM services with large heaps';
+      return 'Balanced web apps, APIs, microservices, and general-purpose workloads';
+    }
+
+    function explainWhy(best, rows) {
+      const cheapest = rows.reduce((a,b)=> a.price_usd_hour < b.price_usd_hour ? a : b);
+      const strongest = rows.reduce((a,b)=> (a.vcpus+a.memory_gib+a.network_score) > (b.vcpus+b.memory_gib+b.network_score) ? a : b);
+      const priceDelta = ((best.price_usd_hour - cheapest.price_usd_hour)/cheapest.price_usd_hour)*100;
+      const perfBest = best.vcpus*0.45 + best.memory_gib*0.35 + best.network_score*0.2;
+      const perfStrong = strongest.vcpus*0.45 + strongest.memory_gib*0.35 + strongest.network_score*0.2;
+      const perfGap = ((perfStrong - perfBest)/Math.max(perfStrong, 1))*100;
+
+      const bits = [];
+      bits.push(`<b>Best fit for:</b> ${useCaseFromWorkload(best.workload_tag)}.`);
+      bits.push(`<b>Why this was picked:</b> it balances cost and performance under your weight settings.`);
+      bits.push(`<b>Cost position:</b> ${priceDelta <= 1 ? 'near-cheapest' : `${priceDelta.toFixed(1)}% above the cheapest option`} in this filtered set.`);
+      bits.push(`<b>Performance position:</b> within ${perfGap.toFixed(1)}% of the strongest candidate here.`);
+      bits.push(`<b>Specs:</b> ${best.vcpus} vCPU, ${best.memory_gib} GiB RAM, network score ${best.network_score}.`);
+      return bits.join(' ');
+    }
+
     function render() {
       sliders.forEach(s => el(s+'Val').textContent = el(s).value);
 
@@ -110,6 +135,7 @@
 
       const best = rows[0];
       el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
+      el('explain').innerHTML = explainWhy(best, rows);
 
       Plotly.newPlot('chart', [{
         x: rows.map(r=>r.price_usd_hour),

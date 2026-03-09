@@ -12,6 +12,7 @@ This project provides a simple scoring engine + Streamlit UI to guide users towa
 - Region + workload filters
 - Weight sliders (price vs CPU vs memory vs network)
 - Composite score ranking
+- Automatic best-fit explainer card (why this instance is recommended)
 - Interactive scatter plot (price vs performance)
 - Quick recommendations and top candidates table
 
