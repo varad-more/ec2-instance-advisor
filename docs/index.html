@@ -6,524 +6,1509 @@
   <title>EC2 Instance Advisor</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
+    /* ── Design tokens ─────────────────────────────── */
     :root {
-      --bg: #f5f8ff;
-      --card: #ffffff;
-      --ink: #101828;
-      --muted: #667085;
-      --line: #e3eafc;
-      --accent: #3b82f6;
-      --accent-2: #1d4ed8;
-      --success-bg: #effaf3;
-      --success-line: #b8e6c4;
-      --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
-      --radius: 14px;
+      --bg:        #eef2ff;
+      --card:      #ffffff;
+      --ink:       #0f172a;
+      --ink-2:     #1e293b;
+      --muted:     #64748b;
+      --line:      #e2e8f0;
+      --accent:    #4f46e5;
+      --accent-lt: #818cf8;
+      --accent-bg: #eef2ff;
+      --success:   #059669;
+      --warn:      #d97706;
+      --sh-sm: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+      --sh:    0 4px 20px rgba(15,23,42,.08);
+      --sh-lg: 0 12px 40px rgba(15,23,42,.13);
+      --r: 14px; --r-sm: 8px;
+      --cpu-c:#3b82f6; --cpu-bg:#eff6ff;
+      --gpu-c:#8b5cf6; --gpu-bg:#f5f3ff;
+      --mem-c:#10b981; --mem-bg:#ecfdf5;
+      --sto-c:#f59e0b; --sto-bg:#fffbeb;
+      --gen-c:#6b7280; --gen-bg:#f9fafb;
     }
-
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--ink);
-      background: radial-gradient(circle at 0% 0%, #eef4ff 0%, var(--bg) 46%, #f8faff 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                   'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--ink); background: var(--bg);
+      min-height: 100vh; -webkit-font-smoothing: antialiased;
     }
 
-    .page {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 22px 16px 28px;
+    /* ── Loader ─────────────────────────────────────── */
+    #loader {
+      position: fixed; inset: 0; background: var(--bg); z-index: 999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
     }
-
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid #c7d2fe; border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .7s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loader p { color: var(--muted); font-size: 14px; }
 
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+    /* ── Toast ───────────────────────────────────────── */
+    #toastShelf {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+      align-items: center; pointer-events: none;
     }
+    .toast {
+      background: var(--ink); color: #fff;
+      padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: var(--sh-lg);
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .22s ease, transform .22s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
 
-    .muted { color: var(--muted); margin: 6px 0 0; font-size: 14px; }
+    /* ── Page ────────────────────────────────────────── */
+    #app { max-width: 1360px; margin: 0 auto; padding: 20px 16px 52px; opacity: 0; }
 
-    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    /* ── Header ──────────────────────────────────────── */
+    .hdr {
+      display: flex; flex-wrap: wrap;
+      justify-content: space-between; align-items: flex-end;
+      gap: 12px; margin-bottom: 22px;
+      padding-bottom: 16px; border-bottom: 1px solid #c7d2fe;
+    }
+    .hdr-title {
+      font-size: 28px; font-weight: 900;
+      letter-spacing: -.04em; line-height: 1;
+    }
+    .hdr-title em { font-style: normal; color: var(--accent); }
+    .hdr-sub { color: var(--muted); font-size: 13px; margin-top: 5px; }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .chip {
-      display: inline-block;
-      font-size: 12px;
-      color: #1849a9;
-      background: #eaf2ff;
-      border: 1px solid #cfe0ff;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-weight: 600;
+      font-size: 11px; font-weight: 700; letter-spacing: .03em;
+      color: var(--accent); background: var(--accent-bg);
+      border: 1px solid #c7d2fe; border-radius: 999px; padding: 4px 10px;
     }
+    .hdr-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; letter-spacing: .03em;
+      color: var(--accent); background: var(--accent-bg);
+      border: 1px solid #c7d2fe; border-radius: 999px;
+      padding: 4px 12px; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .hdr-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
+    .sb-toggle {
+      display: none; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #fff; border: 1px solid var(--line); cursor: pointer;
+      font-size: 18px; color: var(--muted); box-shadow: var(--sh-sm);
+      transition: background .15s;
+    }
+    .sb-toggle:hover { background: var(--accent-bg); color: var(--accent); }
+    @media (max-width: 1060px) { .sb-toggle { display: flex; } }
 
+    /* ── Layout ──────────────────────────────────────── */
     .layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 16px;
-      align-items: start;
+      display: grid; grid-template-columns: 290px 1fr;
+      gap: 16px; align-items: start;
     }
+    @media (max-width: 1060px) { .layout { grid-template-columns: 1fr; } }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px;
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar { display: flex; flex-direction: column; gap: 0; padding: 0; }
+    @media (max-width: 1060px) {
+      .sidebar {
+        display: none; position: fixed; inset: 0; z-index: 100;
+        overflow-y: auto; border-radius: 0;
+        box-shadow: var(--sh-lg); padding: 0;
+      }
+      .sidebar.open { display: flex; }
     }
-
-    .section-title {
-      margin: 0 0 8px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #0f172a;
+    .sb-sec { padding: 14px 16px; }
+    .sb-div { height: 1px; background: var(--line); }
+    .sb-close {
+      display: none; position: absolute; top: 12px; right: 12px;
+      width: 32px; height: 32px; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; color: var(--muted);
+      background: #fff; border: 1px solid var(--line); border-radius: 8px;
     }
+    @media (max-width: 1060px) { .sidebar { position: fixed; } .sb-close { display: flex; } }
 
-    label {
-      display: block;
-      font-size: 13px;
-      margin: 10px 0 6px;
-      color: #334155;
-      font-weight: 600;
+    .sec-title {
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin-bottom: 12px;
     }
-
-    select, input[type='range'], button {
-      width: 100%;
-    }
-
+    label { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 5px; }
     select {
-      border: 1px solid #d7e3ff;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 14px;
-      background: #fff;
-      color: #0f172a;
+      width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm);
+      padding: 8px 10px; font-size: 13px; background: #fff; color: var(--ink); cursor: pointer;
+      transition: border-color .15s;
+    }
+    select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+    /* Region row */
+    .region-row { display: grid; grid-template-columns: 30px 1fr 30px; gap: 5px; align-items: center; }
+    .icon-btn {
+      width: 30px; height: 30px; border: 1px solid var(--line);
+      background: #fff; border-radius: 7px; cursor: pointer;
+      font-size: 15px; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); transition: all .15s; flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: #a5b4fc; }
+    .icon-btn:active { transform: scale(.92); }
+    .region-hint { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+    .kbd-hint { font-size: 10px; opacity: .6; margin-left: 4px; }
+    kbd {
+      display: inline-block; font-size: 9.5px; font-family: inherit;
+      background: rgba(0,0,0,.07); border: 1px solid rgba(0,0,0,.12);
+      border-radius: 4px; padding: 1px 4px;
     }
 
-    input[type='range'] { accent-color: var(--accent); }
+    /* Preset grid */
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .preset-btn {
+      border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+      padding: 8px 6px; border-radius: var(--r-sm);
+      font-size: 11px; font-weight: 700; cursor: pointer;
+      text-align: center; transition: all .15s; line-height: 1.3;
+    }
+    .preset-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: #a5b4fc; }
+    .preset-btn:active { transform: scale(.96); }
+    .preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    /* Sliders */
+    .slider-row { margin-bottom: 10px; }
+    .sl-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .sl-hd span { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+    .sl-val {
+      font-size: 11px; font-weight: 800; padding: 2px 7px;
+      border-radius: 5px; min-width: 36px; text-align: center;
+      transition: background .2s, color .2s;
+    }
+    input[type='range'] { width: 100%; cursor: pointer; accent-color: var(--accent); }
 
-    button {
-      border: 1px solid #cfe0ff;
-      background: #eff5ff;
-      color: #1849a9;
-      padding: 9px 10px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
+    /* Weight bar */
+    .wbar-wrap { margin-top: 12px; }
+    .wbar-hd { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); margin-bottom: 5px; }
+    #weightBar { height: 7px; border-radius: 999px; overflow: hidden; background: var(--line); display: flex; }
+    .wb-seg { height: 100%; transition: width .25s ease; }
+
+    /* Type guide */
+    .type-grid { display: grid; grid-template-columns: 1fr; gap: 7px; }
+    .type-item { padding: 9px 11px; border-radius: var(--r-sm); border: 1px solid var(--line); }
+    .type-item b { display: block; font-size: 12px; margin-bottom: 2px; }
+    .type-item span { font-size: 11.5px; color: #475569; }
+
+    /* Keyboard shortcuts panel */
+    .kbd-panel { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; }
+    .kbd-panel kbd { font-size: 10px; }
+    .kbd-panel span { font-size: 11.5px; color: var(--muted); }
+
+    /* ── Cards ───────────────────────────────────────── */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); padding: 16px; }
+
+    /* ── Main column ─────────────────────────────────── */
+    .main { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── Rec hero ────────────────────────────────────── */
+    .rec-hero {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: var(--r); box-shadow: var(--sh-lg); overflow: hidden;
+    }
+    .rec-hero-accent { height: 4px; transition: background .35s; }
+    .rec-hero-inner { display: grid; grid-template-columns: 1fr 210px; }
+    .rec-hero-left { padding: 20px 22px; border-right: 1px solid var(--line); }
+    .rec-hero-right {
+      padding: 20px 16px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+      background: linear-gradient(160deg, #fafbff 0%, #eef2ff 100%);
+    }
+    .rec-hero.error-state .rec-hero-accent { background: #ef4444 !important; }
+    .rec-hero.error-state .rec-hero-left   { background: #fff8f8; }
+    .rec-hero.error-state .rec-hero-right  { display: none; }
+
+    .rec-eyebrow {
+      font-size: 10px; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .copy-rec-btn {
+      background: var(--accent-bg); border: 1px solid #c7d2fe; color: var(--accent);
+      padding: 4px 11px; border-radius: var(--r-sm);
+      font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap;
+      transition: background .15s, border-color .15s;
+    }
+    .copy-rec-btn:hover { background: #e0e7ff; border-color: #a5b4fc; }
+    .copy-rec-btn:active { transform: scale(.96); }
+
+    .rec-name {
+      font-size: 34px; font-weight: 900; letter-spacing: -.04em;
+      line-height: 1; color: var(--ink); margin-bottom: 10px;
+    }
+    .rec-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .rtag { border-radius: 6px; padding: 3px 10px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--line); color: var(--ink-2); background: var(--bg); }
+
+    .rec-stats {
+      display: flex; border: 1px solid var(--line);
+      border-radius: var(--r-sm); overflow: hidden;
+    }
+    .rec-stat {
+      flex: 1; min-width: 0; padding: 10px 8px; text-align: center;
+      border-right: 1px solid var(--line); transition: background .15s;
+    }
+    .rec-stat:last-child { border-right: none; }
+    .rec-stat:hover { background: var(--accent-bg); }
+    .rec-stat-val { font-size: 14px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rec-stat-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: 3px; }
+    .rec-why { font-size: 11.5px; color: var(--muted); line-height: 1.65; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .rec-why b { color: var(--ink-2); }
+
+    /* Score ring (right panel) */
+    .score-ring-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
+    .score-ring-val  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-ring-num  { font-size: 22px; font-weight: 900; letter-spacing: -.04em; color: var(--ink); line-height: 1; }
+    .score-ring-sub  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: 2px; }
+    .rec-rank-txt { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.6; }
+    .rec-rank-txt strong { display: block; font-size: 16px; font-weight: 900; color: var(--ink); }
+    .rec-cat-label {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; padding: 4px 10px;
+      border-radius: 999px; border: 1px solid transparent;
     }
 
-    button:hover { background: #e7f0ff; }
-
-    .summary {
-      margin: 0 0 10px;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #d7e7ff;
-      background: #f5f9ff;
-      font-size: 14px;
+    @media (max-width: 700px) {
+      .rec-hero-inner { grid-template-columns: 1fr; }
+      .rec-hero-left  { border-right: none; }
+      .rec-hero-right { flex-direction: row; justify-content: flex-start; border-top: 1px solid var(--line); padding: 14px 22px; }
+      .rec-name { font-size: 26px; }
     }
 
-    .summary.good {
-      background: var(--success-bg);
-      border-color: var(--success-line);
+    /* ── Mobile filter FAB ───────────────────────────── */
+    #filterFab {
+      display: none; position: fixed; bottom: 22px; right: 18px; z-index: 200;
+      background: var(--accent); color: #fff; border: none; border-radius: 999px;
+      padding: 12px 18px 12px 14px; font-size: 13px; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(79,70,229,.45); cursor: pointer;
+      align-items: center; gap: 7px; line-height: 1;
+      transition: transform .15s, box-shadow .15s;
+    }
+    #filterFab:active { transform: scale(.95); }
+    @media (max-width: 1060px) { #filterFab { display: flex; } }
+
+    /* ── Section label ───────────────────────────────── */
+    .section-label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin: 4px 0 -4px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--line);
     }
 
-    .error {
-      background: #fff2f2;
-      border-color: #ffcaca;
+    /* ── Family filter pills ─────────────────────────── */
+    .family-filter-bar {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      padding: 8px 14px 10px; border-bottom: 1px solid var(--line);
+      background: #fafbff;
+    }
+    .family-filter-lbl {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin-right: 2px; flex-shrink: 0;
+    }
+    .family-pill {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; border: 1px solid var(--line);
+      background: #fff; color: var(--muted);
+      cursor: pointer; transition: all .15s; user-select: none;
+    }
+    .family-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+    .family-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .family-pill.pill-all.active { background: var(--ink); border-color: var(--ink); }
+
+    /* ── Instance comparison panel ───────────────────── */
+    .cmp-panel {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: var(--r); box-shadow: var(--sh);
+      overflow: hidden; display: none;
+    }
+    .cmp-panel.visible { display: block; }
+    .cmp-hd {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 16px; border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #f0f4ff 0%, #eef2ff 100%);
+    }
+    .cmp-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .cmp-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .cmp-close {
+      width: 26px; height: 26px; border-radius: 6px;
+      border: 1px solid var(--line); background: #fff; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); transition: all .15s; flex-shrink: 0;
+    }
+    .cmp-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+    .cmp-body { display: grid; grid-template-columns: 200px 1fr; }
+    .cmp-specs {
+      padding: 14px 16px; border-right: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .cmp-spec-lbl { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
+    .cmp-spec-val { font-size: 15px; font-weight: 800; color: var(--ink); }
+    .cmp-spec-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+    @media (max-width: 768px) {
+      .cmp-body { grid-template-columns: 1fr; }
+      .cmp-specs { border-right: none; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; gap: 10px 20px; }
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+    /* ── KPI strip ───────────────────────────────────── */
+    .kpi-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+    .kpi {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--r-sm);
+      padding: 13px 14px; box-shadow: var(--sh-sm); position: relative; overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
     }
-
-    .chart {
-      min-height: 380px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: #fff;
-      padding: 8px;
+    .kpi:hover { box-shadow: var(--sh); transform: translateY(-1px); }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: var(--r-sm) var(--r-sm) 0 0;
     }
+    .kpi:nth-child(1)::before { background: var(--accent); }
+    .kpi:nth-child(2)::before { background: var(--success); }
+    .kpi:nth-child(3)::before { background: #f59e0b; }
+    .kpi:nth-child(4)::before { background: #8b5cf6; }
+    .kpi-lbl { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
+    .kpi-val { font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -.02em; line-height: 1; }
+    .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      border: 1px solid #e7ecfb;
-      border-radius: 10px;
-      overflow: hidden;
+    /* ── Charts ──────────────────────────────────────── */
+    .charts-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .chart-card {
+      background: #fff; border: 1px solid var(--line);
+      border-radius: var(--r); box-shadow: var(--sh); overflow: hidden;
     }
+    .chart-hd { padding: 12px 14px 10px; border-bottom: 1px solid var(--line); }
+    .chart-title { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+    .chart-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .chart-body { padding: 4px; }
+    .bar-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 10px 14px 10px; border-bottom: 1px solid var(--line);
+    }
+    .bar-hd-r { display: flex; align-items: center; gap: 8px; }
+    .bar-hd-r label { margin: 0; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+    .bar-hd-r select { width: auto; padding: 5px 8px; font-size: 12px; }
 
+    /* ── Table ───────────────────────────────────────── */
+    .table-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; border-bottom: 1px solid var(--line);
+    }
+    .table-search {
+      flex: 1; border: 1px solid var(--line); border-radius: var(--r-sm);
+      padding: 7px 12px 7px 32px; font-size: 12px; color: var(--ink);
+      background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%2394a3b8' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      transition: border-color .15s;
+    }
+    .table-search:focus { outline: none; border-color: var(--accent); background-color: #fff; }
+    .table-count { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .table-wrap { max-height: 400px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead th {
-      background: #f3f7ff;
-      color: #1f2937;
-      font-weight: 700;
-      border-bottom: 1px solid #e0e8ff;
-      padding: 10px 8px;
-      text-align: left;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+      background: #f8fafc; color: var(--muted);
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 1px solid var(--line); padding: 9px 10px; text-align: left;
+      position: sticky; top: 0; z-index: 2;
     }
-
-    td {
-      border-bottom: 1px solid #edf2ff;
-      padding: 9px 8px;
-      color: #243244;
+    td { border-bottom: 1px solid #f1f5f9; padding: 8px 10px; color: var(--ink-2); }
+    tbody tr { transition: background .12s; }
+    tbody tr:hover { background: #f1f5f9; }
+    tbody tr.rank-1 td { background: #fefce8; }
+    tbody tr.rank-1:hover td { background: #fef9c3; }
+    .cat-pill {
+      font-size: 10.5px; font-weight: 700; padding: 2px 8px;
+      border-radius: 999px; display: inline-block; white-space: nowrap;
     }
+    .score-cell { display: flex; align-items: center; gap: 6px; }
+    .score-bar { height: 4px; border-radius: 999px; flex-shrink: 0; transition: width .35s ease; }
+    .score-num { font-size: 11px; font-weight: 800; }
 
-    tbody tr:nth-child(even) { background: #fbfcff; }
-    tbody tr:hover { background: #f2f7ff; }
+    /* ── Calculator ──────────────────────────────────── */
+    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    .calc-input-wrap label { font-size: 11px; margin-bottom: 4px; }
+    .calc-inp {
+      width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm);
+      padding: 8px 10px; font-size: 13px; color: var(--ink); transition: border-color .15s;
+    }
+    .calc-inp:focus { outline: none; border-color: var(--accent); }
+    .calc-result {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+      padding: 14px; border-radius: var(--r-sm); background: var(--accent-bg); border: 1px solid #c7d2fe;
+    }
+    .cr-item { text-align: center; }
+    .cr-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; }
+    .cr-val { font-size: 20px; font-weight: 900; color: var(--accent); transition: color .2s; }
+    .cr-val.dark { color: var(--ink); }
 
-    .table-wrap { max-height: 360px; overflow: auto; border-radius: 10px; }
+    /* ── Guide ───────────────────────────────────────── */
+    details summary {
+      cursor: pointer; list-style: none; display: flex;
+      align-items: center; justify-content: space-between;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after { content: '▸'; font-size: 12px; color: var(--muted); transition: transform .2s; }
+    details[open] summary::after { transform: rotate(90deg); }
+    .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .guide-item { padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: #fafbff; }
+    .guide-step { font-size: 10.5px; font-weight: 800; color: var(--accent); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
+    .guide-txt { font-size: 12px; color: #475569; line-height: 1.55; }
 
-    ul { margin: 8px 0; padding-left: 18px; }
-    li { margin: 5px 0; color: #334155; }
+    /* ── Animations ──────────────────────────────────── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp .38s ease both; }
+    .fade-up-1 { animation: fadeUp .38s .06s ease both; }
+    .fade-up-2 { animation: fadeUp .38s .12s ease both; }
+    .fade-up-3 { animation: fadeUp .38s .18s ease both; }
+    .fade-up-4 { animation: fadeUp .38s .24s ease both; }
+    .fade-up-5 { animation: fadeUp .38s .30s ease both; }
+    .fade-up-6 { animation: fadeUp .38s .36s ease both; }
 
-    .small { font-size: 12px; color: var(--muted); }
-
-    @media (max-width: 980px) {
-      #calcOut{font-size:13px;}
-      .layout { grid-template-columns: 1fr; }
-      .page { padding: 14px 10px 24px; }
-      h1 { font-size: 24px; }
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 1060px) {
+      .charts-2 { grid-template-columns: 1fr; }
+      .kpi-strip { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 640px) {
+      .kpi-strip { grid-template-columns: repeat(2,1fr); }
+      .calc-grid { grid-template-columns: 1fr 1fr; }
+      .calc-result { grid-template-columns: 1fr; }
+      .guide-grid { grid-template-columns: 1fr; }
+      .rec-name { font-size: 22px; }
+      .hdr-title { font-size: 22px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="header">
+
+<div id="toastShelf"></div>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="spinner"></div>
+  <p>Loading EC2 dataset…</p>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Header -->
+  <header class="hdr">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="sb-toggle" id="sbToggle" title="Toggle filters" onclick="toggleSidebar()">☰</button>
       <div>
-        <h1>EC2 Instance Advisor</h1>
-        <p class="muted">Production-ready static advisor using one-time AWS snapshot data.</p>
-      </div>
-      <div class="chip-row">
-        <span class="chip">AWS Snapshot</span>
-        <span class="chip">GitHub Pages</span>
-        <span class="chip">Cost vs Performance</span>
+        <div class="hdr-title">EC2 Instance <em>Advisor</em></div>
+        <p class="hdr-sub">Not sure which EC2 instance to pick? Set your priorities → get a ranked recommendation instantly.</p>
       </div>
     </div>
+    <div class="chip-row">
+      <span class="chip">AWS Snapshot</span>
+      <span class="chip">GitHub Pages</span>
+      <button class="hdr-btn" onclick="shareURL()">🔗 Share</button>
+    </div>
+  </header>
 
-    <div class="layout">
-      <aside class="card">
-        <h3 class="section-title">Filters & Controls</h3>
+  <div class="layout">
 
-        <label>Region (with pagination)</label>
-        <div class="btn-row">
-          <button id="prevRegion" type="button">◀ Prev</button>
-          <button id="nextRegion" type="button">Next ▶</button>
+    <!-- ── Sidebar ── -->
+    <aside class="card sidebar" id="sidebar">
+      <button class="sb-close" id="sbClose" onclick="toggleSidebar()">✕</button>
+
+      <!-- Filters -->
+      <div class="sb-sec">
+        <div class="sec-title">Filters</div>
+        <div style="margin-bottom:12px">
+          <label>
+            Region
+            <span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd> to cycle</span>
+          </label>
+          <div class="region-row">
+            <button class="icon-btn" id="prevRegion" title="Prev region (←)">‹</button>
+            <select id="region"></select>
+            <button class="icon-btn" id="nextRegion" title="Next region (→)">›</button>
+          </div>
+          <div class="region-hint" id="regionPage"></div>
         </div>
-        <select id="region"></select>
-        <div class="small" id="regionPage" style="margin-top:6px"></div>
-
-        <label>Category filter (CPU / GPU / Memory / Storage / General)</label>
-        <select id="category"></select>
-
-        <label>2nd Graph Metric (Y-axis)</label>
-        <select id="metric">
-          <option value="vcpus">vCPUs</option>
-          <option value="memory_gib">Memory (GiB)</option>
-          <option value="gpu_count">GPU Count</option>
-          <option value="network_score">Network Score</option>
-          <option value="price_usd_hour">Price (USD/hr)</option>
-        </select>
-
-        <label>Price importance: <span id="wPriceVal">35</span>%</label>
-        <input id="wPrice" type="range" min="0" max="100" value="35" />
-
-        <label>CPU importance: <span id="wCpuVal">25</span>%</label>
-        <input id="wCpu" type="range" min="0" max="100" value="25" />
-
-        <label>Memory importance: <span id="wMemVal">20</span>%</label>
-        <input id="wMem" type="range" min="0" max="100" value="20" />
-
-        <label>Network importance: <span id="wNetVal">10</span>%</label>
-        <input id="wNet" type="range" min="0" max="100" value="10" />
-
-        <label>GPU importance: <span id="wGpuVal">10</span>%</label>
-        <input id="wGpu" type="range" min="0" max="100" value="10" />
-      </aside>
-
-      <main class="grid-2">
-        <div id="best" class="summary"></div>
-        <div id="explain" class="summary good"></div>
-
-        <div class="card">
-          <h3 class="section-title">Instance Type Guide</h3>
-          <div id="types"></div>
+        <div>
+          <label>Category</label>
+          <select id="category"></select>
         </div>
+      </div>
 
-        <div id="chart" class="chart"></div>
-        <div id="chart2" class="chart"></div>
+      <div class="sb-div"></div>
 
-        <div class="card">
-          <h3 class="section-title">How to choose the right EC2 instance</h3>
-          <ul>
-            <li><b>Step 1 — Choose workload type:</b> CPU for compute-heavy jobs, GPU for ML/AI, Memory for large RAM workloads, Storage for high-IOPS, General for balanced apps.</li>
-            <li><b>Step 2 — Pick region:</b> Keep compute close to users/data to reduce latency and often cost.</li>
-            <li><b>Step 3 — Set priorities:</b> Increase Price weight for cost control; increase CPU/Memory/Network/GPU weights for performance-critical workloads.</li>
-            <li><b>Step 4 — Read the graphs:</b> Scatter compares cost vs performance. Bar chart compares instance-level metrics directly.</li>
-            <li><b>Step 5 — Validate in production:</b> Benchmark and monitor utilization before finalizing the instance type.</li>
-          </ul>
+      <!-- Presets -->
+      <div class="sb-sec">
+        <div class="sec-title">
+          Weight Presets
+          <span class="kbd-hint"><kbd>B</kbd><kbd>C</kbd><kbd>P</kbd><kbd>M</kbd></span>
         </div>
+        <div class="preset-grid">
+          <button class="preset-btn" id="pr-balanced"    onclick="setPreset('balanced')">⚖️ Balanced</button>
+          <button class="preset-btn" id="pr-cost"        onclick="setPreset('cost')">💰 Cost First</button>
+          <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
+          <button class="preset-btn" id="pr-ml"          onclick="setPreset('ml')">🤖 ML / AI</button>
+        </div>
+      </div>
 
-        
-        <div class="card">
-          <h3 class="section-title">Pricing Calculator</h3>
-          <div style="display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;">
-            <div>
-              <label style="margin-top:0">Hours / month</label>
-              <input id="calcHours" type="number" min="1" value="730" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+      <div class="sb-div"></div>
+
+      <!-- Sliders -->
+      <div class="sb-sec">
+        <div class="sec-title">Scoring Weights</div>
+        <div class="slider-row">
+          <div class="sl-hd">
+            <span>💵 Price</span>
+            <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">35</span>
+          </div>
+          <input id="wPrice" type="range" min="0" max="100" value="35" />
+        </div>
+        <div class="slider-row">
+          <div class="sl-hd">
+            <span>⚙️ CPU</span>
+            <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">25</span>
+          </div>
+          <input id="wCpu" type="range" min="0" max="100" value="25" />
+        </div>
+        <div class="slider-row">
+          <div class="sl-hd">
+            <span>🧠 Memory</span>
+            <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">20</span>
+          </div>
+          <input id="wMem" type="range" min="0" max="100" value="20" />
+        </div>
+        <div class="slider-row">
+          <div class="sl-hd">
+            <span>🌐 Network</span>
+            <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">10</span>
+          </div>
+          <input id="wNet" type="range" min="0" max="100" value="10" />
+        </div>
+        <div class="slider-row">
+          <div class="sl-hd">
+            <span>🎮 GPU</span>
+            <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">10</span>
+          </div>
+          <input id="wGpu" type="range" min="0" max="100" value="10" />
+        </div>
+        <div class="wbar-wrap">
+          <div class="wbar-hd">
+            <span>Distribution</span>
+            <span id="weightTotal" style="font-weight:800">100%</span>
+          </div>
+          <div id="weightBar">
+            <div class="wb-seg" id="wb-price" style="background:#3b82f6"></div>
+            <div class="wb-seg" id="wb-cpu"   style="background:#60a5fa"></div>
+            <div class="wb-seg" id="wb-mem"   style="background:#10b981"></div>
+            <div class="wb-seg" id="wb-net"   style="background:#34d399"></div>
+            <div class="wb-seg" id="wb-gpu"   style="background:#8b5cf6"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-div"></div>
+
+      <!-- Keyboard shortcuts -->
+      <div class="sb-sec">
+        <div class="sec-title">Keyboard Shortcuts</div>
+        <div class="kbd-panel">
+          <kbd>← →</kbd> <span>Cycle region</span>
+          <kbd>B</kbd>   <span>Preset: Balanced</span>
+          <kbd>C</kbd>   <span>Preset: Cost First</span>
+          <kbd>P</kbd>   <span>Preset: Performance</span>
+          <kbd>M</kbd>   <span>Preset: ML / AI</span>
+          <kbd>/</kbd>   <span>Focus table search</span>
+        </div>
+      </div>
+
+      <div class="sb-div"></div>
+
+      <!-- Instance type guide -->
+      <div class="sb-sec">
+        <details>
+          <summary>
+            <span class="sec-title" style="margin:0">Instance Type Guide</span>
+          </summary>
+          <div class="type-grid" id="types" style="margin-top:10px"></div>
+        </details>
+      </div>
+
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="main">
+
+      <!-- KPI strip -->
+      <div class="kpi-strip fade-up-1">
+        <div class="kpi">
+          <div class="kpi-lbl">Matched Instances</div>
+          <div class="kpi-val" id="kpiCount">—</div>
+          <div class="kpi-sub" id="kpiCountSub"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Cheapest in Filter</div>
+          <div class="kpi-val" id="kpiCheap">—</div>
+          <div class="kpi-sub" id="kpiCheapSub"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Best Raw Performance</div>
+          <div class="kpi-val" id="kpiBestPerf">—</div>
+          <div class="kpi-sub" id="kpiBestPerfSub"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Best Value (perf/$)</div>
+          <div class="kpi-val" id="kpiBestVal">—</div>
+          <div class="kpi-sub" id="kpiBestValSub"></div>
+        </div>
+      </div>
+
+      <!-- Scatter + Radar -->
+      <div class="charts-2 fade-up-2">
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="chart-title">Instance Spec Comparison</div>
+            <div class="chart-sub">vCPUs · RAM (GiB) · Cost ($/hr) — filter by instance family</div>
+          </div>
+          <div class="family-filter-bar" id="familyFilter"></div>
+          <div class="chart-body" id="chart" style="height:300px"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="chart-title">Dimension Radar — Top 5</div>
+            <div class="chart-sub">Normalized [0–1] scores across all five dimensions</div>
+          </div>
+          <div class="chart-body" id="chart3" style="height:320px"></div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="chart-card fade-up-3">
+        <div class="bar-hd">
+          <div>
+            <div class="chart-title">Instance Comparison — Top 10</div>
+            <div class="chart-sub">Select a metric to compare side-by-side</div>
+          </div>
+          <div class="bar-hd-r">
+            <label>Metric:</label>
+            <select id="metric">
+              <option value="vcpus">vCPUs</option>
+              <option value="memory_gib">Memory (GiB)</option>
+              <option value="gpu_count">GPU Count</option>
+              <option value="network_score">Network Score</option>
+              <option value="price_usd_hour">Price (USD/hr)</option>
+              <option value="composite">Composite Score</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-body" id="chart2" style="height:290px"></div>
+      </div>
+
+      <!-- Regional price chart -->
+      <div class="chart-card fade-up-4">
+        <div class="chart-hd">
+          <div class="chart-title" id="regionalTitle">Regional Price Comparison</div>
+          <div class="chart-sub">Top recommendation's on-demand price across all available regions</div>
+        </div>
+        <div class="chart-body" id="chart4" style="height:240px"></div>
+      </div>
+
+      <!-- Calculator -->
+      <div class="card fade-up-5">
+        <div class="sec-title">Pricing Calculator</div>
+        <div class="calc-grid">
+          <div class="calc-input-wrap">
+            <label>Hours / month</label>
+            <input id="calcHours" class="calc-inp" type="number" min="1" value="730" />
+          </div>
+          <div class="calc-input-wrap">
+            <label>Instance count</label>
+            <input id="calcCount" class="calc-inp" type="number" min="1" value="1" />
+          </div>
+          <div class="calc-input-wrap">
+            <label>Storage (GB)</label>
+            <input id="calcStorageGb" class="calc-inp" type="number" min="0" value="0" />
+          </div>
+          <div class="calc-input-wrap">
+            <label>Storage $/GB-mo</label>
+            <input id="calcStorageRate" class="calc-inp" type="number" min="0" step="0.001" value="0.08" />
+          </div>
+        </div>
+        <div class="calc-result">
+          <div class="cr-item">
+            <div class="cr-lbl">Compute / mo</div>
+            <div class="cr-val" id="crCompute">—</div>
+          </div>
+          <div class="cr-item">
+            <div class="cr-lbl">Total / mo</div>
+            <div class="cr-val" id="crTotal">—</div>
+          </div>
+          <div class="cr-item">
+            <div class="cr-lbl">Annual estimate</div>
+            <div class="cr-val dark" id="crAnnual">—</div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px">
+          Uses top recommendation's price. Storage is optional (e.g. gp3 ≈ $0.08/GB-mo).
+        </p>
+      </div>
+
+      <!-- Table -->
+      <div class="card fade-up-5" style="padding:0;overflow:hidden">
+        <div class="table-toolbar">
+          <div class="sec-title" style="margin:0;white-space:nowrap">Top Candidates</div>
+          <input type="search" id="tableSearch" class="table-search" placeholder="Search instances, categories, regions…" />
+          <span class="table-count" id="tableCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="table"></table>
+        </div>
+      </div>
+
+      <!-- Guide -->
+      <div class="card fade-up-6">
+        <details open>
+          <summary>
+            <span class="sec-title" style="margin:0">How to choose the right instance</span>
+          </summary>
+          <div class="guide-grid">
+            <div class="guide-item">
+              <div class="guide-step">Step 1 — Workload type</div>
+              <div class="guide-txt">CPU for builds &amp; APIs, GPU for ML/AI, Memory for large caches &amp; JVM, Storage for high-IOPS NVMe, General for balanced apps.</div>
             </div>
-            <div>
-              <label style="margin-top:0">Instance count</label>
-              <input id="calcCount" type="number" min="1" value="1" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            <div class="guide-item">
+              <div class="guide-step">Step 2 — Pick region</div>
+              <div class="guide-txt">Keep compute close to users and data. Use the Regional Price chart to compare costs across AWS regions.</div>
             </div>
-            <div>
-              <label style="margin-top:0">Storage (GB)</label>
-              <input id="calcStorageGb" type="number" min="0" value="0" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            <div class="guide-item">
+              <div class="guide-step">Step 3 — Use presets</div>
+              <div class="guide-txt">Jump-start with Balanced, Cost First, Performance, or ML/AI — then fine-tune sliders for your exact priorities.</div>
             </div>
-            <div>
-              <label style="margin-top:0">Storage $/GB-mo</label>
-              <input id="calcStorageRate" type="number" min="0" step="0.001" value="0.08" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            <div class="guide-item">
+              <div class="guide-step">Step 4 — Read the charts</div>
+              <div class="guide-txt">Line chart = price-performance curves per category. Radar = dimension strengths of top 5. Bar = metric comparison. Regional = cheapest region for #1. Click any table row to see a detailed comparison.</div>
+            </div>
+            <div class="guide-item">
+              <div class="guide-step">Step 5 — Check the score breakdown</div>
+              <div class="guide-txt">Bars in the recommendation card show each dimension's raw normalized score — see exactly why an instance ranked #1.</div>
+            </div>
+            <div class="guide-item">
+              <div class="guide-step">Step 6 — Validate in production</div>
+              <div class="guide-txt">Benchmark with your real workload and monitor utilization before committing to an instance family.</div>
             </div>
           </div>
-          <div id="calcOut" class="summary" style="margin-top:10px"></div>
-          <div class="small">Compute uses selected top recommendation price. Storage is optional estimate (e.g., gp3 ~ $0.08/GB-mo, varies by region/type).</div>
-        </div>
+        </details>
+      </div>
 
-        <div class="card">
-          <h3 class="section-title">Top Candidates</h3>
-          <div class="table-wrap"><table id="table"></table></div>
-        </div>
-      </main>
-    </div>
+    </main>
   </div>
 
-  <script>
-    const csvUrl = './data/ec2_aws_snapshot.csv';
-    const state = { rows: [], regions: [], regionIdx: 0 };
-    const sliders = ['wPrice','wCpu','wMem','wNet','wGpu'];
-    const el = id => document.getElementById(id);
+  <!-- Footer disclaimer -->
+  <footer style="text-align:center;padding:22px 16px 6px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);margin-top:12px;line-height:1.8">
+    ⚠️ This tool is <strong>not affiliated with, endorsed by, or an official channel of Amazon Web Services (AWS)</strong>.<br>
+    It is an independent personal project built for educational &amp; portfolio purposes only. Pricing data may be outdated — always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">aws.amazon.com</a>.
+  </footer>
 
-    const metricLabel = {
-      vcpus: 'vCPUs',
-      memory_gib: 'Memory (GiB)',
-      gpu_count: 'GPU Count',
-      network_score: 'Network Score',
-      price_usd_hour: 'Price (USD/hr)',
-    };
+</div><!-- /#app -->
 
-    const typeExplain = {
-      CPU: 'Compute-optimized for CPU-heavy jobs like builds, encoding, high-QPS APIs.',
-      GPU: 'Accelerated instances for ML training/inference, rendering, and CUDA workloads.',
-      Memory: 'Memory-optimized for large caches, in-memory analytics, JVM-heavy services.',
-      Storage: 'Storage-optimized for high IOPS and low-latency local NVMe workloads.',
-      General: 'Balanced instances for common web apps, microservices, and mixed workloads.'
-    };
+<script>
+/* ── Constants & state ─────────────────────────────── */
+const CSV_URL = './data/ec2_aws_snapshot.csv';
+const state   = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set() };
+const SLIDERS = ['wPrice','wCpu','wMem','wNet','wGpu'];
+const HASH_KEYS = ['region','category','metric',...SLIDERS];
+const el = id => document.getElementById(id);
 
-    function parseCSV(text) {
-      const [header, ...lines] = text.trim().split('\n');
-      const cols = header.split(',');
-      return lines.filter(Boolean).map(line => {
-        const vals = line.split(',');
-        const obj = {};
-        cols.forEach((c, i) => obj[c] = vals[i]);
-        obj.vcpus = +obj.vcpus;
-        obj.memory_gib = +obj.memory_gib;
-        obj.network_score = +obj.network_score;
-        obj.gpu_count = +obj.gpu_count;
-        obj.price_usd_hour = +obj.price_usd_hour;
-        return obj;
-      });
-    }
+const CAT_COLOR = { CPU:'#3b82f6', GPU:'#8b5cf6', Memory:'#10b981', Storage:'#f59e0b', General:'#6b7280' };
+const CAT_BG    = { CPU:'#eff6ff', GPU:'#f5f3ff', Memory:'#ecfdf5', Storage:'#fffbeb', General:'#f9fafb' };
 
-    function norm(values, reverse=false) {
-      const min = values.reduce((a, b) => a < b ? a : b, Infinity);
-      const max = values.reduce((a, b) => a > b ? a : b, -Infinity);
-      if (max === min) return values.map(() => 1);
-      return values.map(v => reverse ? 1 - ((v-min)/(max-min)) : (v-min)/(max-min));
-    }
+const METRIC_LABEL = {
+  vcpus:'vCPUs', memory_gib:'Memory (GiB)', gpu_count:'GPU Count',
+  network_score:'Network Score', price_usd_hour:'Price (USD/hr)', composite:'Composite Score',
+};
+const TYPE_EXPLAIN = {
+  CPU:     'Compute-optimized — builds, encoding, high-QPS APIs.',
+  GPU:     'Accelerated — ML training/inference, CUDA, rendering.',
+  Memory:  'Memory-optimized — large caches, analytics, JVM.',
+  Storage: 'Storage-optimized — high IOPS, low-latency NVMe.',
+  General: 'Balanced — web apps, microservices, mixed workloads.',
+};
+const PRESETS = {
+  balanced:    { wPrice:35, wCpu:25, wMem:20, wNet:10, wGpu:10 },
+  cost:        { wPrice:70, wCpu:10, wMem:10, wNet:5,  wGpu:5  },
+  performance: { wPrice:10, wCpu:35, wMem:30, wNet:15, wGpu:10 },
+  ml:          { wPrice:15, wCpu:20, wMem:20, wNet:10, wGpu:35 },
+};
 
-    function showError(msg) {
-      el('best').classList.add('error');
-      el('best').innerHTML = `<b>Error:</b> ${msg}`;
-    }
+/* ── Toast ─────────────────────────────────────────── */
+function toast(msg, duration = 2200) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  el('toastShelf').appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+}
 
-    function syncRegionPager() {
-      const region = el('region').value;
-      const idx = state.regions.indexOf(region);
-      if (idx >= 0) state.regionIdx = idx;
-      el('regionPage').textContent = `Region ${state.regionIdx + 1} of ${state.regions.length}`;
-    }
+/* ── Sidebar toggle (mobile) ───────────────────────── */
+function toggleSidebar() {
+  const sb = el('sidebar');
+  sb.classList.toggle('open');
+}
 
-    function stepRegion(delta) {
-      if (!state.regions.length) return;
-      state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
-      el('region').value = state.regions[state.regionIdx];
-      syncRegionPager();
-      render();
-    }
+/* ── URL hash state ────────────────────────────────── */
+function saveHash() {
+  const p = new URLSearchParams();
+  HASH_KEYS.forEach(k => { const node = el(k); if (node) p.set(k, node.value); });
+  history.replaceState(null, '', '#' + p.toString());
+}
+function loadHash() {
+  if (!window.location.hash.slice(1)) return;
+  try {
+    const p = new URLSearchParams(window.location.hash.slice(1));
+    HASH_KEYS.forEach(k => { const v = p.get(k); if (v !== null && el(k)) el(k).value = v; });
+  } catch (_) {}
+}
+function shareURL() {
+  saveHash();
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => toast('🔗 Link copied to clipboard!'))
+    .catch(() => toast('Copy the URL from your address bar'));
+}
 
-    function explainWhy(best, rows) {
-      const cheapest = rows.reduce((a,b)=> a.price_usd_hour < b.price_usd_hour ? a : b);
-      const strongest = rows.reduce((a,b)=> (a.perf || 0) > (b.perf || 0) ? a : b);
-      const priceDelta = ((best.price_usd_hour - cheapest.price_usd_hour)/Math.max(cheapest.price_usd_hour, 0.0001))*100;
-      const perfGap = ((strongest.perf - best.perf)/Math.max(strongest.perf, 1))*100;
-      return `<b>Best fit for:</b> ${typeExplain[best.instance_category] || best.instance_category}. ` +
-             `<b>Cost position:</b> ${priceDelta <= 1 ? 'near-cheapest' : `${priceDelta.toFixed(1)}% above cheapest`} in this filter. ` +
-             `<b>Performance position:</b> within ${Math.max(0, perfGap).toFixed(1)}% of the strongest candidate.`;
-    }
+/* ── Copy recommendation ───────────────────────────── */
+function copyRecommendation() {
+  const name = el('recName').textContent;
+  const tags = el('recTags')?.textContent?.trim() || '';
+  if (!name || name === '—') { toast('No recommendation yet'); return; }
+  navigator.clipboard.writeText(`${name} — ${tags}`)
+    .then(() => toast('📋 Recommendation copied!'))
+    .catch(() => toast('Could not access clipboard'));
+}
 
-    function renderTypeExplanations() {
-      const lines = Object.entries(typeExplain).map(([k,v]) => `<li><b>${k}</b>: ${v}</li>`).join('');
-      el('types').innerHTML = `<ul>${lines}</ul>`;
-    }
+/* ── Preset ────────────────────────────────────────── */
+function setPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  Object.entries(p).forEach(([id, val]) => { el(id).value = val; });
+  ['balanced','cost','performance','ml'].forEach(k =>
+    el(`pr-${k}`)?.classList.toggle('active', k === name));
+  toast(`⚡ Preset: ${name.charAt(0).toUpperCase() + name.slice(1)}`);
+  render();
+}
 
-    function renderCalculator(best) {
-      const hours = Math.max(1, Number(el('calcHours')?.value || 730));
-      const count = Math.max(1, Number(el('calcCount')?.value || 1));
-      const storageGb = Math.max(0, Number(el('calcStorageGb')?.value || 0));
-      const storageRate = Math.max(0, Number(el('calcStorageRate')?.value || 0));
+/* ── Data helpers ──────────────────────────────────── */
+function parseCSV(text) {
+  const [header, ...lines] = text.trim().split('\n');
+  const cols = header.split(',');
+  return lines.filter(Boolean).map(line => {
+    const vals = line.split(',');
+    const obj  = {};
+    cols.forEach((c, i) => obj[c] = vals[i]);
+    obj.vcpus          = +obj.vcpus;
+    obj.memory_gib     = +obj.memory_gib;
+    obj.network_score  = +obj.network_score;
+    obj.gpu_count      = +obj.gpu_count;
+    obj.price_usd_hour = +obj.price_usd_hour;
+    return obj;
+  });
+}
+function norm(values, reverse = false) {
+  const min = values.reduce((a, b) => a < b ? a : b,  Infinity);
+  const max = values.reduce((a, b) => a > b ? a : b, -Infinity);
+  if (max === min) return values.map(() => 1);
+  return values.map(v => reverse ? 1 - (v - min) / (max - min) : (v - min) / (max - min));
+}
 
-      const computeMonthly = best.price_usd_hour * hours * count;
-      const storageMonthly = storageGb * storageRate * count;
-      const totalMonthly = computeMonthly + storageMonthly;
-      const annual = totalMonthly * 12;
+/* ── Region pager ──────────────────────────────────── */
+function syncRegionPager() {
+  const idx = state.regions.indexOf(el('region').value);
+  if (idx >= 0) state.regionIdx = idx;
+  el('regionPage').textContent = `${state.regionIdx + 1} of ${state.regions.length} regions`;
+}
+function stepRegion(delta) {
+  if (!state.regions.length) return;
+  state.regionIdx = (state.regionIdx + delta + state.regions.length) % state.regions.length;
+  el('region').value = state.regions[state.regionIdx];
+  syncRegionPager();
+  render();
+}
 
-      el('calcOut').innerHTML = `<b>${best.instance_type}</b> @ $${best.price_usd_hour.toFixed(4)}/hr × ${count} instance(s) × ${hours} hr/mo = <b>$${computeMonthly.toFixed(2)}/mo</b><br>`+
-        `Storage estimate: ${storageGb} GB × $${storageRate.toFixed(3)}/GB-mo × ${count} = <b>$${storageMonthly.toFixed(2)}/mo</b><br>`+
-        `Estimated total: <b>$${totalMonthly.toFixed(2)}/mo</b> (~$${annual.toFixed(2)}/yr)`;
-    }
+/* ── Animated number counter ───────────────────────── */
+function animateNum(elId, to, fmt = v => v.toFixed(0), dur = 380) {
+  const node = el(elId);
+  const from = parseFloat(node.dataset.raw ?? '0') || 0;
+  if (from === to) { node.textContent = fmt(to); node.dataset.raw = to; return; }
+  node.dataset.raw = to;
+  const t0 = performance.now();
+  const tick = t => {
+    const p    = Math.min((t - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    node.textContent = fmt(from + (to - from) * ease);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 
-    function render() {
-      sliders.forEach(s => el(s+'Val').textContent = el(s).value);
-      const region = el('region').value;
-      const category = el('category').value;
-      const metric = el('metric').value;
+/* ── Weight bar ────────────────────────────────────── */
+function renderWeightBar(w, sum) {
+  Object.entries(w).forEach(([k, val]) => {
+    const seg = el(`wb-${k}`);
+    if (seg) seg.style.width = (sum > 0 ? (val / sum * 100) : 0) + '%';
+  });
+  el('weightTotal').textContent = sum > 0 ? '100%' : '0% ⚠️';
+}
 
-      let rows = state.rows.filter(r => (region === 'All' || r.region === region) && (category === 'All' || r.instance_category === category));
-      if (!rows.length) {
-        showError('No rows match selected filters.');
-        el('table').innerHTML = '';
-        return;
-      }
+/* ── KPI strip ─────────────────────────────────────── */
+function renderKPIs(rows) {
+  const regions = new Set(rows.map(r => r.region));
+  animateNum('kpiCount', rows.length, v => Math.round(v).toString());
+  el('kpiCountSub').textContent = `${regions.size} region${regions.size > 1 ? 's' : ''}`;
 
-      const w = {
-        price: +el('wPrice').value,
-        cpu: +el('wCpu').value,
-        mem: +el('wMem').value,
-        net: +el('wNet').value,
-        gpu: +el('wGpu').value,
-      };
-      const sum = Object.values(w).reduce((a,b)=>a+b,0) || 1;
+  const cheapest = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
+  animateNum('kpiCheap', cheapest.price_usd_hour, v => `$${v.toFixed(4)}`);
+  el('kpiCheapSub').textContent = cheapest.instance_type;
 
-      const p = norm(rows.map(r=>r.price_usd_hour), true);
-      const c = norm(rows.map(r=>r.vcpus));
-      const m = norm(rows.map(r=>r.memory_gib));
-      const n = norm(rows.map(r=>r.network_score));
-      const g = norm(rows.map(r=>r.gpu_count));
+  const bestPerf = rows.reduce((a, b) => (a.perf || 0) > (b.perf || 0) ? a : b);
+  animateNum('kpiBestPerf', bestPerf.perf || 0, v => v.toFixed(3));
+  el('kpiBestPerfSub').textContent = bestPerf.instance_type;
 
-      rows = rows.map((r, i) => {
-        const perf = c[i]*0.35 + m[i]*0.30 + n[i]*0.20 + g[i]*0.15;
-        const composite = (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i] + (w.gpu/sum)*g[i];
-        return { ...r, perf, composite };
-      }).sort((a,b)=>b.composite-a.composite);
+  const bestVal = rows.reduce((a, b) => {
+    const va = (a.perf || 0) / Math.max(a.price_usd_hour, 1e-4);
+    const vb = (b.perf || 0) / Math.max(b.price_usd_hour, 1e-4);
+    return va > vb ? a : b;
+  });
+  el('kpiBestVal').textContent    = bestVal.instance_type;
+  el('kpiBestValSub').textContent = `${((bestVal.perf || 0) / Math.max(bestVal.price_usd_hour, 1e-4)).toFixed(1)} perf / dollar`;
+}
 
-      const best = rows[0];
-      el('best').classList.remove('error');
-      el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.instance_category}, ${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
-      el('explain').innerHTML = explainWhy(best, rows);
-      if (el('calcOut')) renderCalculator(best);
+/* ── Rec card ──────────────────────────────────────── */
+function renderRecCard(best, rows) {
+  el('recCard').classList.remove('error-state');
+  const catColor = CAT_COLOR[best.instance_category] || '#4f46e5';
+  const catBg    = CAT_BG[best.instance_category]    || '#f9fafb';
 
-      Plotly.react('chart', [{
-        x: rows.map(r=>r.price_usd_hour),
-        y: rows.map(r=>r.perf),
-        mode: 'markers+text',
-        text: rows.map(r=>r.instance_type),
-        textposition: 'top center',
-        marker: { size: rows.map(r=>12 + r.composite*20), color: rows.map(r=>r.composite), colorscale: 'Blues' },
-        hovertemplate: '%{text}<br>Category: %{customdata[0]}<br>Region: %{customdata[1]}<br>vCPU: %{customdata[2]}<br>Memory: %{customdata[3]} GiB<br>GPU: %{customdata[4]}<br>Price: $%{x}/hr<br>Perf Index: %{y:.2f}<extra></extra>',
-        customdata: rows.map(r => [r.instance_category, r.region, r.vcpus, r.memory_gib, r.gpu_count])
-      }], {
-        title: 'Price vs Performance (x = hourly cost, y = computed performance index)',
-        xaxis: { title: 'Price (USD/hr)' },
-        yaxis: { title: 'Performance index' },
-        margin: { t: 44 }
-      }, {responsive:true});
+  // Accent bar & score arc color
+  el('recAccentBar').style.background = catColor;
+  const arc = el('recScoreArc');
+  if (arc) {
+    arc.style.stroke = catColor;
+    const circ = 238.76;
+    arc.setAttribute('stroke-dasharray', `${(best.composite * circ).toFixed(2)} ${circ}`);
+  }
 
-      const pageRows = rows.slice(0, 10);
-      Plotly.react('chart2', [{
-        x: pageRows.map(r=>r.instance_type),
-        y: pageRows.map(r=>r[metric]),
-        type: 'bar',
-        marker: { color: '#4f7cff' },
-        hovertemplate: 'Instance: %{x}<br>'+metricLabel[metric]+': %{y}<extra></extra>'
-      }], {
-        title: `Instance-wise ${metricLabel[metric]} (current region/category)`,
-        xaxis: { title: 'EC2 Instance Type' },
-        yaxis: { title: metricLabel[metric] },
-        margin: { t: 46 }
-      }, {responsive:true});
+  el('recName').textContent = best.instance_type;
 
-      const head = `<thead><tr><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr></thead>`;
-      const body = `<tbody>${rows.slice(0,20).map(r =>
-        `<tr><td>${r.instance_type}</td><td>${r.instance_category}</td><td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td><td>${r.gpu_count}</td><td>${r.network_score}</td><td>${r.price_usd_hour.toFixed(4)}</td><td>${r.composite.toFixed(3)}</td></tr>`
-      ).join('')}</tbody>`;
-      el('table').innerHTML = head + body;
-    }
+  // Tags: category (colored) + region
+  el('recTags').innerHTML =
+    `<span class="rtag" style="background:${catBg};color:${catColor};border-color:${catColor}40">${best.instance_category}</span>` +
+    `<span class="rtag">${best.region}</span>`;
 
-    async function boot() {
-      try {
-        const resp = await fetch(csvUrl);
-        if (!resp.ok) throw new Error(`Failed to load dataset (${resp.status}).`);
-        const txt = await resp.text();
-        state.rows = parseCSV(txt);
+  // Stat strip
+  el('recStats').innerHTML = [
+    { val: `$${best.price_usd_hour.toFixed(4)}`, lbl: 'Per Hour' },
+    { val: best.vcpus,                            lbl: 'vCPUs' },
+    { val: `${best.memory_gib} GiB`,              lbl: 'RAM' },
+    { val: best.gpu_count > 0 ? best.gpu_count : '—', lbl: 'GPUs' },
+    { val: `${best.network_score}/5`,             lbl: 'Network' },
+  ].map(s => `
+    <div class="rec-stat">
+      <div class="rec-stat-val">${s.val}</div>
+      <div class="rec-stat-lbl">${s.lbl}</div>
+    </div>`).join('');
 
-        const regions = [...new Set(state.rows.map(r=>r.region))];
-        const categories = ['All', ...new Set(state.rows.map(r=>r.instance_category))];
+  // Score ring text
+  el('recScoreNum').textContent = best.composite.toFixed(3);
+  el('recRankTxt').innerHTML = `<strong>#1</strong> of ${rows.length} candidates`;
+  el('recCatLabel').innerHTML =
+    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${catColor};margin-right:4px"></span>` +
+    `<span style="color:${catColor}">${best.instance_category}</span>`;
+  el('recCatLabel').style.cssText =
+    `background:${catBg};border-color:${catColor}30;color:${catColor}`;
 
-        el('region').innerHTML = regions.map(v=>`<option>${v}</option>`).join('');
-        state.regions = regions;
-        state.regionIdx = 0;
-        if (regions.length) el('region').value = regions[0];
-        syncRegionPager();
+  // Insight
+  const cheapest  = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
+  const strongest = rows.reduce((a, b) => (a.perf || 0) > (b.perf || 0) ? a : b);
+  const pd = ((best.price_usd_hour - cheapest.price_usd_hour) / Math.max(cheapest.price_usd_hour, 1e-4)) * 100;
+  const pg = ((strongest.perf - best.perf) / Math.max(strongest.perf, 1)) * 100;
+  el('recWhy').innerHTML =
+    `${TYPE_EXPLAIN[best.instance_category] || ''} ` +
+    `Cost is ${pd <= 1 ? `<b style="color:var(--success)">near-cheapest</b>` : `<b>${pd.toFixed(1)}%</b> above cheapest`} in filter. ` +
+    `Performance within <b>${Math.max(0, pg).toFixed(1)}%</b> of the top performer. ` +
+    `<span style="color:var(--accent);cursor:pointer" onclick="document.getElementById('table').scrollIntoView({behavior:'smooth'})">Compare instances ↓</span>`;
+}
 
-        el('category').innerHTML = categories.map(v=>`<option>${v}</option>`).join('');
+/* ── Charts ────────────────────────────────────────── */
+const PLOTLY_BASE = {
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: '#fafbff',
+  font: { family: 'Inter,sans-serif', size: 11, color: '#64748b' },
+};
 
-        ['region','category','metric',...sliders].forEach(id => {
-          el(id).addEventListener('input', () => {
-            if (id === 'region') syncRegionPager();
-            render();
-          });
-        });
-        el('prevRegion').addEventListener('click', () => stepRegion(-1));
-        el('nextRegion').addEventListener('click', () => stepRegion(1));
+/* ── Family filter ─────────────────────────────────── */
+function getFamily(instanceType) {
+  return instanceType.split('.')[0];
+}
 
-        ['calcHours','calcCount','calcStorageGb','calcStorageRate'].forEach(id => {
-          const node = el(id);
-          if (node) node.addEventListener('input', render);
-        });
+function renderFamilyFilter(rows) {
+  const container = el('familyFilter');
+  if (!container) return;
+  const families = [...new Set(rows.map(r => getFamily(r.instance_type)))].sort();
+  const allActive = families.every(f => state.selectedFamilies.has(f));
 
-        renderTypeExplanations();
+  container.innerHTML =
+    `<span class="family-filter-lbl">Family:</span>` +
+    `<button class="family-pill pill-all ${allActive ? 'active' : ''}"
+       onclick="selectAllFamilies()">All</button>` +
+    families.map(f =>
+      `<button class="family-pill ${state.selectedFamilies.has(f) ? 'active' : ''}"
+         onclick="toggleFamily('${f}')">${f}</button>`
+    ).join('');
+}
+
+function selectAllFamilies() {
+  const families = [...new Set(state.scoredRows.map(r => getFamily(r.instance_type)))];
+  families.forEach(f => state.selectedFamilies.add(f));
+  renderFamilyFilter(state.scoredRows);
+  renderLineChart(state.scoredRows);
+}
+
+function toggleFamily(family) {
+  if (state.selectedFamilies.has(family)) {
+    if (state.selectedFamilies.size > 1) state.selectedFamilies.delete(family);
+    else return; // keep at least one selected
+  } else {
+    state.selectedFamilies.add(family);
+  }
+  renderFamilyFilter(state.scoredRows);
+  renderLineChart(state.scoredRows);
+}
+
+function syncFamilyFilter(rows) {
+  const current = new Set(rows.map(r => getFamily(r.instance_type)));
+  // Remove stale selections
+  [...state.selectedFamilies].forEach(f => { if (!current.has(f)) state.selectedFamilies.delete(f); });
+  // If nothing left selected, select all
+  if (state.selectedFamilies.size === 0) current.forEach(f => state.selectedFamilies.add(f));
+}
+
+function renderLineChart(rows) {
+  /* Filter by selected families, then take top 15 by composite score */
+  const filtered = state.selectedFamilies.size
+    ? rows.filter(r => state.selectedFamilies.has(getFamily(r.instance_type)))
+    : rows;
+  const top = filtered.slice(0, Math.min(15, filtered.length));
+  const names = top.map(r => r.instance_type);
+
+  const traces = [
+    {
+      name: 'vCPUs',
+      type: 'scatter', mode: 'lines+markers',
+      x: names, y: top.map(r => r.vcpus),
+      line:   { color: '#3b82f6', width: 2.5, shape: 'spline' },
+      marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } },
+      yaxis: 'y',
+      hovertemplate: '<b>%{x}</b><br>vCPUs: <b>%{y}</b><extra></extra>',
+    },
+    {
+      name: 'RAM (GiB)',
+      type: 'scatter', mode: 'lines+markers',
+      x: names, y: top.map(r => r.memory_gib),
+      line:   { color: '#10b981', width: 2.5, shape: 'spline' },
+      marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } },
+      yaxis: 'y',
+      hovertemplate: '<b>%{x}</b><br>RAM: <b>%{y} GiB</b><extra></extra>',
+    },
+    {
+      name: 'Cost ($/hr)',
+      type: 'scatter', mode: 'lines+markers',
+      x: names, y: top.map(r => r.price_usd_hour),
+      line:   { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
+      marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } },
+      yaxis: 'y2',
+      hovertemplate: '<b>%{x}</b><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
+    },
+  ];
+
+  Plotly.react('chart', traces, {
+    ...PLOTLY_BASE,
+    xaxis: { tickangle: -35, gridcolor: '#e2e8f0', automargin: true },
+    yaxis:  { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
+    yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
+    legend: { orientation: 'h', y: -0.32, x: 0, font: { size: 11 } },
+    margin: { t: 12, r: 55, b: 80, l: 50 }, hovermode: 'x unified',
+  }, { responsive: true });
+}
+
+function renderRadar(rows) {
+  const top5  = rows.slice(0, Math.min(5, rows.length));
+  const theta = ['Price Eff.','CPU','Memory','Network','GPU','Price Eff.'];
+  const traces = top5.map(r => ({
+    type: 'scatterpolar',
+    r: [r.scoreP, r.scoreC, r.scoreM, r.scoreN, r.scoreG, r.scoreP],
+    theta,
+    fill: 'toself',
+    name: r.instance_type,
+    line: { color: CAT_COLOR[r.instance_category] || '#4f46e5', width: 2 },
+    fillcolor: (CAT_COLOR[r.instance_category] || '#4f46e5') + '22',
+    hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
+  }));
+
+  Plotly.react('chart3', traces, {
+    ...PLOTLY_BASE,
+    polar: {
+      bgcolor: '#fafbff',
+      radialaxis: { visible:true, range:[0,1], gridcolor:'#e2e8f0', tickfont:{size:9}, tickformat:'.1f' },
+      angularaxis: { gridcolor:'#e2e8f0', tickfont:{size:10} },
+    },
+    legend: { orientation:'h', y:-0.2, x:0, font:{size:10} },
+    margin: { t:12, r:12, b:50, l:12 },
+  }, { responsive: true });
+}
+
+function renderBar(rows, metric) {
+  const top10  = rows.slice(0, 10);
+  const yvals  = top10.map(r => metric === 'composite' ? +r.composite.toFixed(4) : r[metric]);
+  const colors = top10.map(r => CAT_COLOR[r.instance_category] || '#4f46e5');
+  Plotly.react('chart2', [{
+    x: top10.map(r => r.instance_type), y: yvals,
+    type: 'bar', marker: { color: colors, opacity: .85 },
+    hovertemplate: '<b>%{x}</b><br>' + METRIC_LABEL[metric] + ': %{y}<extra></extra>',
+  }], {
+    ...PLOTLY_BASE,
+    xaxis: { title:'Instance Type', tickangle:-28, gridcolor:'#e2e8f0' },
+    yaxis: { title: METRIC_LABEL[metric], gridcolor:'#e2e8f0', zeroline:false },
+    margin: { t:12, r:12, b:80, l:52 },
+  }, { responsive: true });
+}
+
+function renderRegional(bestType) {
+  const regionRows = state.rows
+    .filter(r => r.instance_type === bestType)
+    .sort((a, b) => a.price_usd_hour - b.price_usd_hour);
+
+  el('regionalTitle').textContent =
+    `${bestType} — Regional Price Comparison`;
+
+  if (regionRows.length < 2) {
+    Plotly.react('chart4', [{
+      type:'bar', x:[regionRows[0]?.price_usd_hour || 0], y:[regionRows[0]?.region || ''],
+      orientation:'h', marker:{ color:'#4f46e5' },
+    }], { ...PLOTLY_BASE, margin:{t:12,r:60,b:36,l:90} }, { responsive:true });
+    return;
+  }
+
+  const minPrice = regionRows[0].price_usd_hour;
+  const colors   = regionRows.map(r =>
+    r.price_usd_hour === minPrice ? '#10b981' : '#4f46e5');
+
+  Plotly.react('chart4', [{
+    type: 'bar', orientation: 'h',
+    x: regionRows.map(r => r.price_usd_hour),
+    y: regionRows.map(r => r.region),
+    marker: { color: colors, opacity: .85 },
+    text: regionRows.map(r => `$${r.price_usd_hour.toFixed(4)}`),
+    textposition: 'outside',
+    hovertemplate: '%{y}<br>$%{x:.4f}/hr<extra></extra>',
+  }], {
+    ...PLOTLY_BASE,
+    xaxis: { title:'Price (USD/hr)', gridcolor:'#e2e8f0', zeroline:false },
+    yaxis: { automargin: true },
+    margin: { t:12, r:70, b:40, l:10 },
+    annotations: [{
+      x: minPrice, y: regionRows[0].region,
+      xanchor: 'left', yanchor: 'middle',
+      text: ' ✅ cheapest', showarrow: false,
+      font: { size: 10, color: '#059669' }, xshift: 4,
+    }],
+  }, { responsive: true });
+}
+
+/* ── Instance compare panel ────────────────────────── */
+function renderInstanceCompare(row) {
+  const best = state.scoredRows[0];
+  if (!best || row.instance_type === best.instance_type) {
+    closeCompare(); return;
+  }
+
+  el('cmpTitle').textContent = `${row.instance_type}`;
+  el('cmpSub').textContent   = `${row.instance_category} · ${row.region} · vs. top pick ${best.instance_type}`;
+
+  el('cmpSpecs').innerHTML = [
+    { lbl: 'Price/hr',   val: `$${row.price_usd_hour.toFixed(4)}`, sub: `vs $${best.price_usd_hour.toFixed(4)}` },
+    { lbl: 'vCPUs',      val: row.vcpus,   sub: `vs ${best.vcpus}` },
+    { lbl: 'Memory',     val: `${row.memory_gib} GiB`, sub: `vs ${best.memory_gib} GiB` },
+    { lbl: 'GPU Count',  val: row.gpu_count > 0 ? row.gpu_count : '—', sub: `vs ${best.gpu_count > 0 ? best.gpu_count : '—'}` },
+    { lbl: 'Network',    val: `${row.network_score}/5`,  sub: `vs ${best.network_score}/5` },
+    { lbl: 'Score',      val: row.composite.toFixed(3),  sub: `vs ${best.composite.toFixed(3)}` },
+  ].map(s => `
+    <div class="cmp-spec-item">
+      <div class="cmp-spec-lbl">${s.lbl}</div>
+      <div class="cmp-spec-val">${s.val}</div>
+      <div class="cmp-spec-sub">${s.sub}</div>
+    </div>`).join('');
+
+  /* Grouped bar chart: selected vs top pick across 5 normalized dimensions */
+  const dims   = ['Price Eff.','CPU','Memory','Network','GPU'];
+  const selScores = [row.scoreP, row.scoreC, row.scoreM, row.scoreN, row.scoreG];
+  const topScores = [best.scoreP, best.scoreC, best.scoreM, best.scoreN, best.scoreG];
+  const catColor  = CAT_COLOR[row.instance_category]  || '#4f46e5';
+  const topColor  = CAT_COLOR[best.instance_category] || '#4f46e5';
+
+  Plotly.react('cmpChart', [
+    {
+      name: row.instance_type, type: 'bar',
+      x: dims, y: selScores,
+      marker: { color: catColor, opacity: .85 },
+      hovertemplate: '%{x}: %{y:.2f}<extra>' + row.instance_type + '</extra>',
+    },
+    {
+      name: best.instance_type + ' (top)', type: 'bar',
+      x: dims, y: topScores,
+      marker: { color: topColor, opacity: .5, pattern: { shape: '/' } },
+      hovertemplate: '%{x}: %{y:.2f}<extra>' + best.instance_type + '</extra>',
+    },
+  ], {
+    ...PLOTLY_BASE,
+    barmode: 'group',
+    yaxis: { range: [0, 1], gridcolor: '#e2e8f0', zeroline: false, title: 'Normalized score' },
+    xaxis: { gridcolor: '#e2e8f0' },
+    legend: { orientation: 'h', y: -0.26, x: 0, font: { size: 11 } },
+    margin: { t: 10, r: 12, b: 60, l: 50 },
+  }, { responsive: true });
+
+  const panel = el('comparePanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeCompare() {
+  el('comparePanel').classList.remove('visible');
+}
+
+/* ── Calculator ────────────────────────────────────── */
+function renderCalculator(best) {
+  const hours       = Math.max(1, +el('calcHours').value     || 730);
+  const count       = Math.max(1, +el('calcCount').value     || 1);
+  const storageGb   = Math.max(0, +el('calcStorageGb').value || 0);
+  const storageRate = Math.max(0, +el('calcStorageRate').value|| .08);
+  const compute = best.price_usd_hour * hours * count;
+  const total   = compute + storageGb * storageRate * count;
+  animateNum('crCompute', compute, v => `$${v.toFixed(2)}`);
+  animateNum('crTotal',   total,   v => `$${v.toFixed(2)}`);
+  animateNum('crAnnual',  total * 12, v => `$${v.toFixed(2)}`);
+}
+
+/* ── Type guide ────────────────────────────────────── */
+function renderTypes() {
+  el('types').innerHTML = Object.entries(TYPE_EXPLAIN).map(([k, v]) => `
+    <div class="type-item" style="border-left:3px solid ${CAT_COLOR[k]}">
+      <b style="color:${CAT_COLOR[k]}">${k}</b>
+      <span>${v}</span>
+    </div>`).join('');
+}
+
+/* ── Table (with search) ───────────────────────────── */
+function renderTable(rows, query = '') {
+  const q = query.toLowerCase().trim();
+  const filtered = q
+    ? rows.filter(r =>
+        r.instance_type.toLowerCase().includes(q) ||
+        r.instance_category.toLowerCase().includes(q) ||
+        r.region.toLowerCase().includes(q))
+    : rows;
+
+  const shown = filtered.slice(0, 20);
+  el('tableCount').textContent = q
+    ? `${shown.length} of ${filtered.length} match`
+    : `${Math.min(rows.length, 20)} of ${rows.length}`;
+
+  if (!shown.length) {
+    el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match "${query}"</td></tr></tbody>`;
+    return;
+  }
+
+  const head = `<thead><tr>
+    <th>#</th><th>Instance</th><th>Category</th><th>Region</th>
+    <th>vCPU</th><th>Mem (GiB)</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th>
+  </tr><tr><td colspan="10" style="font-size:10px;color:var(--muted);padding:4px 10px 5px;background:#fafbff;font-weight:600">
+    💡 Click any row to compare specs &amp; performance vs the top pick
+  </td></tr></thead>`;
+
+  const body = `<tbody>${shown.map((r, i) => {
+    const cc  = CAT_COLOR[r.instance_category] || '#6b7280';
+    const cbg = CAT_BG[r.instance_category]    || '#f9fafb';
+    const origIdx = rows.indexOf(r);
+    return `<tr class="${origIdx === 0 ? 'rank-1' : ''}" style="cursor:pointer" onclick="handleRowClick(${rows.indexOf(r)})" title="Click to compare with top pick">
+      <td style="color:var(--muted);font-weight:800;font-size:11px">${origIdx === 0 ? '🥇' : origIdx + 1}</td>
+      <td style="font-weight:700">${r.instance_type}</td>
+      <td><span class="cat-pill" style="background:${cbg};color:${cc}">${r.instance_category}</span></td>
+      <td>${r.region}</td>
+      <td>${r.vcpus}</td>
+      <td>${r.memory_gib}</td>
+      <td>${r.gpu_count}</td>
+      <td>${r.network_score}</td>
+      <td>$${r.price_usd_hour.toFixed(4)}</td>
+      <td>
+        <div class="score-cell">
+          <div class="score-bar" style="width:${(r.composite * 58).toFixed(0)}px;background:${cc}"></div>
+          <span class="score-num">${r.composite.toFixed(3)}</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('')}</tbody>`;
+
+  el('table').innerHTML = head + body;
+}
+
+/* ── Table row click ───────────────────────────────── */
+function handleRowClick(idx) {
+  const row = state.scoredRows[idx];
+  if (!row) return;
+  renderInstanceCompare(row);
+}
+
+/* ── Main render ───────────────────────────────────── */
+function render() {
+  SLIDERS.forEach(s => el(s + 'Val').textContent = el(s).value);
+
+  const region   = el('region').value;
+  const category = el('category').value;
+  const metric   = el('metric').value;
+
+  let rows = state.rows.filter(r =>
+    (region   === 'All' || r.region             === region) &&
+    (category === 'All' || r.instance_category  === category));
+
+  if (!rows.length) {
+    el('recCard').classList.add('error-state');
+    el('recName').textContent = 'No instances match your filters.';
+    ['recTags','recStats','recWhy','recRankTxt','recCatLabel'].forEach(id => { if(el(id)) el(id).innerHTML = ''; });
+    if(el('recScoreNum')) el('recScoreNum').textContent = '—';
+    el('table').innerHTML = '';
+    el('tableCount').textContent = '';
+    closeCompare();
+    return;
+  }
+  el('recCard').classList.remove('error-state');
+
+  const w = {
+    price: +el('wPrice').value, cpu: +el('wCpu').value,
+    mem:   +el('wMem').value,   net: +el('wNet').value, gpu: +el('wGpu').value,
+  };
+  const sum = Object.values(w).reduce((a, b) => a + b, 0) || 1;
+  renderWeightBar(w, sum);
+
+  const p = norm(rows.map(r => r.price_usd_hour), true);
+  const c = norm(rows.map(r => r.vcpus));
+  const m = norm(rows.map(r => r.memory_gib));
+  const n = norm(rows.map(r => r.network_score));
+  const g = norm(rows.map(r => r.gpu_count));
+
+  rows = rows.map((r, i) => ({
+    ...r,
+    perf:      c[i]*.35 + m[i]*.30 + n[i]*.20 + g[i]*.15,
+    composite: (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i] + (w.gpu/sum)*g[i],
+    scoreP: p[i], scoreC: c[i], scoreM: m[i], scoreN: n[i], scoreG: g[i],
+  })).sort((a, b) => b.composite - a.composite);
+
+  state.scoredRows = rows;
+  const best = rows[0];
+
+  renderRecCard(best, rows);
+  renderKPIs(rows);
+  syncFamilyFilter(rows);
+  renderFamilyFilter(rows);
+  renderLineChart(rows);
+  renderRadar(rows);
+  renderBar(rows, metric);
+  renderRegional(best.instance_type);
+  renderCalculator(best);
+  renderTable(rows, el('tableSearch').value);
+  saveHash();
+}
+
+/* ── Boot ──────────────────────────────────────────── */
+async function boot() {
+  try {
+    const resp = await fetch(CSV_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    state.rows = parseCSV(await resp.text());
+
+    const regions    = [...new Set(state.rows.map(r => r.region))];
+    const categories = ['All', ...new Set(state.rows.map(r => r.instance_category))];
+
+    el('region').innerHTML   = regions.map(v => `<option>${v}</option>`).join('');
+    el('category').innerHTML = categories.map(v => `<option>${v}</option>`).join('');
+    state.regions   = regions;
+    state.regionIdx = 0;
+    if (regions.length) el('region').value = regions[0];
+    syncRegionPager();
+
+    // Restore URL state, then render
+    loadHash();
+    syncRegionPager();
+
+    // Event listeners
+    ['region','category','metric',...SLIDERS].forEach(id => {
+      el(id).addEventListener('input', () => {
+        if (id === 'region') syncRegionPager();
         render();
-      } catch (e) {
-        showError(e.message || 'Unknown error while starting app.');
-      }
-    }
+      });
+    });
+    el('prevRegion').addEventListener('click', () => stepRegion(-1));
+    el('nextRegion').addEventListener('click', () => stepRegion(1));
+    ['calcHours','calcCount','calcStorageGb','calcStorageRate'].forEach(id =>
+      el(id).addEventListener('input', render));
 
-    boot();
-  </script>
+    // Table search — no need to re-score, just re-filter
+    el('tableSearch').addEventListener('input', () =>
+      renderTable(state.scoredRows, el('tableSearch').value));
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft')  stepRegion(-1);
+      if (e.key === 'ArrowRight') stepRegion(1);
+      if (e.key === 'b' || e.key === 'B') setPreset('balanced');
+      if (e.key === 'c' || e.key === 'C') setPreset('cost');
+      if (e.key === 'p' || e.key === 'P') setPreset('performance');
+      if (e.key === 'm' || e.key === 'M') setPreset('ml');
+      if (e.key === '/') { e.preventDefault(); el('tableSearch').focus(); }
+    });
+
+    renderTypes();
+    render();
+
+    // Reveal app
+    el('loader').style.display = 'none';
+    const app = el('app');
+    app.style.transition = 'opacity .45s ease';
+    app.style.opacity    = '1';
+
+  } catch (e) {
+    el('loader').innerHTML =
+      `<div style="text-align:center;padding:24px;color:#dc2626">
+         <b style="font-size:16px">Failed to load dataset</b><br>
+         <span style="font-size:13px;color:#64748b">${e.message}</span>
+       </div>`;
+  }
+}
+
+boot();
+</script>
 </body>
 </html>
