@@ -55,11 +55,13 @@ def network_score(net: str) -> int:
 def category(instance_type: str, gpu_count: int) -> str:
     if gpu_count > 0 or instance_type.startswith(("g", "p", "trn", "inf")):
         return "GPU"
+    if instance_type.startswith("hpc"):
+        return "CPU"
     if instance_type.startswith("r"):
         return "Memory"
     if instance_type.startswith(("i", "d", "h")):
         return "Storage"
-    if instance_type.startswith(("c", "hpc")):
+    if instance_type.startswith("c"):
         return "CPU"
     return "General"
 

@@ -350,7 +350,8 @@
     }
 
     function norm(values, reverse=false) {
-      const min = Math.min(...values), max = Math.max(...values);
+      const min = values.reduce((a, b) => a < b ? a : b, Infinity);
+      const max = values.reduce((a, b) => a > b ? a : b, -Infinity);
       if (max === min) return values.map(() => 1);
       return values.map(v => reverse ? 1 - ((v-min)/(max-min)) : (v-min)/(max-min));
     }
@@ -435,7 +436,7 @@
       const g = norm(rows.map(r=>r.gpu_count));
 
       rows = rows.map((r, i) => {
-        const perf = r.vcpus*0.35 + r.memory_gib*0.30 + r.network_score*0.20 + r.gpu_count*0.15;
+        const perf = c[i]*0.35 + m[i]*0.30 + n[i]*0.20 + g[i]*0.15;
         const composite = (w.price/sum)*p[i] + (w.cpu/sum)*c[i] + (w.mem/sum)*m[i] + (w.net/sum)*n[i] + (w.gpu/sum)*g[i];
         return { ...r, perf, composite };
       }).sort((a,b)=>b.composite-a.composite);
@@ -446,7 +447,7 @@
       el('explain').innerHTML = explainWhy(best, rows);
       if (el('calcOut')) renderCalculator(best);
 
-      Plotly.newPlot('chart', [{
+      Plotly.react('chart', [{
         x: rows.map(r=>r.price_usd_hour),
         y: rows.map(r=>r.perf),
         mode: 'markers+text',
@@ -463,7 +464,7 @@
       }, {responsive:true});
 
       const pageRows = rows.slice(0, 10);
-      Plotly.newPlot('chart2', [{
+      Plotly.react('chart2', [{
         x: pageRows.map(r=>r.instance_type),
         y: pageRows.map(r=>r[metric]),
         type: 'bar',
@@ -485,7 +486,7 @@
 
     async function boot() {
       try {
-        const resp = await fetch(csvUrl, { cache: 'no-store' });
+        const resp = await fetch(csvUrl);
         if (!resp.ok) throw new Error(`Failed to load dataset (${resp.status}).`);
         const txt = await resp.text();
         state.rows = parseCSV(txt);

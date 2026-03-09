@@ -18,7 +18,11 @@ st.set_page_config(page_title="EC2 Instance Advisor", layout="wide")
 st.title("EC2 Instance Advisor")
 st.caption("Pick the best EC2 instance by balancing regional price and performance.")
 
-df = load_instances()
+@st.cache_data
+def _load():
+    return load_instances()
+
+df = _load()
 
 with st.sidebar:
     st.header("Filters")
@@ -43,22 +47,13 @@ if subset.empty:
     st.warning("No instances match your filters.")
     st.stop()
 
-w_sum = w_price + w_cpu + w_mem + w_net + w_gpu
-if w_sum == 0:
-    st.error("At least one weight must be > 0.")
+try:
+    weights = Weights(price=w_price, cpu=w_cpu, memory=w_mem, network=w_net, gpu=w_gpu)
+except ValueError as exc:
+    st.error(str(exc))
     st.stop()
 
-weights = Weights(
-    price=w_price / w_sum,
-    cpu=w_cpu / w_sum,
-    memory=w_mem / w_sum,
-    network=w_net / w_sum,
-)
-
-ranked = score_instances(subset, weights)
-ranked["gpu_norm"] = ranked["gpu_count"] / max(ranked["gpu_count"].max(), 1)
-ranked["composite_score"] = ranked["composite_score"] * (1 - (w_gpu / w_sum)) + ranked["gpu_norm"] * (w_gpu / w_sum)
-ranked = ranked.sort_values("composite_score", ascending=False)
+ranked = score_instances(subset, weights).sort_values("composite_score", ascending=False)
 
 best = ranked.iloc[0]
 st.success(
@@ -87,7 +82,10 @@ with col1:
 with col2:
     st.subheader("Price vs Performance")
     ranked["perf_index"] = (
-        ranked["vcpus"] * 0.35 + ranked["memory_gib"] * 0.30 + ranked["network_score"] * 0.2 + ranked["gpu_count"] * 0.15
+        ranked["score_cpu"] * 0.35
+        + ranked["score_memory"] * 0.30
+        + ranked["score_network"] * 0.20
+        + ranked["score_gpu"] * 0.15
     )
     fig = px.scatter(
         ranked,
