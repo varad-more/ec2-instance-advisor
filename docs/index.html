@@ -194,6 +194,7 @@
     .small { font-size: 12px; color: var(--muted); }
 
     @media (max-width: 980px) {
+      #calcOut{font-size:13px;}
       .layout { grid-template-columns: 1fr; }
       .page { padding: 14px 10px 24px; }
       h1 { font-size: 24px; }
@@ -275,6 +276,31 @@
             <li><b>Step 4 — Read the graphs:</b> Scatter compares cost vs performance. Bar chart compares instance-level metrics directly.</li>
             <li><b>Step 5 — Validate in production:</b> Benchmark and monitor utilization before finalizing the instance type.</li>
           </ul>
+        </div>
+
+        
+        <div class="card">
+          <h3 class="section-title">Pricing Calculator</h3>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;">
+            <div>
+              <label style="margin-top:0">Hours / month</label>
+              <input id="calcHours" type="number" min="1" value="730" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            </div>
+            <div>
+              <label style="margin-top:0">Instance count</label>
+              <input id="calcCount" type="number" min="1" value="1" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            </div>
+            <div>
+              <label style="margin-top:0">Storage (GB)</label>
+              <input id="calcStorageGb" type="number" min="0" value="0" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            </div>
+            <div>
+              <label style="margin-top:0">Storage $/GB-mo</label>
+              <input id="calcStorageRate" type="number" min="0" step="0.001" value="0.08" style="width:100%;border:1px solid #d7e3ff;border-radius:10px;padding:9px;" />
+            </div>
+          </div>
+          <div id="calcOut" class="summary" style="margin-top:10px"></div>
+          <div class="small">Compute uses selected top recommendation price. Storage is optional estimate (e.g., gp3 ~ $0.08/GB-mo, varies by region/type).</div>
         </div>
 
         <div class="card">
@@ -364,6 +390,22 @@
       el('types').innerHTML = `<ul>${lines}</ul>`;
     }
 
+    function renderCalculator(best) {
+      const hours = Math.max(1, Number(el('calcHours')?.value || 730));
+      const count = Math.max(1, Number(el('calcCount')?.value || 1));
+      const storageGb = Math.max(0, Number(el('calcStorageGb')?.value || 0));
+      const storageRate = Math.max(0, Number(el('calcStorageRate')?.value || 0));
+
+      const computeMonthly = best.price_usd_hour * hours * count;
+      const storageMonthly = storageGb * storageRate * count;
+      const totalMonthly = computeMonthly + storageMonthly;
+      const annual = totalMonthly * 12;
+
+      el('calcOut').innerHTML = `<b>${best.instance_type}</b> @ $${best.price_usd_hour.toFixed(4)}/hr × ${count} instance(s) × ${hours} hr/mo = <b>$${computeMonthly.toFixed(2)}/mo</b><br>`+
+        `Storage estimate: ${storageGb} GB × $${storageRate.toFixed(3)}/GB-mo × ${count} = <b>$${storageMonthly.toFixed(2)}/mo</b><br>`+
+        `Estimated total: <b>$${totalMonthly.toFixed(2)}/mo</b> (~$${annual.toFixed(2)}/yr)`;
+    }
+
     function render() {
       sliders.forEach(s => el(s+'Val').textContent = el(s).value);
       const region = el('region').value;
@@ -402,6 +444,7 @@
       el('best').classList.remove('error');
       el('best').innerHTML = `<b>Top recommendation:</b> ${best.instance_type} (${best.instance_category}, ${best.region}) — $${best.price_usd_hour.toFixed(4)}/hr, score ${best.composite.toFixed(3)}`;
       el('explain').innerHTML = explainWhy(best, rows);
+      if (el('calcOut')) renderCalculator(best);
 
       Plotly.newPlot('chart', [{
         x: rows.map(r=>r.price_usd_hour),
@@ -466,6 +509,11 @@
         });
         el('prevRegion').addEventListener('click', () => stepRegion(-1));
         el('nextRegion').addEventListener('click', () => stepRegion(1));
+
+        ['calcHours','calcCount','calcStorageGb','calcStorageRate'].forEach(id => {
+          const node = el(id);
+          if (node) node.addEventListener('input', render);
+        });
 
         renderTypeExplanations();
         render();
