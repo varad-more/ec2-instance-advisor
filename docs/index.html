@@ -6,23 +6,30 @@
   <title>EC2 Instance Advisor</title>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 24px; color: #111; }
+    body { font-family: Inter, system-ui, Arial, sans-serif; margin: 0; color: #111; background: linear-gradient(180deg,#f8fbff 0%, #f5f7ff 100%); }
     h1 { margin-bottom: 6px; }
     .muted { color: #666; margin-top: 0; }
+    .page { max-width: 1200px; margin: 24px auto; padding: 0 16px 24px; }
     .grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; }
+    .card { border: 1px solid #dbe4ff; border-radius: 14px; padding: 14px; background:#fff; box-shadow: 0 6px 20px rgba(19,49,130,0.06);} 
     label { font-size: 14px; display: block; margin: 8px 0 4px; }
     select, input[type='range'] { width: 100%; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
-    .top { margin: 12px 0; padding: 10px; background: #f6f9ff; border: 1px solid #d9e7ff; border-radius: 10px; }
+    th, td { border-bottom: 1px solid #edf1ff; padding: 8px; text-align: left; }
+    tr:nth-child(even){background:#fafcff;}
+    .top { margin: 12px 0; padding: 12px; background: #f6f9ff; border: 1px solid #d9e7ff; border-radius: 12px; }
     .error { background: #fff4f4; border-color: #ffcaca; }
     ul { margin: 8px 0; padding-left: 18px; }
+    .pill {display:inline-block;background:#eaf1ff;color:#234; border:1px solid #ccdcff;padding:4px 10px;border-radius:999px;font-size:12px;margin-right:6px;}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
+  <div class="page">
   <h1>EC2 Instance Advisor</h1>
+  <div><span class="pill">AWS Snapshot</span><span class="pill">GitHub Pages</span><span class="pill">Cost vs Performance</span></div>
   <p class="muted">Filter by region and instance type (CPU/GPU/Memory/Storage/General), then tune weights.</p>
+  <p class="muted">Data snapshot source: AWS Price List (one-time pull, static CSV).</p>
 
   <div class="grid">
     <div class="card">
@@ -72,7 +79,7 @@
   </div>
 
   <script>
-    const csvUrl = './data/ec2_samples.csv';
+    const csvUrl = './data/ec2_aws_snapshot.csv';
     const state = { rows: [] };
     const sliders = ['wPrice','wCpu','wMem','wNet','wGpu'];
     const el = id => document.getElementById(id);
@@ -211,5 +218,6 @@
 
     boot();
   </script>
+  </div>
 </body>
 </html>
