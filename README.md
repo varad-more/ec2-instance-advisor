@@ -289,3 +289,35 @@ If you open a PR, briefly describe:
 - Any new assumptions about pricing or regions.
 
 This helps keep the advisor opinionated but predictable.
+
+
+## Analytics setup (same style as varadmore.me)
+
+This project now supports optional GA4-style tracking in the static app.
+
+### Enable Google Analytics
+
+Set a GA4 measurement id in one of these ways:
+
+1. Global runtime variable in `docs/index.html` host page:
+
+```html
+<script>
+  window.EC2_ADVISOR_GA4_ID = "G-XXXXXXXXXX";
+</script>
+```
+
+2. Or from browser console/localStorage for quick testing:
+
+```js
+localStorage.setItem('ec2AdvisorGaId', 'G-XXXXXXXXXX');
+location.reload();
+```
+
+### Tracked events
+
+- `page_view`
+- `ui_click` for key CTA/preset buttons
+- `ui_change` for key filters and weight controls
+
+If GA id is not configured, analytics silently stays disabled.

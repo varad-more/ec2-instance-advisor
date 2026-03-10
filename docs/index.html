@@ -1267,6 +1267,38 @@
     /** Convenience alias for getElementById. */
     const el = id => document.getElementById(id);
 
+    /* ── Analytics (GA4 style, optional) ───────────────────── */
+    const ANALYTICS = {
+      gaMeasurementId: (window.EC2_ADVISOR_GA4_ID || localStorage.getItem('ec2AdvisorGaId') || '').trim(),
+      debug: false,
+      loaded: false,
+    };
+
+    function initAnalytics() {
+      if (!ANALYTICS.gaMeasurementId || ANALYTICS.loaded) return;
+      try {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${ANALYTICS.gaMeasurementId}`;
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ window.dataLayer.push(arguments); }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', ANALYTICS.gaMeasurementId, { page_path: window.location.pathname });
+        ANALYTICS.loaded = true;
+      } catch {}
+    }
+
+    function trackEvent(action, params = {}) {
+      if (typeof window.gtag === 'function' && ANALYTICS.gaMeasurementId) {
+        window.gtag('event', action, params);
+      } else if (ANALYTICS.debug) {
+        console.log('[analytics]', action, params);
+      }
+    }
+
     /* ── 2. UI constants ────────────────────────────────────── */
     /** Accent colours per instance category. */
     const CAT_COLOR = { CPU: '#3b82f6', GPU: '#8b5cf6', Memory: '#10b981', Storage: '#f59e0b', General: '#6b7280' };
@@ -1316,6 +1348,22 @@
     }
     // Initialize segment click handlers
     document.addEventListener('DOMContentLoaded', () => {
+      document.body.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
+        const watch = ['region','category','metric','wPrice','wCpu','wMem','wNet','wGpu'];
+        if (watch.includes(t.id)) trackEvent('ui_change', { field: t.id, value: String(t.value).slice(0,64) });
+      }, true);
+      // generic UX analytics hooks
+      document.body.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        const id = t.id || t.getAttribute('data-action') || '';
+        if (!id) return;
+        const interesting = ['btnPresetBalanced','btnPresetCost','btnPresetPerf','btnPresetMl','shareBtn','calcBtn','backToTop'];
+        if (interesting.includes(id)) trackEvent('ui_click', { element_id: id });
+      }, true);
+
       document.querySelectorAll('.seg-bar').forEach(bar => {
         const inputId = bar.dataset.for;
         bar.querySelectorAll('.seg').forEach(btn => {
@@ -1560,6 +1608,12 @@
         });
       }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
       document.addEventListener('DOMContentLoaded', () => {
+      document.body.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
+        const watch = ['region','category','metric','wPrice','wCpu','wMem','wNet','wGpu'];
+        if (watch.includes(t.id)) trackEvent('ui_change', { field: t.id, value: String(t.value).slice(0,64) });
+      }, true);
         document.querySelectorAll('.chart-card, .kpi, .score-breakdown-card, .nlg-panel, .runner-card, .method-card, .bib-card, .rec-hero, .controls-card').forEach(card => {
           card.classList.add('scroll-reveal');
           observer.observe(card);
@@ -2952,6 +3006,8 @@
      * wires all event listeners, and calls render() for the first time.
      */
     async function boot() {
+      initAnalytics();
+      trackEvent('page_view', { page_title: document.title, page_location: window.location.href });
       try {
         const resp = await fetch(CSV_URL);
         if (!resp.ok) throw new Error(`HTTP ${resp.status} `);
