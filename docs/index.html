@@ -2931,6 +2931,60 @@
         </div>
       </section>
 
+
+      <!-- Typical Workload Mapping -->
+      <section class="funnel-step fade-up-3" id="step-workload-map">
+        <div class="step-hdr">
+          <div class="step-num">07</div>
+          <div>
+            <div class="step-title">Typical Workload Mapping</div>
+            <div class="step-desc">
+              Choosing the right family depends on the primary bottleneck of your workload.
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <div class="table-wrap" style="max-height:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Workload Type</th>
+                  <th>Recommended Family</th>
+                  <th>Characteristics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Web & App Servers</strong></td>
+                  <td><strong>General Purpose (M/T)</strong></td>
+                  <td>Balanced CPU and memory. Use T-series (burstable) for dev/test and M-series for steady production traffic.</td>
+                </tr>
+                <tr>
+                  <td><strong>High-Traffic APIs & HPC</strong></td>
+                  <td><strong>Compute Optimized (C)</strong></td>
+                  <td>High vCPU-to-memory ratio. Best for scientific modeling, batch processing, and dedicated game servers.</td>
+                </tr>
+                <tr>
+                  <td><strong>In-Memory Databases</strong></td>
+                  <td><strong>Memory Optimized (R/X)</strong></td>
+                  <td>High RAM-to-vCPU ratio (8:1 or higher). Ideal for Redis, SAP HANA, and real-time big data analytics.</td>
+                </tr>
+                <tr>
+                  <td><strong>NoSQL & Data Warehousing</strong></td>
+                  <td><strong>Storage Optimized (I/D)</strong></td>
+                  <td>Uses local NVMe SSDs for millions of low-latency IOPS. Essential for MongoDB, Cassandra, and high-speed logging.</td>
+                </tr>
+                <tr>
+                  <td><strong>AI Training & Rendering</strong></td>
+                  <td><strong>Accelerated (P/G)</strong></td>
+                  <td>Relies on high-end GPUs. Use P-series for deep learning training and G-series for inference and 3D graphics.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </div><!-- /.funnel-wrap -->
 
     <!-- Footer disclaimer -->

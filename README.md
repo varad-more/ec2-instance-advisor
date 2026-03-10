@@ -125,3 +125,14 @@ This publishes the static app directly from `docs/`.
 - Data is snapshot-based, not live streaming.
 - Prices are on-demand and should be verified before production commitments.
 - Great for shortlisting; final sizing should still be validated with workload benchmarks.
+
+
+## Typical Workload Mapping
+
+| Workload Type | Recommended Family | Characteristics |
+|---|---|---|
+| Web & App Servers | General Purpose (M/T) | Balanced CPU and memory. Use T-series (burstable) for dev/test and M-series for steady production traffic. |
+| High-Traffic APIs & HPC | Compute Optimized (C) | High vCPU-to-memory ratio. Best for scientific modeling, batch processing, and dedicated game servers. |
+| In-Memory Databases | Memory Optimized (R/X) | High RAM-to-vCPU ratio (8:1 or higher). Ideal for Redis, SAP HANA, and real-time big data analytics. |
+| NoSQL & Data Warehousing | Storage Optimized (I/D) | Uses local NVMe SSDs for millions of low-latency IOPS. Essential for MongoDB, Cassandra, and high-speed logging. |
+| AI Training & Rendering | Accelerated (P/G) | Relies on high-end GPUs. Use P-series for deep learning training and G-series for inference and 3D graphics. |
