@@ -137,6 +137,7 @@
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 2px 20px rgba(0, 0, 0, .25);
+      overflow: hidden;
     }
 
     .nav-brand {
@@ -225,11 +226,15 @@
       }
     }
 
-    @media (max-width: 600px) {
+    /* Chips only appear alongside labels on very wide screens (>1500px).
+       Below that, labels + chips together overflow a typical 1280-1440px nav. */
+    @media (max-width: 1500px) {
       .nav-chip.hide-sm {
         display: none;
       }
+    }
 
+    @media (max-width: 600px) {
       .nav-brand span.text {
         display: none;
       }
@@ -2405,13 +2410,8 @@
       box-shadow: 0 2px 10px rgba(99, 102, 241, .5);
     }
 
-    @media (max-width: 900px) {
-      .step-lbl {
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 820px) {
+    /* Hide text labels — icon-only nav up to 1270px (labels fit cleanly above that) */
+    @media (max-width: 1270px) {
       .step-lbl {
         display: none;
       }
@@ -2672,8 +2672,10 @@
       grid-template-columns: 1.6fr 1fr;
     }
 
-    /* Balanced 3-col footer (Brand | Open Source | Shortcuts) */
-    .footer-grid-3col {
+    /* Balanced 3-col footer (Brand | Open Source | Shortcuts)
+       Uses compound selector (.footer-grid.footer-grid-3col) to beat the base
+       .footer-grid @media overrides that come later in the file. */
+    .footer-grid.footer-grid-3col {
       grid-template-columns: 1.25fr 1fr 1fr;
       gap: 44px;
     }
@@ -2684,7 +2686,7 @@
         gap: 32px;
       }
 
-      .footer-grid-3col {
+      .footer-grid.footer-grid-3col {
         grid-template-columns: 1fr;
         gap: 28px;
       }
