@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://varad-more.github.io/ec2-instance-advisor/sitemap.xml

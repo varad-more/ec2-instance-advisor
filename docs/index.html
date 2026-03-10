@@ -5,2441 +5,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EC2 Instance Advisor | Find the right instance for your workload</title>
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="EC2 Instance Advisor | Find the right instance for your workload" />
+  <meta name="description"
+    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload based on CPU, GPU, memory, and storage needs." />
+  <meta name="keywords"
+    content="AWS, EC2, Amazon Web Services, cloud computing, EC2 instance types, cloud architecture, EC2 advisor, find EC2 instance" />
+  <meta name="author" content="Varad More" />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="canonical" href="https://varad-more.github.io/ec2-instance-advisor/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://varad-more.github.io/ec2-instance-advisor/" />
+  <meta property="og:title" content="EC2 Instance Advisor | Find the right instance for your workload" />
+  <meta property="og:description"
+    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
+  <meta property="og:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://varad-more.github.io/ec2-instance-advisor/" />
+  <meta property="twitter:title" content="EC2 Instance Advisor | Find the right instance for your workload" />
+  <meta property="twitter:description"
+    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
+  <meta property="twitter:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <style>
-    /* ── Design tokens ──────────────────────────────────── */
-    :root {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --ink: #0f172a;
-      --ink-2: #1e293b;
-      --muted: #64748b;
-      --line: #e2e8f0;
-      --accent: #4f46e5;
-      --accent-lt: #818cf8;
-      --accent-bg: #eef2ff;
-      --success: #059669;
-      --warn: #d97706;
-      --sh-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
-      --sh: 0 4px 20px rgba(15, 23, 42, .08);
-      --sh-lg: 0 12px 40px rgba(15, 23, 42, .13);
-      --r: 14px;
-      --r-sm: 8px;
-      --cpu-c: #3b82f6;
-      --cpu-bg: #eff6ff;
-      --gpu-c: #8b5cf6;
-      --gpu-bg: #f5f3ff;
-      --mem-c: #10b981;
-      --mem-bg: #ecfdf5;
-      --sto-c: #f59e0b;
-      --sto-bg: #fffbeb;
-      --gen-c: #6b7280;
-      --gen-bg: #f9fafb;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
-        'Segoe UI', Roboto, Arial, sans-serif;
-      color: var(--ink);
-      background: var(--bg);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── Loader ─────────────────────────────────────────── */
-    #loader {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid rgba(99, 102, 241, .3);
-      border-top-color: #818cf8;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    #loader strong {
-      color: #818cf8;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: -.02em;
-    }
-
-    #loader p {
-      color: #64748b;
-      font-size: 13px;
-    }
-
-    /* ── Toast ───────────────────────────────────────────── */
-    #toastShelf {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      pointer-events: none;
-    }
-
-    .toast {
-      background: var(--ink);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: var(--sh-lg);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity .22s, transform .22s;
-      pointer-events: none;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ── App ─────────────────────────────────────────────── */
-    #app {
-      opacity: 0;
-    }
-
-    .site-nav {
-      position: sticky;
-      top: 0;
-      z-index: 80;
-      background: rgba(255, 255, 255, .8);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid rgba(226, 232, 240, .6);
-      padding: 0 36px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, .02), 0 4px 12px rgba(15, 23, 42, .04);
-    }
-
-    .nav-brand {
-      font-size: 17px;
-      font-weight: 900;
-      letter-spacing: -.03em;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-brand-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      box-shadow: 0 2px 8px rgba(79, 70, 229, .3);
-    }
-
-    .nav-brand em {
-      font-style: normal;
-      color: var(--accent);
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .nav-chip {
-      font-size: 11.5px;
-      font-weight: 700;
-      letter-spacing: .03em;
-      color: var(--muted);
-      background: rgba(241, 245, 249, .6);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 5px 12px;
-    }
-
-    .nav-chip.warn {
-      color: #92400e;
-      background: #fffbeb;
-      border-color: #fde68a;
-    }
-
-    .nav-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #fff;
-      background: var(--ink);
-      border: 1px solid var(--ink);
-      border-radius: 999px;
-      padding: 7px 16px;
-      cursor: pointer;
-      transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
-      font-family: inherit;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, .15);
-    }
-
-    .nav-btn:hover {
-      background: var(--ink-2);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(15, 23, 42, .2);
-    }
-
-    .nav-btn:active {
-      transform: translateY(0);
-    }
-
-    @media (max-width: 768px) {
-      .site-nav {
-        padding: 0 20px;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .nav-chip.hide-sm {
-        display: none;
-      }
-
-      .nav-brand span.text {
-        display: none;
-      }
-    }
-
-    /* ── Hero ────────────────────────────────────────────── */
-    .hero-section {
-      background: linear-gradient(140deg, #0f172a 0%, #1e1b4b 55%, #2d2770 100%);
-      padding: 72px 28px 64px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-section::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234f46e5' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .hero-glow {
-      position: absolute;
-      top: -100px;
-      right: -100px;
-      width: 600px;
-      height: 600px;
-      pointer-events: none;
-      background: radial-gradient(circle, rgba(99, 102, 241, .22) 0%, transparent 65%);
-    }
-
-    .hero-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(99, 102, 241, .2);
-      border: 1px solid rgba(165, 180, 252, .35);
-      color: #a5b4fc;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .09em;
-      text-transform: uppercase;
-      padding: 5px 14px;
-      border-radius: 999px;
-      margin-bottom: 22px;
-    }
-
-    .hero-dot {
-      width: 6px;
-      height: 6px;
-      background: #34d399;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1)
-      }
-
-      50% {
-        opacity: .55;
-        transform: scale(1.35)
-      }
-    }
-
-    .hero-title {
-      font-size: clamp(28px, 4.5vw, 52px);
-      font-weight: 900;
-      letter-spacing: -.04em;
-      line-height: 1.1;
-      color: #fff;
-      margin-bottom: 18px;
-    }
-
-    .hero-title em {
-      font-style: normal;
-      color: #818cf8;
-    }
-
-    .hero-desc {
-      font-size: 15.5px;
-      color: #94a3b8;
-      line-height: 1.75;
-      max-width: 640px;
-      margin-bottom: 38px;
-    }
-
-    .hero-bottom {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 28px;
-      align-items: center;
-    }
-
-    .hero-stats {
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-
-    .hero-stat-val {
-      font-size: 32px;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: -.03em;
-      line-height: 1;
-    }
-
-    .hero-stat-lbl {
-      font-size: 10.5px;
-      font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      margin-top: 4px;
-    }
-
-    .hero-vdivider {
-      width: 1px;
-      height: 52px;
-      background: rgba(255, 255, 255, .1);
-      flex-shrink: 0;
-    }
-
-    .hero-region-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      background: rgba(255, 255, 255, .07);
-      border: 1px solid rgba(255, 255, 255, .12);
-      border-radius: 12px;
-      padding: 12px 18px;
-    }
-
-    .hero-region-lbl {
-      font-size: 11px;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      flex-shrink: 0;
-    }
-
-    #region {
-      background: rgba(255, 255, 255, .12);
-      border: 1px solid rgba(255, 255, 255, .2);
-      color: #e2e8f0;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-family: inherit;
-      cursor: pointer;
-      min-width: 175px;
-      width: auto;
-    }
-
-    #region option {
-      background: #1e293b;
-      color: #e2e8f0;
-    }
-
-    #region:focus {
-      outline: 2px solid rgba(129, 140, 248, .6);
-      outline-offset: 2px;
-      border-color: transparent;
-    }
-
-    .hero-icon-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, .09);
-      border: 1px solid rgba(255, 255, 255, .16);
-      color: #94a3b8;
-      font-size: 17px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .15s;
-      flex-shrink: 0;
-      font-family: inherit;
-    }
-
-    .hero-icon-btn:hover {
-      background: rgba(99, 102, 241, .4);
-      color: #fff;
-      border-color: rgba(165, 180, 252, .4);
-    }
-
-    .hero-icon-btn:active {
-      transform: scale(.92);
-    }
-
-    .hero-region-hint {
-      font-size: 10.5px;
-      color: #475569;
-    }
-
-    @media (max-width: 700px) {
-      .hero-section {
-        padding: 48px 20px 48px;
-      }
-
-      .hero-bottom {
-        gap: 20px;
-      }
-
-      .hero-vdivider {
-        display: none;
-      }
-    }
-
-    /* ── Funnel wrapper ──────────────────────────────────── */
-    .funnel-wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 32px 80px;
-    }
-
-    @media (max-width: 600px) {
-      .funnel-wrap {
-        padding: 0 14px 60px;
-      }
-    }
-
-    /* ── Funnel step ─────────────────────────────────────── */
-    .funnel-step {
-      padding-top: 60px;
-      scroll-margin-top: 70px;
-    }
-
-    .step-hdr {
-      display: flex;
-      gap: 18px;
-      align-items: flex-start;
-      margin-bottom: 28px;
-    }
-
-    .step-num {
-      flex-shrink: 0;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: -.01em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, .32);
-    }
-
-    .step-title {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -.03em;
-      color: var(--ink);
-      margin-bottom: 5px;
-    }
-
-    .step-desc {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.65;
-      max-width: 700px;
-    }
-
-    /* ── Family cards ────────────────────────────────────── */
-    .family-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
-    }
-
-    @media (max-width: 1100px) {
-      .family-cards-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .family-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    /* Card shell */
-    .family-card {
-      background: #fff;
-      border: 2px solid var(--line);
-      border-radius: 14px;
-      padding: 15px 14px 12px;
-      cursor: pointer;
-      transition: border-color .2s, transform .2s, box-shadow .2s;
-      position: relative;
-      overflow: hidden;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Top colour bar */
-    .family-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--fam-color, var(--accent));
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .25s ease;
-    }
-
-    .family-card:hover {
-      border-color: var(--fam-color, var(--accent));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, .10);
-    }
-
-    .family-card:hover::before,
-    .family-card.fc-active::before {
-      transform: scaleX(1);
-    }
-
-    .family-card.fc-active {
-      border-color: var(--fam-color, var(--accent));
-      background: var(--fam-bg, var(--accent-bg));
-    }
-
-    /* Header row: icon + name + badge */
-    .fc-hdr {
-      display: flex;
-      align-items: flex-start;
-      gap: 9px;
-      margin-bottom: 10px;
-    }
-
-    .fc-icon {
-      font-size: 22px;
-      line-height: 1;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .fc-hdr-text {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .fc-name {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--ink);
-      line-height: 1.2;
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .fc-tag-badge {
-      display: inline-block;
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: .04em;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: var(--fam-color, var(--accent));
-      color: #fff;
-    }
-
-    /* Description — clamped to 2 lines */
-    .fc-desc {
-      font-size: 11px;
-      color: #475569;
-      line-height: 1.55;
-      margin-bottom: 9px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* Use-case tags */
-    .fc-uses {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px;
-      margin-bottom: 9px;
-    }
-
-    .fc-use {
-      font-size: 9.5px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      font-weight: 600;
-      white-space: nowrap;
-      background: var(--fam-bg, var(--accent-bg));
-      color: var(--fam-color, var(--accent));
-      border: 1px solid rgba(0, 0, 0, .07);
-    }
-
-    /* Footer row: examples left, count+cta right */
-    .fc-footer {
-      margin-top: auto;
-      padding-top: 8px;
-      border-top: 1px solid rgba(0, 0, 0, .06);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .fc-examples {
-      font-size: 10px;
-      color: var(--muted);
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fc-examples b {
-      color: var(--fam-color, var(--accent));
-      font-weight: 700;
-    }
-
-    .fc-count {
-      font-size: 9.5px;
-      font-weight: 700;
-      color: var(--muted);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .fc-cta {
-      font-size: 9.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--fam-color, var(--accent));
-      opacity: 0;
-      transition: opacity .15s;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .family-card:hover .fc-cta,
-    .family-card.fc-active .fc-cta {
-      opacity: 1;
-    }
-
-    .family-card.fc-active .fc-cta::before {
-      content: '✓ ';
-    }
-
-    /* ── Chart card ──────────────────────────────────────── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--sh);
-    }
-
-    .chart-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--sh);
-      overflow: hidden;
-    }
-
-    .chart-hd {
-      padding: 12px 16px 10px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .chart-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ink-2);
-    }
-
-    .chart-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .chart-body {
-      padding: 4px;
-    }
-
-    /* ── Controls card (inline) ──────────────────────────── */
-    .controls-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--sh);
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .controls-top {
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--line);
-      background: #fafbff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .controls-top-lbl {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    .controls-body {
-      padding: 18px 20px;
-    }
-
-    /* Preset row */
-    .preset-btn {
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink-2);
-      padding: 6px 13px;
-      border-radius: var(--r-sm);
-      font-size: 11.5px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .15s;
-      font-family: inherit;
-      white-space: nowrap;
-    }
-
-    .preset-btn:hover {
-      background: var(--accent-bg);
-      color: var(--accent);
-      border-color: #a5b4fc;
-    }
-
-    .preset-btn:active {
-      transform: scale(.96);
-    }
-
-    .preset-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    /* Category select */
-    #category {
-      width: auto;
-      padding: 7px 12px;
-      font-size: 13px;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      background: #fff;
-      color: var(--ink);
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    #category:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-      border-color: transparent;
-    }
-
-    /* Sliders grid */
-    .sliders-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 36px;
-    }
-
-    @media (max-width: 640px) {
-      .sliders-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .sl-hd {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .sl-hd span {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--ink-2);
-    }
-
-    .sl-val {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 5px;
-      min-width: 36px;
-      text-align: center;
-      transition: background .2s, color .2s;
-    }
-
-    input[type='range'] {
-      width: 100%;
-      cursor: pointer;
-      accent-color: var(--accent);
-    }
-
-    /* Weight bar */
-    .wbar-wrap {
-      grid-column: 1 / -1;
-      margin-top: 6px;
-    }
-
-    .wbar-hd {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10.5px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    #weightBar {
-      height: 7px;
-      border-radius: 999px;
-      overflow: hidden;
-      background: var(--line);
-      display: flex;
-    }
-
-    .wb-seg {
-      height: 100%;
-      transition: width .25s ease;
-    }
-
-    /* ── Charts 2-up ─────────────────────────────────────── */
-    .charts-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 900px) {
-      .charts-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Bar chart header */
-    .bar-hd {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--line);
-      flex-wrap: wrap;
-    }
-
-    .bar-hd-r {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .bar-hd-r label {
-      margin: 0;
-      font-size: 11.5px;
-      color: var(--muted);
-      white-space: nowrap;
-      font-weight: 600;
-    }
-
-    .bar-hd-r select {
-      width: auto;
-      padding: 5px 8px;
-      font-size: 12px;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      background: #fff;
-      color: var(--ink);
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    /* ── Family filter pills ─────────────────────────────── */
-    .family-filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-      padding: 8px 14px 10px;
-      border-bottom: 1px solid var(--line);
-      background: #fafbff;
-    }
-
-    .family-filter-lbl {
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--muted);
-      margin-right: 2px;
-      flex-shrink: 0;
-    }
-
-    .family-pill {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-      user-select: none;
-      font-family: inherit;
-    }
-
-    .family-pill:hover:not(.active) {
-      border-color: var(--pill-color, var(--accent));
-      color: var(--pill-color, var(--accent));
-      background: var(--accent-bg);
-    }
-
-    .family-pill.active {
-      background: var(--pill-color, var(--accent));
-      color: #fff;
-      border-color: var(--pill-color, var(--accent));
-    }
-
-    .family-pill.pill-all.active {
-      background: var(--ink);
-      border-color: var(--ink);
-    }
-
-    /* None / clear pill */
-    .family-pill.pill-none {
-      border-style: dashed;
-      margin-left: 4px;
-    }
-
-    .family-pill.pill-none:hover:not(.active) {
-      border-color: #ef4444;
-      color: #ef4444;
-      background: #fef2f2;
-      border-style: solid;
-    }
-
-    .family-pill.pill-none.active {
-      background: #64748b;
-      color: #fff;
-      border-color: #64748b;
-      border-style: solid;
-    }
-
-    /* ── KPI strip ───────────────────────────────────────── */
-    .kpi-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 900px) {
-      .kpi-strip {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .kpi {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      padding: 13px 14px;
-      box-shadow: var(--sh-sm);
-      position: relative;
-      overflow: hidden;
-      transition: box-shadow .2s, transform .2s;
-    }
-
-    .kpi:hover {
-      box-shadow: var(--sh);
-      transform: translateY(-1px);
-    }
-
-    .kpi::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      border-radius: var(--r-sm) var(--r-sm) 0 0;
-    }
-
-    .kpi:nth-child(1)::before {
-      background: var(--accent);
-    }
-
-    .kpi:nth-child(2)::before {
-      background: var(--success);
-    }
-
-    .kpi:nth-child(3)::before {
-      background: #f59e0b;
-    }
-
-    .kpi:nth-child(4)::before {
-      background: #8b5cf6;
-    }
-
-    .kpi-lbl {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .kpi-val {
-      font-size: 21px;
-      font-weight: 900;
-      color: var(--ink);
-      letter-spacing: -.02em;
-      line-height: 1;
-    }
-
-    .kpi-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* ── Rec hero ────────────────────────────────────────── */
-    .rec-hero {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--sh-lg);
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-
-    .rec-hero-accent {
-      height: 4px;
-      transition: background .35s;
-    }
-
-    .rec-hero-inner {
-      display: grid;
-      grid-template-columns: 1fr 210px;
-    }
-
-    .rec-hero-left {
-      padding: 20px 22px;
-      border-right: 1px solid var(--line);
-    }
-
-    .rec-hero-right {
-      padding: 20px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: linear-gradient(160deg, #fafbff 0%, #eef2ff 100%);
-    }
-
-    .rec-hero.error-state .rec-hero-accent {
-      background: #ef4444 !important;
-    }
-
-    .rec-hero.error-state .rec-hero-left {
-      background: #fff8f8;
-    }
-
-    .rec-hero.error-state .rec-hero-right {
-      display: none;
-    }
-
-    .rec-eyebrow {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .copy-rec-btn {
-      background: var(--accent-bg);
-      border: 1px solid #c7d2fe;
-      color: var(--accent);
-      padding: 4px 11px;
-      border-radius: var(--r-sm);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background .15s;
-      font-family: inherit;
-    }
-
-    .copy-rec-btn:hover {
-      background: #e0e7ff;
-    }
-
-    .rec-name {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: -.04em;
-      line-height: 1;
-      color: var(--ink);
-      margin-bottom: 10px;
-    }
-
-    .rec-tags {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .rtag {
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 11.5px;
-      font-weight: 600;
-      border: 1px solid var(--line);
-      color: var(--ink-2);
-      background: var(--bg);
-    }
-
-    .rec-stats {
-      display: flex;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      overflow: hidden;
-    }
-
-    .rec-stat {
-      flex: 1;
-      min-width: 0;
-      padding: 10px 8px;
-      text-align: center;
-      border-right: 1px solid var(--line);
-      transition: background .15s;
-    }
-
-    .rec-stat:last-child {
-      border-right: none;
-    }
-
-    .rec-stat:hover {
-      background: var(--accent-bg);
-    }
-
-    .rec-stat-val {
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: -.02em;
-      color: var(--ink);
-      line-height: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .rec-stat-lbl {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    .rec-why {
-      font-size: 11.5px;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--line);
-    }
-
-    .rec-why b {
-      color: var(--ink-2);
-    }
-
-    .score-ring-wrap {
-      position: relative;
-      width: 96px;
-      height: 96px;
-      flex-shrink: 0;
-    }
-
-    .score-ring-val {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .score-ring-num {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -.04em;
-      color: var(--ink);
-      line-height: 1;
-    }
-
-    .score-ring-sub {
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .rec-rank-txt {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.6;
-    }
-
-    .rec-rank-txt strong {
-      display: block;
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--ink);
-    }
-
-    .rec-cat-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-    }
-
-    @media (max-width: 700px) {
-      .rec-hero-inner {
-        grid-template-columns: 1fr;
-      }
-
-      .rec-hero-left {
-        border-right: none;
-      }
-
-      .rec-hero-right {
-        flex-direction: row;
-        justify-content: flex-start;
-        border-top: 1px solid var(--line);
-        padding: 14px 22px;
-      }
-
-      .rec-name {
-        font-size: 26px;
-      }
-    }
-
-    /* ── Compare panel ───────────────────────────────────── */
-    .cmp-panel {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--r);
-      box-shadow: var(--sh);
-      overflow: hidden;
-      display: none;
-      margin-bottom: 14px;
-    }
-
-    .cmp-panel.visible {
-      display: block;
-    }
-
-    .cmp-hd {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(90deg, #f0f4ff 0%, #eef2ff 100%);
-    }
-
-    .cmp-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-
-    .cmp-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .cmp-close {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      border: 1px solid var(--line);
-      background: #fff;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      transition: all .15s;
-      flex-shrink: 0;
-      font-family: inherit;
-    }
-
-    .cmp-close:hover {
-      background: #fee2e2;
-      color: #dc2626;
-      border-color: #fca5a5;
-    }
-
-    .cmp-body {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-    }
-
-    .cmp-specs {
-      padding: 14px 16px;
-      border-right: 1px solid var(--line);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .cmp-spec-lbl {
-      font-size: 9.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--muted);
-      margin-bottom: 2px;
-    }
-
-    .cmp-spec-val {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--ink);
-    }
-
-    .cmp-spec-sub {
-      font-size: 10.5px;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
-    @media (max-width: 768px) {
-      .cmp-body {
-        grid-template-columns: 1fr;
-      }
-
-      .cmp-specs {
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px 20px;
-      }
-    }
-
-    /* ── Family Highlights ────────────────────────────────── */
-    .fh-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-    }
-
-    .fh-card {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px;
-      background: var(--surface);
-    }
-
-    .fh-card-hdr {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--line);
-    }
-
-    .fh-card-icon {
-      font-size: 18px;
-    }
-
-    .fh-card-name {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: -.02em;
-      color: var(--ink);
-    }
-
-    .fh-card-count {
-      font-size: 10px;
-      color: var(--muted);
-      margin-left: auto;
-      font-weight: 600;
-    }
-
-    .fh-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 7px 0;
-    }
-
-    .fh-row+.fh-row {
-      border-top: 1px solid rgba(0, 0, 0, .04);
-    }
-
-    .fh-row-badge {
-      font-size: 8.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      padding: 2px 6px;
-      border-radius: 4px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .fh-row-badge.cheapest {
-      background: #ecfdf5;
-      color: #065f46;
-    }
-
-    .fh-row-badge.powerful {
-      background: #eff6ff;
-      color: #1e40af;
-    }
-
-    .fh-row-badge.value {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .fh-row-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .fh-row-name {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .fh-row-stat {
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    @media (max-width: 900px) {
-      .fh-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .fh-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    /* ── Table ───────────────────────────────────────────── */
-    .table-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .table-search {
-      flex: 1;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      padding: 7px 12px 7px 32px;
-      font-size: 12px;
-      color: var(--ink);
-      background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%2394a3b8' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
-      transition: border-color .15s;
-      font-family: inherit;
-    }
-
-    .table-search:focus {
-      outline: none;
-      border-color: var(--accent);
-      background-color: #fff;
-    }
-
-    .table-count {
-      font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .table-wrap {
-      max-height: 420px;
-      overflow: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    thead th {
-      background: #f8fafc;
-      color: var(--muted);
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      border-bottom: 1px solid var(--line);
-      padding: 9px 10px;
-      text-align: left;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-
-    td {
-      border-bottom: 1px solid #f1f5f9;
-      padding: 8px 10px;
-      color: var(--ink-2);
-    }
-
-    tbody tr {
-      transition: background .12s;
-    }
-
-    tbody tr:hover {
-      background: #f1f5f9;
-    }
-
-    tbody tr.rank-1 td {
-      background: #fefce8;
-    }
-
-    tbody tr.rank-1:hover td {
-      background: #fef9c3;
-    }
-
-    .cat-pill {
-      font-size: 10.5px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    .score-cell {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .score-bar {
-      height: 4px;
-      border-radius: 999px;
-      flex-shrink: 0;
-      transition: width .35s ease;
-    }
-
-    .score-num {
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    /* ── Calculator ──────────────────────────────────────── */
-    .calc-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    @media (max-width: 700px) {
-      .calc-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    .calc-input-wrap label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--ink-2);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .calc-inp {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: var(--r-sm);
-      padding: 8px 10px;
-      font-size: 13px;
-      color: var(--ink);
-      transition: border-color .15s;
-      font-family: inherit;
-    }
-
-    .calc-inp:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .calc-result {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      padding: 14px;
-      border-radius: var(--r-sm);
-      background: var(--accent-bg);
-      border: 1px solid #c7d2fe;
-    }
-
-    @media (max-width: 500px) {
-      .calc-result {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .cr-item {
-      text-align: center;
-    }
-
-    .cr-lbl {
-      font-size: 10.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .cr-val {
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--accent);
-      transition: color .2s;
-    }
-
-    .cr-val.dark {
-      color: var(--ink);
-    }
-
-    /* ── Shared utilities ────────────────────────────────── */
-    .sec-title {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-    }
-
-    label {
-      display: block;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--ink-2);
-      margin-bottom: 5px;
-    }
-
-    kbd {
-      display: inline-block;
-      font-size: 9.5px;
-      font-family: inherit;
-      background: rgba(0, 0, 0, .07);
-      border: 1px solid rgba(0, 0, 0, .12);
-      border-radius: 4px;
-      padding: 1px 4px;
-    }
-
-    /* ── Nav step jumps ──────────────────────────────────── */
-    .nav-steps {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      margin: 0 auto;
-    }
-
-    .nav-step-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      height: 28px;
-      border-radius: 999px;
-      padding: 0 10px 0 2px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .2s;
-      font-family: inherit;
-    }
-
-    .step-no {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--muted);
-      transition: all .2s;
-    }
-
-    .step-lbl {
-      font-size: 11.5px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .nav-step-btn:hover {
-      background: var(--accent-bg);
-      color: var(--accent);
-    }
-
-    .nav-step-btn:hover .step-no {
-      background: #fff;
-      color: var(--accent);
-    }
-
-    .nav-step-btn.ns-active {
-      background: var(--accent-bg);
-      color: var(--ink);
-      border-color: #c7d2fe;
-      box-shadow: 0 2px 6px rgba(79, 70, 229, .1);
-    }
-
-    .nav-step-btn.ns-active .step-no {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(79, 70, 229, .3);
-    }
-
-    @media (max-width: 900px) {
-      .step-lbl {
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 820px) {
-      .step-lbl {
-        display: none;
-      }
-
-      .nav-step-btn {
-        padding: 0 2px;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .nav-steps {
-        display: none;
-      }
-    }
-
-    /* ═══════════════════════════════════════════════════════
-       COMPREHENSIVE MOBILE STYLES
-    ═══════════════════════════════════════════════════════ */
-
-    /* Small phones (≤480px) */
-    @media (max-width: 480px) {
-
-      /* Hero */
-      .hero-section {
-        padding: 40px 16px 36px;
-      }
-
-      .hero-title {
-        font-size: clamp(22px, 8vw, 34px);
-        letter-spacing: -.02em;
-      }
-
-      .hero-desc {
-        font-size: 14px;
-        margin-bottom: 24px;
-      }
-
-      .hero-stats {
-        gap: 18px;
-      }
-
-      .hero-stat-val {
-        font-size: 24px;
-      }
-
-      /* Steps */
-      .funnel-step {
-        padding-top: 40px;
-        scroll-margin-top: 60px;
-      }
-
-      .step-hdr {
-        gap: 12px;
-        margin-bottom: 18px;
-      }
-
-      .step-title {
-        font-size: 18px;
-      }
-
-      .step-desc {
-        font-size: 13px;
-      }
-
-      .step-num {
-        width: 34px;
-        height: 34px;
-        font-size: 12px;
-        border-radius: 10px;
-      }
-
-      /* Family cards */
-      .family-cards-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      /* Controls */
-      .controls-body {
-        padding: 14px 14px;
-      }
-
-      /* Chart bodies - shorter on mobile */
-      #chart5 {
-        height: 220px !important;
-      }
-
-      #chart {
-        height: 220px !important;
-      }
-
-      #chart2 {
-        height: 220px !important;
-      }
-
-      #chart3 {
-        height: 240px !important;
-      }
-
-      #chart4 {
-        height: 200px !important;
-      }
-
-      #chart6 {
-        height: 240px !important;
-      }
-
-      /* Family highlights - 2 cols */
-      .fh-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .fh-card {
-        padding: 10px;
-      }
-
-      .fh-row-badge {
-        font-size: 7.5px;
-      }
-
-      /* KPI strip */
-      .kpi-strip {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      /* Calc result */
-      .calc-result {
-        grid-template-columns: 1fr;
-      }
-
-      /* Table */
-      .table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .table-toolbar {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .table-toolbar input {
-        font-size: 13px;
-        min-width: 0;
-      }
-
-      /* Footer */
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-
-      .footer-bottom {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .footer-disclaimer {
-        width: 100%;
-        justify-content: flex-start;
-      }
-
-      /* Compare panel */
-      .cmp-body {
-        grid-template-columns: 1fr;
-      }
-
-      /* Navbar */
-      .site-nav {
-        padding: 0 14px;
-        height: 52px;
-      }
-
-      .nav-actions {
-        gap: 8px;
-      }
-    }
-
-    /* Mid-size phones (481px–600px) */
-    @media (min-width: 481px) and (max-width: 600px) {
-      .hero-title {
-        font-size: clamp(26px, 6vw, 38px);
-      }
-
-      .hero-desc {
-        font-size: 14.5px;
-      }
-
-      .fh-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      #chart5 {
-        height: 250px !important;
-      }
-
-      #chart3 {
-        height: 270px !important;
-      }
-
-      .footer-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .footer-bottom {
-        flex-wrap: wrap;
-      }
-    }
-
-    /* All phones (≤600px) generic */
-    @media (max-width: 600px) {
-
-      /* Prevent horizontal overflow */
-      body {
-        overflow-x: hidden;
-      }
-
-      .funnel-wrap {
-        padding: 0 14px 50px;
-      }
-
-      /* Table scrollable */
-      .table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      #table {
-        min-width: 560px;
-      }
-
-      /* Ensure charts don't overflow */
-      .chart-card {
-        overflow: hidden;
-      }
-
-      .charts-2 {
-        grid-template-columns: 1fr;
-      }
-
-      /* Navbar chips hidden */
-      .nav-chip.hide-sm {
-        display: none;
-      }
-
-      .nav-brand span.text {
-        display: none;
-      }
-    }
-
-    /* ── Back to top ─────────────────────────────────────── */
-    #backToTop {
-      position: fixed;
-      bottom: 28px;
-      right: 24px;
-      z-index: 70;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(79, 70, 229, .38);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(10px);
-      transition: opacity .25s, transform .25s;
-      font-family: inherit;
-    }
-
-    #backToTop.btt-visible {
-      opacity: 1;
-      pointer-events: all;
-      transform: translateY(0);
-    }
-
-    #backToTop:hover {
-      background: #4338ca;
-      transform: translateY(-2px) !important;
-    }
-
-    /* ── Load more btn ───────────────────────────────────── */
-    .load-more-btn {
-      display: block;
-      width: 100%;
-      padding: 11px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      background: var(--accent-bg);
-      border: none;
-      border-top: 1px solid #c7d2fe;
-      cursor: pointer;
-      transition: background .15s;
-      font-family: inherit;
-      letter-spacing: .02em;
-    }
-
-    .load-more-btn:hover {
-      background: #e0e7ff;
-    }
-
-    /* ── Animations ──────────────────────────────────────── */
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(16px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .fade-up {
-      animation: fadeUp .4s ease both;
-    }
-
-    .fade-up-1 {
-      animation: fadeUp .4s .06s ease both;
-    }
-
-    .fade-up-2 {
-      animation: fadeUp .4s .14s ease both;
-    }
-
-    .fade-up-3 {
-      animation: fadeUp .4s .22s ease both;
-    }
-
-    /* ── Site Footer ─────────────────────────────────── */
-    .site-footer {
-      background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%);
-      border-top: 1px solid rgba(99, 102, 241, .18);
-      padding: 64px 28px 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .site-footer::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234f46e5' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .footer-glow {
-      position: absolute;
-      bottom: -80px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 300px;
-      pointer-events: none;
-      background: radial-gradient(ellipse, rgba(99, 102, 241, .14) 0%, transparent 70%);
-    }
-
-    .footer-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1.2fr;
-      gap: 48px;
-      padding-bottom: 48px;
-    }
-
-    @media (max-width: 900px) {
-      .footer-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 36px;
-      }
-    }
-
-    @media (max-width: 540px) {
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 28px;
-      }
-
-      .site-footer {
-        padding: 48px 20px 0;
-      }
-    }
-
-    /* Brand column */
-    .footer-brand {
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -.04em;
-      color: #fff;
-      margin-bottom: 12px;
-    }
-
-    .footer-brand em {
-      font-style: normal;
-      color: #818cf8;
-    }
-
-    .footer-tagline {
-      font-size: 13px;
-      color: #64748b;
-      line-height: 1.7;
-      max-width: 260px;
-      margin-bottom: 20px;
-    }
-
-    .footer-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(99, 102, 241, .15);
-      border: 1px solid rgba(165, 180, 252, .25);
-      color: #a5b4fc;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .06em;
-      padding: 5px 13px;
-      border-radius: 999px;
-    }
-
-    .footer-badge-dot {
-      width: 6px;
-      height: 6px;
-      background: #34d399;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    /* Section headings */
-    .footer-section-title {
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: #475569;
-      margin-bottom: 16px;
-    }
-
-    /* Links */
-    .footer-links {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .footer-links a {
-      font-size: 13px;
-      color: #94a3b8;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      transition: color .15s;
-    }
-
-    .footer-links a:hover {
-      color: #818cf8;
-    }
-
-    .footer-links a .fl-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, .05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    /* Stat pills */
-    .footer-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .footer-stat {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 9px 13px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, .04);
-      border: 1px solid rgba(255, 255, 255, .07);
-    }
-
-    .footer-stat-label {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #64748b;
-    }
-
-    .footer-stat-val {
-      font-size: 13px;
-      font-weight: 800;
-      color: #e2e8f0;
-    }
-
-    /* Keyboard shortcuts */
-    .footer-kbds {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .footer-kbd-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .footer-kbd-key {
-      font-size: 10px;
-      font-family: inherit;
-      background: rgba(255, 255, 255, .07);
-      border: 1px solid rgba(255, 255, 255, .12);
-      border-radius: 5px;
-      padding: 3px 7px;
-      color: #94a3b8;
-      font-weight: 700;
-      letter-spacing: .03em;
-      flex-shrink: 0;
-    }
-
-    .footer-kbd-desc {
-      font-size: 12px;
-      color: #64748b;
-    }
-
-    /* Divider */
-    .footer-divider {
-      border: none;
-      border-top: 1px solid rgba(255, 255, 255, .07);
-      margin: 0;
-    }
-
-    /* Bottom bar */
-    .footer-bottom {
-      padding: 18px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .footer-copy {
-      font-size: 12px;
-      color: #94a3b8;
-    }
-
-    .footer-copy a {
-      color: #cbd5e1;
-      text-decoration: none;
-    }
-
-    .footer-copy a:hover {
-      color: #818cf8;
-    }
-
-    .footer-disclaimer {
-      font-size: 11px;
-      color: #facc15;
-      background: rgba(234, 179, 8, .08);
-      border: 1px solid rgba(234, 179, 8, .2);
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -2464,27 +62,110 @@
       </div>
       <div class="nav-steps" id="navSteps">
         <button class="nav-step-btn" data-step="step-families" onclick="scrollToStep('step-families')"
-          title="Understand Instance Families">
-          <span class="step-no">01</span><span class="step-lbl">Overview</span>
+          title="Instance Families">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg></span><span class="step-lbl">Families</span>
         </button>
         <button class="nav-step-btn" data-step="step-agg" onclick="scrollToStep('step-agg')"
           title="Family-Level Comparison">
-          <span class="step-no">02</span><span class="step-lbl">Compare</span>
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg></span><span class="step-lbl">Compare</span>
         </button>
         <button class="nav-step-btn" data-step="step-drill" onclick="scrollToStep('step-drill')"
           title="Set Priorities &amp; Drill Down">
-          <span class="step-no">03</span><span class="step-lbl">Priorities</span>
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14" />
+              <line x1="4" y1="10" x2="4" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12" y2="3" />
+              <line x1="20" y1="21" x2="20" y2="16" />
+              <line x1="20" y1="12" x2="20" y2="3" />
+              <line x1="1" y1="14" x2="7" y2="14" />
+              <line x1="9" y1="8" x2="15" y2="8" />
+              <line x1="17" y1="16" x2="23" y2="16" />
+            </svg></span><span class="step-lbl">Priorities</span>
         </button>
+        <span class="nav-divider"></span>
         <button class="nav-step-btn" data-step="step-rec" onclick="scrollToStep('step-rec')" title="Your Best Match">
-          <span class="step-no">04</span><span class="step-lbl">Top Match</span>
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg></span><span class="step-lbl">Top Match</span>
         </button>
         <button class="nav-step-btn" data-step="step-browse" onclick="scrollToStep('step-browse')"
           title="Browse All Candidates">
-          <span class="step-no">05</span><span class="step-lbl">Browse All</span>
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg></span><span class="step-lbl">Browse</span>
         </button>
         <button class="nav-step-btn" data-step="step-calc" onclick="scrollToStep('step-calc')"
-          title="Estimate Monthly Costs">
-          <span class="step-no">06</span><span class="step-lbl">Calculator</span>
+          title="Monthly Cost Calculator">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" />
+              <line x1="8" y1="6" x2="16" y2="6" />
+              <line x1="8" y1="10" x2="8" y2="10.01" />
+              <line x1="12" y1="10" x2="12" y2="10.01" />
+              <line x1="16" y1="10" x2="16" y2="10.01" />
+              <line x1="8" y1="14" x2="8" y2="14.01" />
+              <line x1="12" y1="14" x2="12" y2="14.01" />
+              <line x1="16" y1="14" x2="16" y2="14.01" />
+              <line x1="8" y1="18" x2="8" y2="18.01" />
+              <line x1="12" y1="18" x2="12" y2="18.01" />
+              <line x1="16" y1="18" x2="16" y2="18.01" />
+            </svg></span><span class="step-lbl">Cost</span>
+        </button>
+        <span class="nav-divider"></span>
+        <button class="nav-step-btn" data-step="step-methodology" onclick="scrollToStep('step-methodology')"
+          title="Scoring Methodology">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg></span><span class="step-lbl">Methods</span>
+        </button>
+        <button class="nav-step-btn" data-step="step-workload-map" onclick="scrollToStep('step-workload-map')"
+          title="Workload Mapping Guide">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+              <line x1="8" y1="2" x2="8" y2="18" />
+              <line x1="16" y1="6" x2="16" y2="22" />
+            </svg></span><span class="step-lbl">Workloads</span>
+        </button>
+        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
+          title="Instance Architecture Reference">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg></span><span class="step-lbl">Arch</span>
+        </button>
+        <button class="nav-step-btn" data-step="step-bibliography" onclick="scrollToStep('step-bibliography')"
+          title="References & Resources">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg></span><span class="step-lbl">Refs</span>
         </button>
       </div>
       <div class="nav-actions">
@@ -2544,11 +225,18 @@
           <div class="hero-vdivider"></div>
 
           <div class="hero-region-wrap">
-            <span class="hero-region-lbl">AWS Region</span>
-            <button class="hero-icon-btn" id="prevRegion" title="Previous region (←)">‹</button>
-            <select id="region"></select>
-            <button class="hero-icon-btn" id="nextRegion" title="Next region (→)">›</button>
-            <span class="hero-region-hint" id="regionPage"></span>
+            <span class="hero-region-lbl">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;opacity:.7">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              AWS Region
+            </span>
+            <div class="region-select-wrap">
+              <select id="region"></select>
+            </div>
           </div>
         </div>
 
@@ -2644,54 +332,128 @@
             </div>
           </div>
           <div class="controls-body">
-            <div class="sliders-grid">
-              <div>
-                <div class="sl-hd">
-                  <span>💵 Price</span>
-                  <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">35</span>
+            <div class="prio-label">Click a level to set how important each criterion is for your recommendation</div>
+            <div class="prio-grid">
+
+              <!-- Price -->
+              <div class="prio-card" style="--prio-accent:#3b82f6;--prio-bg:#eff6ff">
+                <div class="prio-card-icon">💵</div>
+                <div class="prio-card-body">
+                  <div class="prio-card-hd">
+                    <div class="prio-card-name">Price Efficiency</div>
+                    <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">35</span>
+                  </div>
+                  <div class="prio-card-desc">Favor instances with the lowest hourly cost</div>
+                  <input id="wPrice" type="hidden" value="35" />
+                  <div class="seg-bar" data-for="wPrice">
+                    <button class="seg" data-val="0">Off</button>
+                    <button class="seg" data-val="10">Low</button>
+                    <button class="seg seg-active" data-val="25">Med</button>
+                    <button class="seg" data-val="50">High</button>
+                    <button class="seg" data-val="100">Max</button>
+                  </div>
                 </div>
-                <input id="wPrice" type="range" min="0" max="100" value="35" />
               </div>
-              <div>
-                <div class="sl-hd">
-                  <span>⚙️ CPU</span>
-                  <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">25</span>
+
+              <!-- CPU -->
+              <div class="prio-card" style="--prio-accent:#60a5fa;--prio-bg:#eff6ff">
+                <div class="prio-card-icon">⚙️</div>
+                <div class="prio-card-body">
+                  <div class="prio-card-hd">
+                    <div class="prio-card-name">Compute (vCPUs)</div>
+                    <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">25</span>
+                  </div>
+                  <div class="prio-card-desc">Prioritize raw CPU power and core count</div>
+                  <input id="wCpu" type="hidden" value="25" />
+                  <div class="seg-bar" data-for="wCpu">
+                    <button class="seg" data-val="0">Off</button>
+                    <button class="seg" data-val="10">Low</button>
+                    <button class="seg seg-active" data-val="25">Med</button>
+                    <button class="seg" data-val="50">High</button>
+                    <button class="seg" data-val="100">Max</button>
+                  </div>
                 </div>
-                <input id="wCpu" type="range" min="0" max="100" value="25" />
               </div>
-              <div>
-                <div class="sl-hd">
-                  <span>🧠 Memory</span>
-                  <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">20</span>
+
+              <!-- Memory -->
+              <div class="prio-card" style="--prio-accent:#10b981;--prio-bg:#ecfdf5">
+                <div class="prio-card-icon">🧠</div>
+                <div class="prio-card-body">
+                  <div class="prio-card-hd">
+                    <div class="prio-card-name">Memory (RAM)</div>
+                    <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">20</span>
+                  </div>
+                  <div class="prio-card-desc">Weight for available RAM capacity (GiB)</div>
+                  <input id="wMem" type="hidden" value="20" />
+                  <div class="seg-bar" data-for="wMem">
+                    <button class="seg" data-val="0">Off</button>
+                    <button class="seg seg-active" data-val="10">Low</button>
+                    <button class="seg" data-val="25">Med</button>
+                    <button class="seg" data-val="50">High</button>
+                    <button class="seg" data-val="100">Max</button>
+                  </div>
                 </div>
-                <input id="wMem" type="range" min="0" max="100" value="20" />
               </div>
-              <div>
-                <div class="sl-hd">
-                  <span>🌐 Network</span>
-                  <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">10</span>
+
+              <!-- Network -->
+              <div class="prio-card" style="--prio-accent:#34d399;--prio-bg:#f0fdf4">
+                <div class="prio-card-icon">🌐</div>
+                <div class="prio-card-body">
+                  <div class="prio-card-hd">
+                    <div class="prio-card-name">Network Bandwidth</div>
+                    <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">10</span>
+                  </div>
+                  <div class="prio-card-desc">Importance of network throughput (Gbps)</div>
+                  <input id="wNet" type="hidden" value="10" />
+                  <div class="seg-bar" data-for="wNet">
+                    <button class="seg" data-val="0">Off</button>
+                    <button class="seg seg-active" data-val="10">Low</button>
+                    <button class="seg" data-val="25">Med</button>
+                    <button class="seg" data-val="50">High</button>
+                    <button class="seg" data-val="100">Max</button>
+                  </div>
                 </div>
-                <input id="wNet" type="range" min="0" max="100" value="10" />
               </div>
-              <div>
-                <div class="sl-hd">
-                  <span>🎮 GPU</span>
-                  <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">10</span>
+
+              <!-- GPU -->
+              <div class="prio-card prio-card-full" style="--prio-accent:#8b5cf6;--prio-bg:#f5f3ff">
+                <div class="prio-card-icon">🎮</div>
+                <div class="prio-card-body">
+                  <div class="prio-card-hd">
+                    <div class="prio-card-name">GPU Accelerators</div>
+                    <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">10</span>
+                  </div>
+                  <div class="prio-card-desc">ML, AI, deep learning, and graphics rendering workloads</div>
+                  <input id="wGpu" type="hidden" value="10" />
+                  <div class="seg-bar" data-for="wGpu">
+                    <button class="seg" data-val="0">Off</button>
+                    <button class="seg seg-active" data-val="10">Low</button>
+                    <button class="seg" data-val="25">Med</button>
+                    <button class="seg" data-val="50">High</button>
+                    <button class="seg" data-val="100">Max</button>
+                  </div>
                 </div>
-                <input id="wGpu" type="range" min="0" max="100" value="10" />
               </div>
-              <div class="wbar-wrap">
-                <div class="wbar-hd">
-                  <span>Weight distribution</span>
-                  <span id="weightTotal" style="font-weight:800">100%</span>
-                </div>
-                <div id="weightBar">
-                  <div class="wb-seg" id="wb-price" style="background:#3b82f6"></div>
-                  <div class="wb-seg" id="wb-cpu" style="background:#60a5fa"></div>
-                  <div class="wb-seg" id="wb-mem" style="background:#10b981"></div>
-                  <div class="wb-seg" id="wb-net" style="background:#34d399"></div>
-                  <div class="wb-seg" id="wb-gpu" style="background:#8b5cf6"></div>
-                </div>
+
+            </div>
+            <div class="wbar-wrap">
+              <div class="wbar-hd">
+                <span>Weight distribution</span>
+                <span id="weightTotal" style="font-weight:800">100%</span>
+              </div>
+              <div id="weightBar">
+                <div class="wb-seg" id="wb-price" style="background:#3b82f6"></div>
+                <div class="wb-seg" id="wb-cpu" style="background:#60a5fa"></div>
+                <div class="wb-seg" id="wb-mem" style="background:#10b981"></div>
+                <div class="wb-seg" id="wb-net" style="background:#34d399"></div>
+                <div class="wb-seg" id="wb-gpu" style="background:#8b5cf6"></div>
+              </div>
+              <div class="wbar-legend">
+                <span style="color:#3b82f6">● Price</span>
+                <span style="color:#60a5fa">● CPU</span>
+                <span style="color:#10b981">● Memory</span>
+                <span style="color:#34d399">● Network</span>
+                <span style="color:#8b5cf6">● GPU</span>
               </div>
             </div>
           </div>
@@ -2714,6 +476,21 @@
             </div>
             <div class="chart-body" id="chart3" style="height:320px"></div>
           </div>
+        </div>
+
+        <!-- Parallel Coordinates Chart -->
+        <div class="chart-card parallel-coord-card">
+          <div class="chart-hd">
+            <div class="chart-title">Parallel Coordinates: Multi-Dimensional Instance Comparison</div>
+            <div class="chart-sub">Each line represents one instance. Drag along any axis to filter by range. Axes:
+              Price, vCPUs, Memory, Network, Composite Score.</div>
+          </div>
+          <div class="chart-body" id="chartParallel" style="height:360px"></div>
+          <!-- Custom Legend for Parcoords -->
+          <div id="parcoordsLegend" style="
+            display:flex; flex-wrap:nowrap; overflow-x:auto; gap:6px; padding:8px 16px 12px; margin-top:-10px;
+            scrollbar-width:none; -ms-overflow-style:none; white-space:nowrap; border-top:1px solid var(--line);
+          "></div>
         </div>
 
         <!-- Bar chart -->
@@ -2837,8 +614,43 @@
           </div>
         </div>
 
+        <!-- Score Breakdown: Stacked Bar Chart -->
+        <div class="score-breakdown-card">
+          <div class="score-breakdown-hd">
+            <div>
+              <div class="chart-title">Score Breakdown: Why This Instance?</div>
+              <div class="chart-sub">Stacked bar shows each criterion's contribution to the total weighted score. Wider
+                segments indicate higher influence from your priority settings.</div>
+            </div>
+          </div>
+          <div class="score-breakdown-body" id="scoreBreakdownBody"></div>
+          <div class="sb-legend" id="scoreBreakdownLegend"></div>
+        </div>
+
+        <!-- NLG Explainability Panel -->
+        <div class="nlg-panel">
+          <div class="nlg-hdr">
+            <div class="nlg-icon">💡</div>
+            <div class="nlg-title">AI Insight: Why This Recommendation?</div>
+          </div>
+          <div class="nlg-text" id="nlgText">
+            Adjust the weight sliders above to see a personalized explanation of why a specific instance was
+            recommended.
+          </div>
+        </div>
+
+        <!-- Top 5 Runners-Up -->
+        <div style="margin-top:20px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em">Top 5 Runners-Up</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:600">Next best candidates ranked by your weighted
+              criteria</div>
+          </div>
+          <div class="runners-grid" id="runnersGrid"></div>
+        </div>
+
         <!-- Regional price chart -->
-        <div class="chart-card">
+        <div class="chart-card" style="margin-top:16px">
           <div class="chart-hd">
             <div class="chart-title" id="regionalTitle">Regional Price Comparison</div>
             <div class="chart-sub">Top recommendation's on-demand price across all available AWS regions</div>
@@ -2877,22 +689,39 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 06 — Cost Estimator
+         STEP 06 — Monthly TCO Estimator
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-calc">
         <div class="step-hdr">
           <div class="step-num">06</div>
           <div>
-            <div class="step-title">Estimate Your Monthly Costs</div>
+            <div class="step-title">Monthly TCO Estimator</div>
             <div class="step-desc">
-              Model real spend based on usage hours, fleet size, and optional EBS storage.
-              Uses the top recommendation's on-demand price. Great for quick budget sanity checks
-              before heading to the AWS Pricing Calculator.
+              Compare billing models side-by-side. Factor in EBS storage type, data egress, and fleet
+              size to get a realistic monthly TCO. Defaults to US-East-1 (Linux/UNIX) pricing.
             </div>
           </div>
         </div>
         <div class="chart-card" style="padding:20px">
-          <div class="calc-grid">
+
+          <!-- ── Billing model toggle ── -->
+          <div class="billing-toggle-row">
+            <span class="billing-toggle-label">Billing Model</span>
+            <div class="billing-toggle" id="billingToggle">
+              <button class="billing-btn active" data-model="ondemand">On-Demand</button>
+              <button class="billing-btn" data-model="reserved1yr">
+                1-Yr Reserved (No Upfront)
+                <span class="billing-badge">~36% off</span>
+              </button>
+              <button class="billing-btn" data-model="savings">
+                Savings Plans
+                <span class="billing-badge">~20% off</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Input grid: compute + storage ── -->
+          <div class="calc-grid" style="grid-template-columns:repeat(4,1fr)">
             <div class="calc-input-wrap">
               <label>Hours / month</label>
               <input id="calcHours" class="calc-inp" type="number" min="1" value="730" />
@@ -2902,44 +731,179 @@
               <input id="calcCount" class="calc-inp" type="number" min="1" value="1" />
             </div>
             <div class="calc-input-wrap">
+              <label>EBS Volume Type</label>
+              <select id="calcEbsType" class="calc-inp calc-select">
+                <option value="gp3">gp3 — $0.08 / GB-mo</option>
+                <option value="gp2">gp2 — $0.10 / GB-mo</option>
+                <option value="io1">io1 — $0.125 / GB-mo</option>
+                <option value="io2">io2 — $0.125 / GB-mo</option>
+                <option value="st1">st1 HDD — $0.045 / GB-mo</option>
+                <option value="sc1">sc1 Cold HDD — $0.015 / GB-mo</option>
+              </select>
+            </div>
+            <div class="calc-input-wrap">
               <label>Storage (GB)</label>
               <input id="calcStorageGb" class="calc-inp" type="number" min="0" value="0" />
             </div>
+          </div>
+
+          <!-- ── Input grid: data egress ── -->
+          <div class="calc-grid" style="grid-template-columns:1fr 2fr;margin-top:0;margin-bottom:12px">
             <div class="calc-input-wrap">
-              <label>Storage $/GB-mo</label>
-              <input id="calcStorageRate" class="calc-inp" type="number" min="0" step="0.001" value="0.08" />
+              <label>Data Egress (GB / month)</label>
+              <input id="calcEgress" class="calc-inp" type="number" min="0" value="0" />
+            </div>
+            <div class="calc-input-wrap" style="display:flex;align-items:flex-end;padding-bottom:1px">
+              <p style="font-size:10.5px;color:var(--muted);margin:0;line-height:1.6">
+                Tiered egress: first 10 TB → $0.09/GB &nbsp;·&nbsp; next 40 TB → $0.085/GB
+                &nbsp;·&nbsp; next 100 TB → $0.07/GB &nbsp;·&nbsp; beyond → $0.05/GB
+              </p>
             </div>
           </div>
-          <div class="calc-result">
-            <div class="cr-item">
-              <div class="cr-lbl">Compute / mo</div>
-              <div class="cr-val" id="crCompute">—</div>
+
+          <!-- ── Effective rate line ── -->
+          <div class="calc-rate-line" id="calcRateLine">
+            Effective rate: <strong id="calcEffRate">—</strong> / hr
+            &nbsp;·&nbsp; Region default: <strong>us-east-1</strong>
+            &nbsp;·&nbsp; Instance: <strong id="calcInstType">—</strong>
+          </div>
+
+          <!-- ── TCO breakdown ── -->
+          <div class="tco-result">
+            <div class="tco-row">
+              <div class="cr-item">
+                <div class="cr-lbl">Compute / mo</div>
+                <div class="cr-val" id="crCompute">—</div>
+              </div>
+              <div class="cr-item">
+                <div class="cr-lbl">Storage / mo</div>
+                <div class="cr-val" id="crStorage">—</div>
+              </div>
+              <div class="cr-item">
+                <div class="cr-lbl">Data Transfer / mo</div>
+                <div class="cr-val" id="crTransfer">—</div>
+              </div>
+              <div class="cr-item tco-total">
+                <div class="cr-lbl">Total TCO / mo</div>
+                <div class="cr-val dark" id="crTotal">—</div>
+              </div>
+              <div class="cr-item">
+                <div class="cr-lbl">Annual estimate</div>
+                <div class="cr-val dark" id="crAnnual">—</div>
+              </div>
             </div>
-            <div class="cr-item">
-              <div class="cr-lbl">Total / mo</div>
-              <div class="cr-val" id="crTotal">—</div>
+
+            <!-- Cost proportion bar -->
+            <div class="tco-bar-wrap" id="tcoBarWrap" style="display:none">
+              <div class="tco-bar">
+                <div class="tco-bar-seg seg-compute" id="tcoBarCompute" style="width:0%"></div>
+                <div class="tco-bar-seg seg-storage" id="tcoBarStorage" style="width:0%"></div>
+                <div class="tco-bar-seg seg-transfer" id="tcoBarTransfer" style="width:0%"></div>
+              </div>
+              <div class="tco-bar-legend">
+                <span><span class="tbl-dot seg-compute"></span>Compute</span>
+                <span><span class="tbl-dot seg-storage"></span>Storage</span>
+                <span><span class="tbl-dot seg-transfer"></span>Data Transfer</span>
+              </div>
             </div>
-            <div class="cr-item">
-              <div class="cr-lbl">Annual estimate</div>
-              <div class="cr-val dark" id="crAnnual">—</div>
+
+            <!-- Savings vs On-Demand badge -->
+            <div class="savings-badge" id="savingsBadge" style="display:none">
+              <span class="savings-icon">💰</span>
+              <span>Saves <strong id="savingsAmt">—</strong> / mo vs On-Demand</span>
+              <span class="savings-pct" id="savingsPct"></span>
             </div>
           </div>
-          <p style="font-size:11px;color:var(--muted);margin-top:10px">
-            On-demand pricing only. Excludes data transfer, support plans, and other AWS service charges.
-            Storage rate example: gp3 ≈ $0.08/GB-mo.
+
+          <p style="font-size:11px;color:var(--muted);margin-top:12px">
+            Pricing based on US-East-1, Linux/UNIX, shared tenancy. Reserved discounts are instance-family
+            weighted averages. Savings Plans reflect 1-year Compute Savings Plan rates. Egress excludes
+            CloudFront, Direct Connect, and inter-region transfers. Always verify on
+            <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
+              style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
           </p>
         </div>
       </section>
 
 
-      <!-- Typical Workload Mapping -->
-      <section class="funnel-step fade-up-3" id="step-workload-map">
+      <!-- ═══════════════════════════════════════════════
+         STEP 07 — Methodology  (explain scoring before reference tables)
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-3" id="step-methodology">
         <div class="step-hdr">
           <div class="step-num">07</div>
           <div>
-            <div class="step-title">Typical Workload Mapping</div>
+            <div class="step-title">Scoring Methodology</div>
             <div class="step-desc">
-              Choosing the right family depends on the primary bottleneck of your workload.
+              How our engine ranks instances. The EC2 Instance Advisor uses Multi-Criteria Decision Analysis (MCDA)
+              — an established operations-research framework — to produce objective, bias-free recommendations.
+            </div>
+          </div>
+        </div>
+
+        <div class="methodology-grid">
+          <!-- Weighted Scoring Model -->
+          <div class="method-card mc-scoring">
+            <div class="method-icon">🎯</div>
+            <div class="method-name">Weighted Scoring Model (WSM)</div>
+            <div class="method-text">
+              Each EC2 instance is evaluated across five criteria: price, vCPUs, memory, network, and GPU count.
+              Your slider inputs directly set the mathematical weight for each criterion.
+            </div>
+            <div class="method-formula">
+              <strong>Composite Score =</strong><br>
+              (w<sub>price</sub> × NormPrice) + (w<sub>cpu</sub> × NormCPU) +<br>
+              (w<sub>mem</sub> × NormMem) + (w<sub>net</sub> × NormNet) +<br>
+              (w<sub>gpu</sub> × NormGPU)<br><br>
+              Where each w<sub>i</sub> = slider_value / sum_of_all_sliders
+            </div>
+          </div>
+
+          <!-- Normalization -->
+          <div class="method-card mc-normalize">
+            <div class="method-icon">📊</div>
+            <div class="method-name">Metric Normalization</div>
+            <div class="method-text">
+              Raw metrics span vastly different scales (e.g., $0.01/hr vs 768 GiB RAM). Each is
+              <strong>min-max normalized</strong> to [0, 1] within the active filter set.
+              Hardware metrics use direct normalization (higher = better); price uses inverse (lower = better).
+            </div>
+            <div class="method-formula">
+              <strong>Direct:</strong> score = (value − min) / (max − min)<br>
+              <strong>Inverse:</strong> score = 1 − (value − min) / (max − min)<br><br>
+              A $0.01/hr instance scores high on price; a 96-vCPU instance scores high on compute.
+            </div>
+          </div>
+
+          <!-- User Weights -->
+          <div class="method-card mc-weights">
+            <div class="method-icon">⚖️</div>
+            <div class="method-name">User-Defined Weights</div>
+            <div class="method-text">
+              Sliders (0–100) are normalized to weights summing to 1.0.
+              Only the <strong>relative priority</strong> between criteria matters, not absolute values.
+              Price=70, CPU=10 produces the same ranking as Price=7, CPU=1.
+            </div>
+            <div class="method-formula">
+              <strong>Example — Balanced Preset:</strong><br>
+              Price: 35 → 0.35 &nbsp;·&nbsp; CPU: 25 → 0.25 &nbsp;·&nbsp; Mem: 20 → 0.20<br>
+              Network: 10 → 0.10 &nbsp;·&nbsp; GPU: 10 → 0.10<br><br>
+              Sum = 100 → Each weight = slider / 100
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+         STEP 08 — Typical Workload Mapping
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-3" id="step-workload-map">
+        <div class="step-hdr">
+          <div class="step-num">08</div>
+          <div>
+            <div class="step-title">Workload → Family Quick Reference</div>
+            <div class="step-desc">
+              Match your primary bottleneck to the right EC2 family. Use this alongside the recommendation above.
             </div>
           </div>
         </div>
@@ -2955,29 +919,31 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Web & App Servers</strong></td>
+                  <td><strong>Web &amp; App Servers</strong></td>
                   <td><strong>General Purpose (M/T)</strong></td>
-                  <td>Balanced CPU and memory. Use T-series (burstable) for dev/test and M-series for steady production traffic.</td>
+                  <td>Balanced CPU and memory. T-series for burstable dev/test; M-series for steady production traffic.
+                  </td>
                 </tr>
                 <tr>
-                  <td><strong>High-Traffic APIs & HPC</strong></td>
+                  <td><strong>High-Traffic APIs &amp; HPC</strong></td>
                   <td><strong>Compute Optimized (C)</strong></td>
-                  <td>High vCPU-to-memory ratio. Best for scientific modeling, batch processing, and dedicated game servers.</td>
+                  <td>High vCPU-to-memory ratio. Scientific modeling, batch processing, and dedicated game servers.</td>
                 </tr>
                 <tr>
                   <td><strong>In-Memory Databases</strong></td>
                   <td><strong>Memory Optimized (R/X)</strong></td>
-                  <td>High RAM-to-vCPU ratio (8:1 or higher). Ideal for Redis, SAP HANA, and real-time big data analytics.</td>
+                  <td>8:1+ RAM-to-vCPU ratio. Redis, SAP HANA, real-time analytics, large JVM heaps.</td>
                 </tr>
                 <tr>
-                  <td><strong>NoSQL & Data Warehousing</strong></td>
+                  <td><strong>NoSQL &amp; Data Warehousing</strong></td>
                   <td><strong>Storage Optimized (I/D)</strong></td>
-                  <td>Uses local NVMe SSDs for millions of low-latency IOPS. Essential for MongoDB, Cassandra, and high-speed logging.</td>
+                  <td>Local NVMe SSDs for millions of low-latency IOPS. MongoDB, Cassandra, high-speed logging.</td>
                 </tr>
                 <tr>
-                  <td><strong>AI Training & Rendering</strong></td>
-                  <td><strong>Accelerated (P/G)</strong></td>
-                  <td>Relies on high-end GPUs. Use P-series for deep learning training and G-series for inference and 3D graphics.</td>
+                  <td><strong>AI Training &amp; Inference</strong></td>
+                  <td><strong>Accelerated (P/G/Trn/Inf)</strong></td>
+                  <td>P-series for GPU training; G-series for inference &amp; rendering; trn1/inf2 for AWS ML silicon.
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -2985,19 +951,187 @@
         </div>
       </section>
 
-    </div><!-- /.funnel-wrap -->
+      <!-- ═══════════════════════════════════════════════
+         STEP RA — Instance Family Architecture Reference
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-3" id="step-arch">
+        <div class="step-hdr">
+          <div class="step-num" style="font-size:11px;letter-spacing:.5px">RA</div>
+          <div>
+            <div class="step-title">Instance Family Architecture Reference</div>
+            <div class="step-desc">
+              Underlying CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for every EC2 family in this
+              dataset.
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <!-- filter bar -->
+          <div class="arch-filter-bar">
+            <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
+              class="arch-search-inp" />
+            <div class="arch-legend">
+              <span class="avb intel">Intel</span>
+              <span class="avb amd">AMD</span>
+              <span class="avb aws">AWS</span>
+              <span class="isab x86">x86_64</span>
+              <span class="isab arm">ARM64</span>
+            </div>
+          </div>
+          <!-- table -->
+          <div class="table-wrap" style="max-height:none">
+            <table id="archTable"></table>
+          </div>
+        </div>
+      </section>
 
-    <!-- Footer disclaimer -->
-    <footer
-      style="text-align:center;padding:28px 16px 14px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);background:#fff;line-height:1.9;margin-top:8px">
-      ⚠️ This tool is <strong>not affiliated with, endorsed by, or an official channel of Amazon Web Services
-        (AWS)</strong>.<br>
-      Independent personal project for educational &amp; portfolio purposes only. Pricing data may be outdated.
-      always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
-        style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
-    </footer>
+      <!-- ═══════════════════════════════════════════════
+         STEP 09 — References
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-3" id="step-bibliography">
+        <div class="step-hdr">
+          <div class="step-num">09</div>
+          <div>
+            <div class="step-title">References</div>
+            <div class="step-desc">
+              Official AWS sources for instance specs, pricing constants, hardware architecture, and scoring
+              methodology.
+            </div>
+          </div>
+        </div>
 
-    <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+        <div class="ref-table">
+
+          <!-- ── Instance Data ── -->
+          <div class="ref-section-hdr">Instance Data</div>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/instance-types/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-data">Data</span>
+            <span class="ref-name">EC2 Instance Types</span>
+            <span class="ref-desc">500+ instance types — vCPU, memory, storage &amp; network specs per family</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/index.json"
+            target="_blank" rel="noopener">
+            <span class="ref-tag rt-data">Data</span>
+            <span class="ref-name">AWS Bulk Pricing API</span>
+            <span class="ref-desc">JSON endpoint powering the on-demand price snapshot (2,571 rows · 30 regions)</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+
+          <!-- ── Pricing Constants ── -->
+          <div class="ref-section-hdr">Pricing Constants</div>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/pricing/on-demand/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-pricing">Pricing</span>
+            <span class="ref-name">EC2 On-Demand Pricing</span>
+            <span class="ref-desc">Per-region hourly rates &amp; data-egress tiers used in the TCO estimator</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/ebs/pricing/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-pricing">Pricing</span>
+            <span class="ref-name">Amazon EBS Pricing</span>
+            <span class="ref-desc">gp3 / gp2 / io1 / io2 / st1 / sc1 rates ($/GB-month) — us-east-1 defaults</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/" target="_blank"
+            rel="noopener">
+            <span class="ref-tag rt-pricing">Pricing</span>
+            <span class="ref-name">Reserved Instances Pricing</span>
+            <span class="ref-desc">1-Year No-Upfront multipliers (34–36% off) used per instance family prefix</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/savingsplans/compute-pricing/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-pricing">Pricing</span>
+            <span class="ref-name">Compute Savings Plans</span>
+            <span class="ref-desc">Flexible 1-Year commitment discount (~20% off on-demand) applied in cost
+              estimator</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+
+          <!-- ── Hardware Architecture ── -->
+          <div class="ref-section-hdr">Hardware Architecture</div>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/graviton/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">AWS Graviton</span>
+            <span class="ref-desc">Graviton2 / 3 / 3E / 4 — ARM64 ISA, Nitro, perf benchmarks for t4g, m6g–m8g, c6g–c7g,
+              r6g–r7g</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/nitro/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">AWS Nitro System</span>
+            <span class="ref-desc">Nitro v1–v5 hypervisor generations mapped to each instance family</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/intel/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">Intel on AWS</span>
+            <span class="ref-desc">Xeon Skylake → Cascade Lake → Ice Lake → Sapphire Rapids generations on EC2</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/amd/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">AMD EPYC on EC2</span>
+            <span class="ref-desc">EPYC Rome / Milan / Genoa (Zen 2–4) — c6a, m6a, r6a, c7a, m7a, r7a, t3a, g5,
+              g6</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/nvidia/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">NVIDIA on AWS</span>
+            <span class="ref-desc">T4 / A10G / L4 / V100 / A100 GPUs in g4dn, g5, g6, p3, p4d families</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/ec2/instance-types/trn1/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-arch">Arch</span>
+            <span class="ref-name">AWS Trainium &amp; Inferentia</span>
+            <span class="ref-desc">Custom ML accelerator specs for trn1 (Trainium) and inf2 (Inferentia2)</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+
+          <!-- ── Methodology ── -->
+          <div class="ref-section-hdr">Methodology</div>
+          <a class="ref-row"
+            href="https://docs.aws.amazon.com/whitepapers/latest/cost-optimization-right-sizing/cost-optimization-right-sizing.html"
+            target="_blank" rel="noopener">
+            <span class="ref-tag rt-method">Method</span>
+            <span class="ref-name">Right Sizing Whitepaper</span>
+            <span class="ref-desc">MCDA-aligned CPU/memory thresholds, upsize/downsize/family-change decision
+              framework</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/architecture/well-architected/" target="_blank"
+            rel="noopener">
+            <span class="ref-tag rt-method">Method</span>
+            <span class="ref-name">AWS Well-Architected</span>
+            <span class="ref-desc">Cost Optimization pillar — right-sizing, reserved capacity &amp; workload
+              profiling</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+          <a class="ref-row" href="https://aws.amazon.com/blogs/compute/" target="_blank" rel="noopener">
+            <span class="ref-tag rt-method">Method</span>
+            <span class="ref-name">AWS Compute Blog</span>
+            <span class="ref-desc">Graviton benchmarks (20–40% savings vs x86) &amp; attribute-based instance
+              selection</span>
+            <span class="ref-arrow">↗</span>
+          </a>
+
+        </div>
+    </div>
+    </section>
+
+  </div><!-- /.funnel-wrap -->
+
+  <!-- Footer disclaimer -->
+  <footer
+    style="text-align:center;padding:28px 16px 14px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);background:#fff;line-height:1.9;margin-top:8px">
+    ⚠️ This tool is <strong>not affiliated with, endorsed by, or an official channel of Amazon Web Services
+      (AWS)</strong>.<br>
+    Independent personal project for educational &amp; portfolio purposes only. Pricing data may be outdated.
+    always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
+      style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
+  </footer>
+
+  <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   </div><!-- /#app -->
 
@@ -3023,16 +1157,168 @@
       General: 'Balanced: web apps, microservices, mixed workloads.',
     };
     const PRESETS = {
-      balanced: { wPrice: 35, wCpu: 25, wMem: 20, wNet: 10, wGpu: 10 },
-      cost: { wPrice: 70, wCpu: 10, wMem: 10, wNet: 5, wGpu: 5 },
-      performance: { wPrice: 10, wCpu: 35, wMem: 30, wNet: 15, wGpu: 10 },
-      ml: { wPrice: 15, wCpu: 20, wMem: 20, wNet: 10, wGpu: 35 },
+      balanced: { wPrice: 25, wCpu: 25, wMem: 25, wNet: 10, wGpu: 10 },
+      cost: { wPrice: 100, wCpu: 10, wMem: 10, wNet: 0, wGpu: 0 },
+      performance: { wPrice: 10, wCpu: 50, wMem: 25, wNet: 10, wGpu: 10 },
+      ml: { wPrice: 10, wCpu: 25, wMem: 25, wNet: 10, wGpu: 50 },
     };
 
-    /* Family card metadata */
+    /* ── Segment bar helpers ─────────────────────────────── */
+    const SEG_LEVELS = [0, 10, 25, 50, 100];
+    function syncSegBar(inputId, val) {
+      const bar = document.querySelector(`.seg-bar[data-for="${inputId}"]`);
+      if (!bar) return;
+      // snap to nearest valid level
+      const snapped = SEG_LEVELS.reduce((prev, curr) => Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev);
+      el(inputId).value = snapped;
+      bar.querySelectorAll('.seg').forEach(btn => {
+        btn.classList.toggle('seg-active', +btn.dataset.val === snapped);
+      });
+      const valEl = el(inputId + 'Val');
+      if (valEl) {
+        const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
+        valEl.textContent = labels[snapped] || snapped;
+      }
+    }
+    // Initialize segment click handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.seg-bar').forEach(bar => {
+        const inputId = bar.dataset.for;
+        bar.querySelectorAll('.seg').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const val = +btn.dataset.val;
+            el(inputId).value = val;
+            bar.querySelectorAll('.seg').forEach(b => b.classList.toggle('seg-active', +b.dataset.val === val));
+            const valEl = el(inputId + 'Val');
+            if (valEl) {
+              const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
+              valEl.textContent = labels[val] || val;
+            }
+            render();
+          });
+        });
+      });
+    });
+
+    /* ── Pricing constants (US-East-1) ──────────────────── */
+    const EBS_RATES = { gp3: 0.08, gp2: 0.10, io1: 0.125, io2: 0.125, st1: 0.045, sc1: 0.015 };
+    // 1-Year No-Upfront Reserved multipliers by instance-type prefix
+    const RESERVED_1YR_MULT = { t: 0.65, m: 0.64, c: 0.636, r: 0.665, x: 0.67, i: 0.677, d: 0.70, g: 0.71, p: 0.71, inf: 0.68, trn: 0.68 };
+    const DEFAULT_RESERVED_MULT = 0.66;
+    const SAVINGS_PLAN_MULT = 0.80; // 1-Year Compute Savings Plan (~20% off)
+    // Egress tiers: [cumulative GB ceiling, $/GB] — first 1 GB/mo is free (ignored for simplicity)
+    const EGRESS_TIERS = [
+      { limit: 10240, rate: 0.09 },    // 0–10 TB
+      { limit: 51200, rate: 0.085 },   // 10–50 TB
+      { limit: 153600, rate: 0.07 },   // 50–150 TB
+      { limit: Infinity, rate: 0.05 }, // 150 TB+
+    ];
+
+    /* ── Architecture reference map ─────────────────────
+       Keys = instance-family prefix (mat       rst token before '.')
+       Fields: cat, vendo    roc, isa, hyp, accel, yr
+    ─────────────────────────────────────────────────────── */
+    const ARCH_MAP = {
+      // ── General Purpose ──────────────────────────────────
+      t3: { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8000 (Skylake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      t3a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Rome (Zen 1+)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      t4g: { cat: 'General', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      m5: { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum (Skylake / Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
+      m6a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
+      m6g: { cat: 'General', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      m6i: { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      m7a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m7g: { cat: 'General', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      m7i: { cat: 'General', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m8g: { cat: 'General', vendor: 'AWS', proc: 'Graviton4', isa: 'ARM64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      // ── Compute Optimized ────────────────────────────────
+      c5: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Platinum (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2016 },
+      c6a: { cat: 'Compute', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
+      c6g: { cat: 'Compute', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      c6i: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      c7a: { cat: 'Compute', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c7g: { cat: 'Compute', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      c7i: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      // ── Memory Optimized ─────────────────────────────────
+      r5: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum (Skylake / Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
+      r6a: { cat: 'Memory', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
+      r6g: { cat: 'Memory', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      r6i: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      r7a: { cat: 'Memory', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r7g: { cat: 'Memory', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      r7i: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      x2idn: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      z1d: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Skylake (4.0 GHz turbo)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      // ── Storage Optimized ────────────────────────────────
+      d3: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      i3: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Broadwell (E5 v4)', isa: 'x86_64', hyp: 'Nitro v1', accel: '—', yr: 2016 },
+      i4i: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      im4gn: { cat: 'Storage', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      // ── GPU ──────────────────────────────────────────────
+      g4dn: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v3', accel: 'NVIDIA T4', yr: 2019 },
+      g5: { cat: 'GPU', vendor: 'AMD', proc: 'EPYC Rome (Zen 2)', isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A10G', yr: 2021 },
+      g6: { cat: 'GPU', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA L4', yr: 2024 },
+      p3: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Broadwell (E5 v4)', isa: 'x86_64', hyp: 'Xen', accel: 'NVIDIA V100', yr: 2017 },
+      p4d: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A100', yr: 2020 },
+      // ── HPC & Accelerated ────────────────────────────────
+      hpc7g: { cat: 'HPC', vendor: 'AWS', proc: 'Graviton3E', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      inf2: { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Inferentia2', yr: 2023 },
+      trn1: { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium', yr: 2022 },
+    };
+
+    /* ── Region metadata (geo grou       endly name) ─────────
+       Groups mirror the AWS Manag    t Console region picker.
+    ─────────────────────────────────────────────────────── */
+    const REGION_META = {
+      // US East
+      'us-east-1': { geo: 'US East',      label: 'N. Virginia' },
+      'us-east-2': { geo: 'US East',      label: 'Ohio' },
+      // US West
+      'us-west-1': { geo: 'US West',      label: 'N. California' },
+      'us-west-2': { geo: 'US West',      label: 'Oregon' },
+      // Canada
+      'ca-central-1': { geo: 'Canada',    label: 'Central (Montréal)' },
+      'ca-west-1':    { geo: 'Canada',    label: 'West (Calgary)' },
+      // Mexico
+      'mx-central-1': { geo: 'Mexico',    label: 'Central (Querétaro)' },
+      // South America
+      'sa-east-1': { geo: 'South America', label: 'São Paulo' },
+      // Europe
+      'eu-central-1': { geo: 'Europe',   label: 'Frankfurt' },
+      'eu-central-2': { geo: 'Europe',   label: 'Zurich' },
+      'eu-north-1':   { geo: 'Europe',   label: 'Stockholm' },
+      'eu-south-1':   { geo: 'Europe',   label: 'Milan' },
+      'eu-south-2':   { geo: 'Europe',   label: 'Spain' },
+      'eu-west-1':    { geo: 'Europe',   label: 'Ireland' },
+      'eu-west-2':    { geo: 'Europe',   label: 'London' },
+      'eu-west-3':    { geo: 'Europe',   label: 'Paris' },
+      // Middle East
+      'il-central-1': { geo: 'Middle East', label: 'Israel' },
+      'me-central-1': { geo: 'Middle East', label: 'UAE' },
+      'me-south-1':   { geo: 'Middle East', label: 'Bahrain' },
+      // Africa
+      'af-south-1': { geo: 'Africa',     label: 'Cape Town' },
+      // Asia Pacific
+      'ap-east-1':      { geo: 'Asia Pacific', label: 'Hong Kong' },
+      'ap-northeast-1': { geo: 'Asia Pacific', label: 'Tokyo' },
+      'ap-northeast-2': { geo: 'Asia Pacific', label: 'Seoul' },
+      'ap-northeast-3': { geo: 'Asia Pacific', label: 'Osaka' },
+      'ap-south-1':     { geo: 'Asia Pacific', label: 'Mumbai' },
+      'ap-south-2':     { geo: 'Asia Pacific', label: 'Hyderabad' },
+      'ap-southeast-1': { geo: 'Asia Pacific', label: 'Singapore' },
+      'ap-southeast-2': { geo: 'Asia Pacific', label: 'Sydney' },
+      'ap-southeast-3': { geo: 'Asia Pacific', label: 'Jakarta' },
+      'ap-southeast-4': { geo: 'Asia Pacific', label: 'Melbourne' },
+    };
+    const GEO_ORDER = [
+      'US East', 'US West', 'Canada', 'Mexico', 'South America',
+      'Europe', 'Middle East', 'Africa', 'Asia Pacific',
+    ];
+
+    /*  card metadata */
     const FAMILY_INFO = {
       All: {
-        icon: '🌐', name: 'All Families', tag: 'All',
+        icon: '🗂️', name: 'All Families', tag: 'All',
         color: '#4f46e5', bg: '#eef2ff',
         desc: 'Compare every instance type simultaneously with no category filter applied.',
         useCases: ['Full comparison', 'Research', 'Exploratory work'],
@@ -3092,6 +1378,45 @@
       el(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    /* ── ScrollSpy ─────────────────────────────────────────── */
+    (function initScrollSpy() {
+      const ids = ['step-families', 'step-agg', 'step-drill', 'step-rec', 'step-browse', 'step-calc', 'step-methodology', 'step-workload-map', 'step-arch', 'step-bibliography'];
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          let active = ids[0];
+          for (const id of ids) {
+            const section = el(id);
+            if (section && section.getBoundingClientRect().top <= 120) active = id;
+          }
+          document.querySelectorAll('.nav-step-btn').forEach(btn => {
+            btn.classList.toggle('ns-active', btn.dataset.step === active);
+          });
+          ticking = false;
+        });
+      }, { passive: true });
+    })();
+
+    /* ── Scroll Reveal Observer ─────────────────────────────── */
+    (function initScrollReveal() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.chart-card, .kpi, .score-breakdown-card, .nlg-panel, .runner-card, .method-card, .bib-card, .rec-hero, .controls-card').forEach(card => {
+          card.classList.add('scroll-reveal');
+          observer.observe(card);
+        });
+      });
+    })();
+
     /* ── Table load more ─────────────────────────────────────── */
     function tableLoadMore() {
       state.tableLimit += 30;
@@ -3131,7 +1456,10 @@
     /* ── Preset ─────────────────────────────────────────────── */
     function setPreset(name) {
       const p = PRESETS[name]; if (!p) return;
-      Object.entries(p).forEach(([id, val]) => { el(id).value = val; });
+      Object.entries(p).forEach(([id, val]) => {
+        el(id).value = val;
+        syncSegBar(id, val);
+      });
       ['balanced', 'cost', 'performance', 'ml'].forEach(k =>
         el(`pr-${k}`)?.classList.toggle('active', k === name));
       toast(`⚡ Preset: ${name.charAt(0).toUpperCase() + name.slice(1)}`);
@@ -3158,11 +1486,10 @@
       return values.map(v => reverse ? 1 - (v - min) / (max - min) : (v - min) / (max - min));
     }
 
-    /* ── Region pager ───────────────────────────────────────── */
+    /* ── Region sync ────────────────────────────────────────── */
     function syncRegionPager() {
       const idx = state.regions.indexOf(el('region').value);
       if (idx >= 0) state.regionIdx = idx;
-      el('regionPage').textContent = `${state.regionIdx + 1} of ${state.regions.length}`;
     }
     function stepRegion(delta) {
       if (!state.regions.length) return;
@@ -3305,10 +1632,33 @@
     function renderFamilyCards(regionRows) {
       const c = el('familyCards'); if (!c) return;
       const sel = el('category').value || 'All';
+      
       c.innerHTML = Object.entries(FAMILY_INFO).map(([key, info]) => {
-        const count = key === 'All'
+        const isAll = (key === 'All');
+        const count = isAll
           ? regionRows.length
           : regionRows.filter(r => r.instance_category === key).length;
+          
+        let archPills = '';
+        if (!isAll) {
+          // Find up to 3 unique processor vendors/ISAs for this category from ARCH_MAP
+          const relatedFams = Object.values(ARCH_MAP).filter(d => d.cat === key);
+          const uniqueVendors = [...new Set(relatedFams.map(d => d.vendor))];
+          const hasARM = relatedFams.some(d => d.isa === 'ARM64');
+          const hasX86 = relatedFams.some(d => d.isa === 'x86_64');
+          const accelerators = [...new Set(relatedFams.map(d => d.accel).filter(a => a !== '—'))];
+          
+          let pills = [];
+          if (uniqueVendors.length) pills.push(uniqueVendors.join(', '));
+          if (hasX86) pills.push('x86_64');
+          if (hasARM) pills.push('ARM64');
+          if (accelerators.length) pills.push(accelerators[0] + (accelerators.length > 1 ? '...' : ''));
+          
+          if (pills.length) {
+            archPills = `<div class="fc-arch-flex">${pills.map(p => `<span class="fc-arch-pill">${p}</span>`).join('')}</div>`;
+          }
+        }
+
         return `
       <div class="family-card${sel === key ? ' fc-active' : ''}"
            style="--fam-color:${info.color};--fam-bg:${info.bg}"
@@ -3321,6 +1671,7 @@
           </div>
         </div>
         <div class="fc-desc">${info.desc}</div>
+        ${archPills}
         <div class="fc-uses">${info.useCases.map(u => `<span class="fc-use">${u}</span>`).join('')}</div>
         <div class="fc-footer">
           ${info.examples
@@ -3380,7 +1731,7 @@
         yaxis2: { title: 'Avg Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
         legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
         margin: { t: 16, r: 65, b: 70, l: 55 }, hovermode: 'x unified',
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
 
       /* Family Highlights */
       renderFamilyHighlights(regionRows, cats);
@@ -3429,10 +1780,9 @@
       }).join('');
     }
 
-    /* ── Instance Spec line chart ───────────────────────────── */
+    /* ── Instance Spec line chart ────────────────────────── */
     function renderLineChart(rows) {
-      const MAX = 12;
-      /* Filter to selected categories; empty = nothing */
+      const MAX = 30; /* Filter to selected categories; empty = nothing */
       const filtered = state.selectedFamilies.size
         ? rows.filter(r => state.selectedFamilies.has(r.instance_category)) : [];
 
@@ -3444,39 +1794,53 @@
             text: 'Select a category above to compare instances', font: { size: 13, color: '#94a3b8' }
           }],
           margin: { t: 12, r: 55, b: 40, l: 50 },
-        }, { responsive: true });
+        }, { responsive: true, displayModeBar: false });
       }
 
-      /* Smart sampling: broad view → 2-3 per category (skip scale-breaking outliers);
-         focused view (1-2 cats) → top MAX for that selection */
+      /* Smart sampling: broad view → plot Highest and Lowest for each active category;
+         focused view (1-2 cats) → top MAX */
       const activeCats = [...new Set(filtered.map(r => r.instance_category))];
-      let top;
+      let names = [];
+      let vcpus = [], memory = [], prices = [];
+
       if (activeCats.length >= 3) {
-        const sane = filtered.filter(r => r.memory_gib <= 256 && r.price_usd_hour <= 8);
-        const src = sane.length >= Math.floor(MAX / 2) ? sane : filtered;
-        const perCat = Math.max(2, Math.floor(MAX / activeCats.length));
-        top = activeCats.flatMap(c => src.filter(r => r.instance_category === c).slice(0, perCat)).slice(0, MAX);
+        // Broad view: For each category, get the best and worst instance
+        activeCats.forEach(cat => {
+          const catRows = filtered.filter(r => r.instance_category === cat);
+          if (!catRows.length) return;
+          const best = catRows[0];
+          const worst = catRows[catRows.length - 1];
+          // Format names to explicitly show they represent the category extremes
+          names.push(`${cat} (Best: ${best.instance_type})`, `${cat} (Lowest: ${worst.instance_type})`);
+          vcpus.push(best.vcpus, worst.vcpus);
+          memory.push(best.memory_gib, worst.memory_gib);
+          prices.push(best.price_usd_hour, worst.price_usd_hour);
+        });
       } else {
-        top = (filtered.filter(r => r.memory_gib <= 512).slice(0, MAX) || filtered.slice(0, MAX));
+        // Focused view
+        let top = (filtered.filter(r => r.memory_gib <= 512).slice(0, MAX) || filtered.slice(0, MAX));
         if (!top.length) top = filtered.slice(0, MAX);
+        names = top.map(r => r.instance_type);
+        vcpus = top.map(r => r.vcpus);
+        memory = top.map(r => r.memory_gib);
+        prices = top.map(r => r.price_usd_hour);
       }
 
-      const names = top.map(r => r.instance_type);
       Plotly.react('chart', [
         {
-          name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.vcpus),
+          name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: vcpus,
           line: { color: '#3b82f6', width: 2.5, shape: 'spline' },
           marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br>vCPUs: <b>%{y}</b><extra></extra>',
         },
         {
-          name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.memory_gib),
+          name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: memory,
           line: { color: '#10b981', width: 2.5, shape: 'spline' },
           marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br>RAM: <b>%{y} GiB</b><extra></extra>',
         },
         {
-          name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: top.map(r => r.price_usd_hour),
+          name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: prices,
           line: { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
           marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
           hovertemplate: '<b>%{x}</b><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
@@ -3488,30 +1852,62 @@
         yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
         legend: { orientation: 'h', y: -0.32, x: 0, font: { size: 11 } },
         margin: { t: 12, r: 55, b: 80, l: 50 }, hovermode: 'x unified',
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
     }
 
     /* ── Radar chart ────────────────────────────────────────── */
     const RADAR_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
     function renderRadar(rows) {
-      /* Broad view (3+ categories): 1 best per category for clean comparison.
+      /* Broad view (3+ categories): Best vs Lowest range per category for a clearer picture.
          Focused view (1-2 categories): top 5 by score. */
       const activeCats = [...new Set(rows.map(r => r.instance_category))];
-      let top5;
-      if (activeCats.length >= 3) {
-        top5 = FILTER_CATS.map(cat => rows.find(r => r.instance_category === cat)).filter(Boolean).slice(0, 5);
-      } else {
-        top5 = rows.slice(0, Math.min(5, rows.length));
-      }
       const theta = ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU', 'Price Eff.'];
-      Plotly.react('chart3', top5.map((r, i) => ({
-        type: 'scatterpolar',
-        r: [r.scoreP, r.scoreC, r.scoreM, r.scoreN, r.scoreG, r.scoreP],
-        theta, fill: 'toself', name: r.instance_type,
-        line: { color: RADAR_COLORS[i % RADAR_COLORS.length], width: 2 },
-        fillcolor: RADAR_COLORS[i % RADAR_COLORS.length] + '22',
-        hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
-      })), {
+      let traces = [];
+
+      if (activeCats.length >= 3) {
+        // Broad view: plot best and lowest of each category and shade the region between
+        FILTER_CATS.forEach(cat => {
+          const catRows = rows.filter(r => r.instance_category === cat);
+          if (!catRows.length) return;
+
+          const best = catRows[0];
+          const worst = catRows[catRows.length - 1];
+          const color = CAT_COLOR[cat] || '#4f46e5';
+
+          // Trace 1: Lowest instance (invisible line to define inner fill boundary)
+          traces.push({
+            type: 'scatterpolar',
+            r: [worst.scoreP, worst.scoreC, worst.scoreM, worst.scoreN, worst.scoreG, worst.scoreP],
+            theta, mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'none'
+          });
+
+          // Trace 2: Best instance (filled to the lowest instance)
+          traces.push({
+            type: 'scatterpolar',
+            r: [best.scoreP, best.scoreC, best.scoreM, best.scoreN, best.scoreG, best.scoreP],
+            theta, mode: 'lines', fill: 'tonext', name: cat,
+            line: { color: color, width: 2 },
+            fillcolor: color + '22', // transparent shade
+            hovertemplate: '<b>' + cat + ' (Best)</b>: ' + best.instance_type + '<br><b>(Lowest)</b>: ' + worst.instance_type + '<extra></extra>',
+          });
+        });
+      } else {
+        // Focused view: top 5 individual instances
+        const top5 = rows.slice(0, Math.min(5, rows.length));
+        traces = top5.map((r, i) => {
+          const color = CAT_COLOR[r.instance_category] || RADAR_COLORS[i % RADAR_COLORS.length];
+          return {
+            type: 'scatterpolar',
+            r: [r.scoreP, r.scoreC, r.scoreM, r.scoreN, r.scoreG, r.scoreP],
+            theta, fill: 'toself', name: r.instance_type,
+            line: { color: color, width: 2 },
+            fillcolor: color + '22',
+            hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
+          };
+        });
+      }
+
+      Plotly.react('chart3', traces, {
         ...PLOTLY_BASE,
         polar: {
           bgcolor: '#fafbff',
@@ -3520,7 +1916,7 @@
         },
         legend: { orientation: 'h', y: -0.2, x: 0, font: { size: 10 } },
         margin: { t: 12, r: 12, b: 50, l: 12 },
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
     }
 
     /* ── Bar chart ──────────────────────────────────────────── */
@@ -3536,7 +1932,177 @@
         xaxis: { title: 'Instance Type', tickangle: -28, gridcolor: '#e2e8f0' },
         yaxis: { title: METRIC_LABEL[metric], gridcolor: '#e2e8f0', zeroline: false },
         margin: { t: 12, r: 12, b: 80, l: 52 },
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    /* ── Stacked Bar Chart (Score Breakdown) ─────────────────── */
+    const SB_COLORS = { price: '#3b82f6', cpu: '#60a5fa', mem: '#10b981', net: '#34d399', gpu: '#8b5cf6' };
+    const SB_LABELS = { price: 'Price Efficiency', cpu: 'Compute (vCPUs)', mem: 'Memory (RAM)', net: 'Network', gpu: 'GPU' };
+    function renderScoreBreakdown(rows, w, sum) {
+      const body = el('scoreBreakdownBody');
+      const legend = el('scoreBreakdownLegend');
+      if (!body || !legend) return;
+      const top5 = rows.slice(0, 5);
+      body.innerHTML = top5.map((r, idx) => {
+        const contributions = {
+          price: (w.price / sum) * r.scoreP,
+          cpu: (w.cpu / sum) * r.scoreC,
+          mem: (w.mem / sum) * r.scoreM,
+          net: (w.net / sum) * r.scoreN,
+          gpu: (w.gpu / sum) * r.scoreG,
+        };
+        const total = Object.values(contributions).reduce((a, b) => a + b, 0);
+        const maxScore = 1;
+        const segments = Object.entries(contributions).map(([key, val]) => {
+          const pct = (val / maxScore * 100).toFixed(1);
+          const label = pct > 8 ? `${(+pct).toFixed(0)}%` : '';
+          return `<div class="sb-segment" style="width:${pct}%;background:${SB_COLORS[key]}" title="${SB_LABELS[key]}: ${(val * 100).toFixed(1)}%">${label}</div>`;
+        }).join('');
+        return `
+          <div class="sb-row">
+            <div class="sb-label">${idx === 0 ? '★ ' : ''}${r.instance_type}</div>
+            <div class="sb-bar-wrap">${segments}</div>
+            <div class="sb-total">${(total * 100).toFixed(1)}%</div>
+          </div>`;
+      }).join('');
+      legend.innerHTML = Object.entries(SB_COLORS).map(([key, color]) =>
+        `<div class="sb-legend-item"><div class="sb-legend-dot" style="background:${color}"></div>${SB_LABELS[key]}</div>`
+      ).join('');
+    }
+
+    /* ── NLG Explainability ──────────────────────────────────── */
+    function renderNLG(best, rows, w, sum) {
+      const nlg = el('nlgText');
+      if (!nlg) return;
+      const weights = [
+        { key: 'price', label: 'cost efficiency', val: w.price },
+        { key: 'cpu', label: 'compute capacity (vCPUs)', val: w.cpu },
+        { key: 'mem', label: 'memory (RAM)', val: w.mem },
+        { key: 'net', label: 'network throughput', val: w.net },
+        { key: 'gpu', label: 'GPU acceleration', val: w.gpu },
+      ].sort((a, b) => b.val - a.val);
+      const top1 = weights[0];
+      const top2 = weights[1];
+      const pctTop1 = ((top1.val / sum) * 100).toFixed(0);
+      const pctTop2 = ((top2.val / sum) * 100).toFixed(0);
+      const cheapest = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
+      const priceDiff = ((best.price_usd_hour - cheapest.price_usd_hour) / Math.max(cheapest.price_usd_hour, 1e-4) * 100).toFixed(1);
+      let priceContext = '';
+      if (+priceDiff <= 1) {
+        priceContext = 'It is among the most affordable options in your current filter.';
+      } else if (+priceDiff <= 30) {
+        priceContext = `Its price is only ${priceDiff}% above the cheapest option, offering strong value for the performance gained.`;
+      } else {
+        priceContext = `While ${priceDiff}% above the cheapest option, its superior specs justify the premium at your current priority weights.`;
+      }
+      const scoreDisplay = (best.composite * 100).toFixed(1);
+      nlg.innerHTML = `
+        This <strong> ${best.instance_type}</strong> instance was selected because you
+        ${+pctTop1 >= 50 ? 'heavily' : 'primarily'} prioritized
+          <strong> ${top1.label}</strong> (${pctTop1}% weight)
+        ${+pctTop2 >= 15
+          ? `while also valuing <strong>${top2.label}</strong> (${pctTop2}% weight)`
+          : ''
+        }.
+        It achieved a composite score of <strong> ${scoreDisplay}%</strong>
+        across ${rows.length} candidates in the ${best.region} region.
+          ${priceContext}
+        ${best.instance_category !== 'General'
+          ? `As a <strong>${best.instance_category}</strong> family instance, it is architecturally optimized for ${TYPE_EXPLAIN[best.instance_category]?.toLowerCase() || 'specialized workloads'}`
+          : ''
+        }
+      `;
+    }
+
+    /* ── Top 5 Runners-Up ──────────────────────────────────── */
+    function renderRunnersUp(rows) {
+      const grid = el('runnersGrid');
+      if (!grid) return;
+      const runners = rows.slice(1, 6);
+      grid.innerHTML = runners.map((r, i) => {
+        const catColor = CAT_COLOR[r.instance_category] || '#4f46e5';
+        const catBg = CAT_BG[r.instance_category] || '#f9fafb';
+        return `
+        <div class="runner-card" onclick="renderInstanceCompare(state.scoredRows[${i + 1}])">
+            <div class="runner-rank">#${i + 2}</div>
+            <div class="runner-name">${r.instance_type}</div>
+            <div class="runner-cat" style="background:${catBg};color:${catColor};border:1px solid ${catColor}30">${r.instance_category}</div>
+            <div class="runner-specs">
+              <div><div class="runner-spec-lbl">Price/hr</div><div class="runner-spec-val">$${r.price_usd_hour.toFixed(4)}</div></div>
+              <div><div class="runner-spec-lbl">vCPUs</div><div class="runner-spec-val">${r.vcpus}</div></div>
+              <div><div class="runner-spec-lbl">Memory</div><div class="runner-spec-val">${r.memory_gib} GiB</div></div>
+              <div><div class="runner-spec-lbl">Score</div><div class="runner-spec-val">${r.composite.toFixed(3)}</div></div>
+            </div>
+            <div class="runner-score-bar">
+              <div class="runner-score-fill" style="width:${(r.composite * 100).toFixed(1)}%;background:${catColor}"></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ── Parallel Coordinates Chart ──────────────────────────── */
+    function renderParallelCoordinates(rows) {
+      if (!rows || rows.length < 2) return;
+      const top30 = rows.slice(0, Math.min(30, rows.length));
+      const catIndex = { CPU: 0, GPU: 1, Memory: 2, Storage: 3, General: 4 };
+      const catColors = [CAT_COLOR.CPU, CAT_COLOR.GPU, CAT_COLOR.Memory, CAT_COLOR.Storage, CAT_COLOR.General];
+      Plotly.react('chartParallel', [{
+        type: 'parcoords',
+        line: {
+          color: top30.map(r => catIndex[r.instance_category] ?? 4),
+          colorscale: catColors.map((c, i) => [[i / (catColors.length - 1), c]]).flat().concat([[1, CAT_COLOR.General]]),
+          showscale: false,
+        },
+        dimensions: [
+          {
+            label: 'Instance',
+            tickvals: top30.map((_, i) => i),
+            ticktext: top30.map(r => r.instance_type),
+            values: top30.map((_, i) => i),
+          },
+          {
+            label: 'Price ($/hr)',
+            values: top30.map(r => +r.price_usd_hour.toFixed(4)),
+            range: [0, Math.max(...top30.map(r => r.price_usd_hour)) * 1.1],
+          },
+          {
+            label: 'vCPUs',
+            values: top30.map(r => r.vcpus),
+            range: [0, Math.max(...top30.map(r => r.vcpus)) * 1.1],
+          },
+          {
+            label: 'Memory (GiB)',
+            values: top30.map(r => r.memory_gib),
+            range: [0, Math.max(...top30.map(r => r.memory_gib)) * 1.1],
+          },
+          {
+            label: 'Network',
+            values: top30.map(r => r.network_score),
+            range: [0, 5.5],
+          },
+          {
+            label: 'Score',
+            values: top30.map(r => +r.composite.toFixed(4)),
+            range: [0, 1.05],
+          },
+        ],
+      }], {
+        ...PLOTLY_BASE,
+        margin: { t: 40, r: 40, b: 30, l: 85 },
+      }, { responsive: true, displayModeBar: false });
+
+      // Build custom legend
+      const legendHtml = top30.map((r) => {
+        const catColor = CAT_COLOR[r.instance_category] || CAT_COLOR.General;
+        const bg = catColor + '15'; // 15% opacity hex
+        return `<div style="
+          display:inline-flex; align-items:center; gap:4px; padding:2px 8px;
+          border-radius:999px; background:${bg}; color:${catColor}; border:1px solid ${catColor}40;
+          font-size:10px; font-weight:700; font-family:var(--mono); flex-shrink:0;
+        "><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${catColor}"></span>${r.instance_type}</div>`;
+      }).join('');
+      const legendEl = el('parcoordsLegend');
+      if (legendEl) legendEl.innerHTML = legendHtml;
     }
 
     /* ── Value Map scatter chart ────────────────────────────── */
@@ -3585,7 +2151,7 @@
           text: '⬆ Best value zone', showarrow: false,
           font: { size: 10, color: '#059669' }, xanchor: 'left',
         }],
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
     }
 
     /* ── Regional price chart ───────────────────────────────── */
@@ -3597,7 +2163,7 @@
         Plotly.react('chart4', [{
           type: 'bar', x: [rows[0]?.price_usd_hour || 0], y: [rows[0]?.region || ''],
           orientation: 'h', marker: { color: '#4f46e5' },
-        }], { ...PLOTLY_BASE, margin: { t: 12, r: 60, b: 36, l: 90 } }, { responsive: true });
+        }], { ...PLOTLY_BASE, margin: { t: 12, r: 60, b: 36, l: 90 } }, { responsive: true, displayModeBar: false });
         return;
       }
       const minP = rows[0].price_usd_hour;
@@ -3605,18 +2171,17 @@
         type: 'bar', orientation: 'h',
         x: rows.map(r => r.price_usd_hour), y: rows.map(r => r.region),
         marker: { color: rows.map(r => r.price_usd_hour === minP ? '#10b981' : '#4f46e5'), opacity: .85 },
-        text: rows.map(r => `$${r.price_usd_hour.toFixed(4)}`), textposition: 'outside',
+        text: rows.map(r => r.price_usd_hour === minP
+          ? `$${r.price_usd_hour.toFixed(4)}  ✅`
+          : `$${r.price_usd_hour.toFixed(4)} `),
+        textposition: 'outside',
         hovertemplate: '%{y}<br>$%{x:.4f}/hr<extra></extra>',
       }], {
         ...PLOTLY_BASE,
         xaxis: { title: 'Price (USD/hr)', gridcolor: '#e2e8f0', zeroline: false },
         yaxis: { automargin: true },
-        margin: { t: 12, r: 70, b: 40, l: 10 },
-        annotations: [{
-          x: minP, y: rows[0].region, xanchor: 'left', yanchor: 'middle',
-          text: ' ✅ cheapest', showarrow: false, font: { size: 10, color: '#059669' }, xshift: 4,
-        }],
-      }, { responsive: true });
+        margin: { t: 12, r: 80, b: 40, l: 10 },
+      }, { responsive: true, displayModeBar: false });
     }
 
     /* ── Instance compare panel ─────────────────────────────── */
@@ -3624,14 +2189,14 @@
       const best = state.scoredRows[0];
       if (!best || row.instance_type === best.instance_type) { closeCompare(); return; }
       el('cmpTitle').textContent = row.instance_type;
-      el('cmpSub').textContent = `${row.instance_category} · ${row.region} · vs. top pick ${best.instance_type}`;
+      el('cmpSub').textContent = `${row.instance_category} · ${row.region} · vs.top pick ${best.instance_type} `;
       el('cmpSpecs').innerHTML = [
-        { lbl: 'Price/hr', val: `$${row.price_usd_hour.toFixed(4)}`, sub: `vs $${best.price_usd_hour.toFixed(4)}` },
-        { lbl: 'vCPUs', val: row.vcpus, sub: `vs ${best.vcpus}` },
+        { lbl: 'Price/hr', val: `$${row.price_usd_hour.toFixed(4)} `, sub: `vs $${best.price_usd_hour.toFixed(4)} ` },
+        { lbl: 'vCPUs', val: row.vcpus, sub: `vs ${best.vcpus} ` },
         { lbl: 'Memory', val: `${row.memory_gib} GiB`, sub: `vs ${best.memory_gib} GiB` },
-        { lbl: 'GPU Count', val: row.gpu_count > 0 ? row.gpu_count : '—', sub: `vs ${best.gpu_count > 0 ? best.gpu_count : '—'}` },
-        { lbl: 'Network', val: `${row.network_score}/5`, sub: `vs ${best.network_score}/5` },
-        { lbl: 'Score', val: row.composite.toFixed(3), sub: `vs ${best.composite.toFixed(3)}` },
+        { lbl: 'GPU Count', val: row.gpu_count > 0 ? row.gpu_count : '—', sub: `vs ${best.gpu_count > 0 ? best.gpu_count : '—'} ` },
+        { lbl: 'Network', val: `${row.network_score} /5`, sub: `vs ${best.network_score}/5` },
+        { lbl: 'Score', val: row.composite.toFixed(3), sub: `vs ${best.composite.toFixed(3)} ` },
       ].map(s => `<div class="cmp-spec-item"><div class="cmp-spec-lbl">${s.lbl}</div><div class="cmp-spec-val">${s.val}</div><div class="cmp-spec-sub">${s.sub}</div></div>`).join('');
       const dims = ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU'];
       const catC = CAT_COLOR[row.instance_category] || '#4f46e5';
@@ -3645,21 +2210,145 @@
         xaxis: { gridcolor: '#e2e8f0' },
         legend: { orientation: 'h', y: -0.26, x: 0, font: { size: 11 } },
         margin: { t: 10, r: 12, b: 60, l: 50 },
-      }, { responsive: true });
+      }, { responsive: true, displayModeBar: false });
     }
     function closeCompare() { el('comparePanel').classList.remove('visible'); }
 
-    /* ── Calculator ─────────────────────────────────────────── */
+    /* ── TCO Calculator ─────────────────────────────────────── */
     function renderCalculator(best) {
       const hours = Math.max(1, +el('calcHours').value || 730);
       const count = Math.max(1, +el('calcCount').value || 1);
       const sgb = Math.max(0, +el('calcStorageGb').value || 0);
-      const srate = Math.max(0, +el('calcStorageRate').value || .08);
-      const compute = best.price_usd_hour * hours * count;
-      const total = compute + sgb * srate * count;
-      animateNum('crCompute', compute, v => `$${v.toFixed(2)}`);
-      animateNum('crTotal', total, v => `$${v.toFixed(2)}`);
-      animateNum('crAnnual', total * 12, v => `$${v.toFixed(2)}`);
+      const egress = Math.max(0, +el('calcEgress').value || 0);
+      const ebsType = el('calcEbsType').value || 'gp3';
+      const activeBtn = el('billingToggle').querySelector('.billing-btn.active');
+      const model = activeBtn ? activeBtn.dataset.model : 'ondemand';
+
+      // Effective hourly rate based on billing model
+      let mult = 1.0;
+      if (model === 'reserved1yr') {
+        const prefix = best.instance_type.split('.')[0].toLowerCase();
+        const key = Object.keys(RESERVED_1YR_MULT).find(k => prefix.startsWith(k)) || null;
+        mult = key ? RESERVED_1YR_MULT[key] : DEFAULT_RESERVED_MULT;
+      } else if (model === 'savings') {
+        mult = SAVINGS_PLAN_MULT;
+      }
+      const effectiveRate = best.price_usd_hour * mult;
+
+      // Compute cost
+      const compute = effectiveRate * hours * count;
+
+      // Storage cost (EBS)
+      const srate = EBS_RATES[ebsType] ?? 0.08;
+      const storage = sgb * srate * count;
+
+      // Data egress cost (tiered)
+      let transfer = 0, remaining = egress, prev = 0;
+      for (const tier of EGRESS_TIERS) {
+        if (remaining <= 0) break;
+        const chunk = Math.min(remaining, tier.limit - prev);
+        transfer += chunk * tier.rate;
+        remaining -= chunk;
+        prev = tier.limit;
+      }
+
+      const total = compute + storage + transfer;
+
+      // Update effective-rate line
+      el('calcEffRate').textContent = `$${effectiveRate.toFixed(4)} `;
+      el('calcInstType').textContent = best.instance_type;
+
+      // Animate values
+      animateNum('crCompute', compute, v => `$${v.toFixed(2)} `);
+      animateNum('crStorage', storage, v => `$${v.toFixed(2)} `);
+      animateNum('crTransfer', transfer, v => `$${v.toFixed(2)} `);
+      animateNum('crTotal', total, v => `$${v.toFixed(2)} `);
+      animateNum('crAnnual', total * 12, v => `$${v.toFixed(2)} `);
+
+      // Cost proportion bar
+      if (total > 0) {
+        el('tcoBarWrap').style.display = 'block';
+        el('tcoBarCompute').style.width = `${(compute / total * 100).toFixed(1)}% `;
+        el('tcoBarStorage').style.width = `${(storage / total * 100).toFixed(1)}% `;
+        el('tcoBarTransfer').style.width = `${(transfer / total * 100).toFixed(1)}% `;
+      } else {
+        el('tcoBarWrap').style.display = 'none';
+      }
+
+      // Savings-vs-on-demand badge
+      if (model !== 'ondemand' && total > 0) {
+        const odCompute = best.price_usd_hour * hours * count;
+        const odTotal = odCompute + storage + transfer;
+        const saved = odTotal - total;
+        const pct = ((saved / odTotal) * 100).toFixed(0);
+        el('savingsAmt').textContent = `$${saved.toFixed(2)} `;
+        el('savingsPct').textContent = `${pct}% savings`;
+        el('savingsBadge').style.display = 'flex';
+      } else {
+        el('savingsBadge').style.display = 'none';
+      }
+    }
+
+    /* ── Architecture Reference Table ───────────────────────── */
+    function renderArchTable(query) {
+      const q = (query || '').toLowerCase().trim();
+      const allFams = Object.keys(ARCH_MAP);
+      const families = q
+        ? allFams.filter(f => {
+          const d = ARCH_MAP[f];
+          return f.includes(q) || d.vendor.toLowerCase().includes(q) ||
+            d.proc.toLowerCase().includes(q) || d.cat.toLowerCase().includes(q) ||
+            d.isa.toLowerCase().includes(q) || d.accel.toLowerCase().includes(q);
+        })
+        : allFams;
+
+      const tbl = el('archTable');
+      if (!tbl) return;
+
+      if (!families.length) {
+        tbl.innerHTML = '<tbody><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No families match "' + query + '"</td></tr></tbody>';
+        return;
+      }
+
+      // Sort by category order, then family name
+      const catOrder = ['General', 'Compute', 'Memory', 'Storage', 'GPU', 'HPC', 'Accelerated'];
+      families.sort((a, b) => {
+        const ci = catOrder.indexOf(ARCH_MAP[a].cat);
+        const cj = catOrder.indexOf(ARCH_MAP[b].cat);
+        return ci !== cj ? ci - cj : a.localeCompare(b);
+      });
+
+      const vBadge = v => {
+        const cls = ({ Intel: 'intel', AMD: 'amd', AWS: 'aws' })[v] || '';
+        return '<span class="avb ' + cls + '">' + v + '</span>';
+      };
+      const iBadge = i => '<span class="isab ' + (i === 'ARM64' ? 'arm' : 'x86') + '">' + i + '</span>';
+      const aBadge = a => a !== '—' ? '<span class="accel-badge">' + a + '</span>' : '<span class="arch-dash">—</span>';
+
+      let bodyRows = '';
+      let lastCat = '';
+      for (const fam of families) {
+        const d = ARCH_MAP[fam];
+        if (d.cat !== lastCat) {
+          lastCat = d.cat;
+          bodyRows += '<tr class="arch-cat-row"><td colspan="8">' + d.cat + '</td></tr>';
+        }
+        bodyRows += '<tr>' +
+          '<td><code class="arch-fam">' + fam + '</code></td>' +
+          '<td class="arch-cat-cell">' + d.cat + '</td>' +
+          '<td>' + vBadge(d.vendor) + '</td>' +
+          '<td class="arch-proc">' + d.proc + '</td>' +
+          '<td>' + iBadge(d.isa) + '</td>' +
+          '<td class="arch-hyp">' + d.hyp + '</td>' +
+          '<td>' + aBadge(d.accel) + '</td>' +
+          '<td class="arch-yr">' + d.yr + '</td>' +
+          '</tr>';
+      }
+
+      tbl.innerHTML = '<thead><tr>' +
+        '<th>Family</th><th>Category</th><th>CPU Vendor</th><th>Processor</th>' +
+        '<th>ISA</th><th>Hypervisor</th><th>Accelerator</th><th>Year</th>' +
+        '</tr></thead><tbody>' + bodyRows + '</tbody>';
     }
 
     /* ── Table ──────────────────────────────────────────────── */
@@ -3673,7 +2362,7 @@
       const shown = filtered.slice(0, lim);
       el('tableCount').textContent = q
         ? `${shown.length} of ${filtered.length} match`
-        : `Showing ${shown.length} of ${rows.length}`;
+        : `Showing ${shown.length} of ${rows.length} `;
       const lmw = el('tableLoadMoreWrap');
       if (!shown.length) {
         el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match "${query}"</td></tr></tbody>`;
@@ -3696,12 +2385,13 @@
         <td>$${r.price_usd_hour.toFixed(4)}</td>
         <td><div class="score-cell"><div class="score-bar" style="width:${(r.composite * 58).toFixed(0)}px;background:${cc}"></div><span class="score-num">${r.composite.toFixed(3)}</span></div></td>
       </tr>`;
-        }).join('')}</tbody>`;
+        }).join('')
+        }</tbody>`;
       /* ── Load more button ── */
       if (lmw) {
         if (filtered.length > shown.length) {
           const rem = Math.min(filtered.length - shown.length, 30);
-          lmw.innerHTML = `<button class="load-more-btn" onclick="tableLoadMore()">Show ${rem} more  (${filtered.length - shown.length} remaining) ↓</button>`;
+          lmw.innerHTML = `<button class="load-more-btn" onclick="tableLoadMore()"> Show ${rem} more (${filtered.length - shown.length} remaining) ↓</button > `;
         } else {
           lmw.innerHTML = '';
         }
@@ -3711,7 +2401,14 @@
 
     /* ── Main render ────────────────────────────────────────── */
     function render() {
-      SLIDERS.forEach(s => { const v = el(s + 'Val'); if (v) v.textContent = el(s).value; });
+      SLIDERS.forEach(s => {
+        const v = el(s + 'Val');
+        if (v) {
+          const val = +el(s).value;
+          const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
+          v.textContent = labels[val] || val;
+        }
+      });
       const region = el('region').value;
       const category = el('category').value;
       const metric = el('metric').value;
@@ -3756,11 +2453,15 @@
       const best = rows[0];
 
       renderRecCard(best, rows);
+      renderScoreBreakdown(rows, w, sum);
+      renderNLG(best, rows, w, sum);
+      renderRunnersUp(rows);
       renderKPIs(rows);
       syncFamilyFilter(rows);
       renderFamilyFilter(rows);
       renderLineChart(rows);
       renderRadar(rows);
+      renderParallelCoordinates(rows);
       renderBar(rows, metric);
       renderScatterChart(rows);
       renderRegional(best.instance_type);
@@ -3773,14 +2474,35 @@
     async function boot() {
       try {
         const resp = await fetch(CSV_URL);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} `);
         state.rows = parseCSV(await resp.text());
 
-        const regions = [...new Set(state.rows.map(r => r.region))];
+        const rawRegions = [...new Set(state.rows.map(r => r.region))];
         const categories = ['All', ...new Set(state.rows.map(r => r.instance_category))];
         const families = new Set(state.rows.map(r => getFamily(r.instance_type)));
 
-        el('region').innerHTML = regions.map(v => `<option>${v}</option>`).join('');
+        /* Sort geo-first (matching AWS Console order), then alpha within group */
+        const regions = rawRegions.slice().sort((a, b) => {
+          const ga = GEO_ORDER.indexOf(REGION_META[a]?.geo ?? 'Other');
+          const gb = GEO_ORDER.indexOf(REGION_META[b]?.geo ?? 'Other');
+          return ga !== gb ? ga - gb : a.localeCompare(b);
+        });
+
+        /* Build grouped <optgroup> select (mirrors AWS Management Console) */
+        const geoGroups = {};
+        regions.forEach(r => {
+          const g = REGION_META[r]?.geo ?? 'Other';
+          (geoGroups[g] = geoGroups[g] || []).push(r);
+        });
+        el('region').innerHTML = GEO_ORDER
+          .filter(g => geoGroups[g])
+          .map(g => `<optgroup label="${g}">${geoGroups[g].map(r => {
+            const m = REGION_META[r];
+            return `<option value="${r}">${r}${m ? ' — ' + m.label : ''}</option>`;
+          }).join('')
+            }</optgroup>`)
+          .join('');
+
         el('category').innerHTML = categories.map(v => `<option>${v}</option>`).join('');
         state.regions = regions;
         /* Default to us-east-1 if available, else first region */
@@ -3801,12 +2523,21 @@
         ['region', 'category', 'metric', ...SLIDERS].forEach(id => {
           el(id).addEventListener('input', () => { if (id === 'region') syncRegionPager(); render(); });
         });
-        el('prevRegion').addEventListener('click', () => stepRegion(-1));
-        el('nextRegion').addEventListener('click', () => stepRegion(1));
-        ['calcHours', 'calcCount', 'calcStorageGb', 'calcStorageRate'].forEach(id =>
+        /* Arrow keys still cycle regions (← →) */
+        ['calcHours', 'calcCount', 'calcStorageGb', 'calcEgress'].forEach(id =>
           el(id).addEventListener('input', render));
+        el('calcEbsType').addEventListener('change', render);
+        el('billingToggle').querySelectorAll('.billing-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            el('billingToggle').querySelectorAll('.billing-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+          });
+        });
         el('tableSearch').addEventListener('input', () =>
           renderTable(state.scoredRows, el('tableSearch').value));
+        el('archSearch').addEventListener('input', e =>
+          renderArchTable(e.target.value));
 
         /* Keyboard shortcuts */
         document.addEventListener('keydown', e => {
@@ -3822,6 +2553,7 @@
         });
 
         render();
+        renderArchTable(); // static — rendered once from ARCH_MAP
 
         el('loader').style.display = 'none';
         const app = el('app');
