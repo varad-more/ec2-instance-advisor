@@ -61,6 +61,15 @@
         <span class="text">EC2 <em>Advisor</em></span>
       </div>
       <div class="nav-steps" id="navSteps">
+        <button class="nav-step-btn" data-step="step-workload-map" onclick="scrollToStep('step-workload-map')"
+          title="Workload Mapping Guide">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+              <line x1="8" y1="2" x2="8" y2="18" />
+              <line x1="16" y1="6" x2="16" y2="22" />
+            </svg></span><span class="step-lbl">Start</span>
+        </button>
         <button class="nav-step-btn" data-step="step-families" onclick="scrollToStep('step-families')"
           title="Instance Families">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -70,24 +79,6 @@
               <rect x="3" y="14" width="7" height="7" />
               <rect x="14" y="14" width="7" height="7" />
             </svg></span><span class="step-lbl">Families</span>
-        </button>
-        <button class="nav-step-btn" data-step="step-agg" onclick="scrollToStep('step-agg')"
-          title="Family-Level Comparison">
-          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg></span><span class="step-lbl">Compare</span>
-        </button>
-        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
-          title="Hardware Architecture Reference">
-          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg></span><span class="step-lbl">Arch</span>
         </button>
         <button class="nav-step-btn" data-step="step-drill" onclick="scrollToStep('step-drill')"
           title="Set Priorities &amp; Drill Down">
@@ -142,6 +133,25 @@
             </svg></span><span class="step-lbl">Cost</span>
         </button>
         <span class="nav-divider"></span>
+        <button class="nav-step-btn" data-step="step-agg" onclick="scrollToStep('step-agg')"
+          title="Family-Level Comparison">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg></span><span class="step-lbl">Compare</span>
+        </button>
+        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
+          title="Hardware Architecture Reference">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg></span><span class="step-lbl">Arch</span>
+        </button>
+        <span class="nav-divider"></span>
         <button class="nav-step-btn" data-step="step-methodology" onclick="scrollToStep('step-methodology')"
           title="Scoring Methodology">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -149,15 +159,6 @@
               <path
                 d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
             </svg></span><span class="step-lbl">Methods</span>
-        </button>
-        <button class="nav-step-btn" data-step="step-workload-map" onclick="scrollToStep('step-workload-map')"
-          title="Workload Mapping Guide">
-          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-              <line x1="8" y1="2" x2="8" y2="18" />
-              <line x1="16" y1="6" x2="16" y2="22" />
-            </svg></span><span class="step-lbl">Workloads</span>
         </button>
         <button class="nav-step-btn" data-step="step-bibliography" onclick="scrollToStep('step-bibliography')"
           title="References & Resources">
@@ -243,15 +244,101 @@
       </div>
     </section>
 
+    <!-- ── How to use ── -->
+    <div class="funnel-wrap" style="padding-top:20px;padding-bottom:28px">
+      <div class="chart-card howto-card">
+        <div class="chart-hd">
+          <div class="chart-title">How to use this advisor (2 minutes)</div>
+          <div class="chart-sub">A quick workflow so you don’t have to guess what to do next</div>
+        </div>
+        <div class="howto-body">
+          <ol class="howto-steps">
+            <li><strong>Pick a region</strong> (top of page). Prices and rankings are region-specific.</li>
+            <li><strong>Choose a family</strong> if you already know your workload shape (CPU / Memory / Storage / GPU). If
+              not, keep <strong>All</strong> and use the descriptions + examples.</li>
+            <li><strong>Set priorities</strong> using presets + the weight levels (Price, CPU, Memory, Network, GPU).
+              Only the <strong>relative importance</strong> matters.</li>
+            <li><strong>Review the Top Match</strong> and scroll down to <strong>compare</strong> runners‑up in the table.
+              Click any row to see a head‑to‑head view.</li>
+            <li><strong>Estimate cost</strong> with the Monthly TCO section (compute + EBS + egress).</li>
+          </ol>
+          <div class="help-callout" style="margin-top:14px">
+            <div class="help-callout-title">Good to know</div>
+            <ul class="help-list">
+              <li><strong>Snapshot-based</strong>: prices come from a stored CSV, not live AWS billing.</li>
+              <li><strong>Shortlisting tool</strong>: the goal is to narrow options; benchmark before production.</li>
+              <li><strong>Shareable</strong>: use the <strong>Share</strong> button in the navbar to send a link with your current settings.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Funnel ── -->
     <div class="funnel-wrap">
+
+      <!-- ═══════════════════════════════════════════════
+         STEP 01 — Start here
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-1" id="step-workload-map">
+        <div class="step-hdr">
+          <div class="step-num">01</div>
+          <div>
+            <div class="step-title">Workload → Family Quick Reference</div>
+            <div class="step-desc">
+              If you don’t know where to begin, use this mapping to pick a sensible starting family based on your primary
+              bottleneck. Then continue to set priorities and get a ranked recommendation.
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <div class="table-wrap" style="max-height:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Workload Type</th>
+                  <th>Recommended Family</th>
+                  <th>Characteristics</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Web &amp; App Servers</strong></td>
+                  <td><strong>General Purpose (M/T)</strong></td>
+                  <td>Balanced CPU and memory. T-series for burstable dev/test; M-series for steady production traffic.</td>
+                </tr>
+                <tr>
+                  <td><strong>High-Traffic APIs &amp; HPC</strong></td>
+                  <td><strong>Compute Optimized (C)</strong></td>
+                  <td>High vCPU-to-memory ratio. Scientific modeling, batch processing, and dedicated game servers.</td>
+                </tr>
+                <tr>
+                  <td><strong>In-Memory Databases</strong></td>
+                  <td><strong>Memory Optimized (R/X)</strong></td>
+                  <td>8:1+ RAM-to-vCPU ratio. Redis, SAP HANA, real-time analytics, large JVM heaps.</td>
+                </tr>
+                <tr>
+                  <td><strong>NoSQL &amp; Data Warehousing</strong></td>
+                  <td><strong>Storage Optimized (I/D)</strong></td>
+                  <td>Local NVMe SSDs for millions of low-latency IOPS. MongoDB, Cassandra, high-speed logging.</td>
+                </tr>
+                <tr>
+                  <td><strong>AI Training &amp; Inference</strong></td>
+                  <td><strong>Accelerated (P/G/Trn/Inf)</strong></td>
+                  <td>P-series for GPU training; G-series for inference &amp; rendering; trn1/inf2 for AWS ML silicon.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       <!-- ═══════════════════════════════════════════════
          STEP 01 — Family Discovery
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-1" id="step-families">
         <div class="step-hdr">
-          <div class="step-num">01</div>
+          <div class="step-num">02</div>
           <div>
             <div class="step-title">Understand Instance Families</div>
             <div class="step-desc">
@@ -262,79 +349,17 @@
             </div>
           </div>
         </div>
+        <div class="help-callout">
+          <div class="help-callout-title">Tip: choose by bottleneck</div>
+          <div class="help-callout-text">
+            If you’re unsure, think about what usually limits you first:
+            <strong>CPU-bound</strong> (builds/encoding/APIs) → Compute,
+            <strong>RAM-bound</strong> (caches/analytics/JVM) → Memory,
+            <strong>IOPS/throughput</strong> (datastores/logs) → Storage,
+            <strong>CUDA/accelerators</strong> → GPU.
+          </div>
+        </div>
         <div class="family-cards-grid" id="familyCards"></div>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 02 — Family-Level Aggregate Comparison
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-2" id="step-agg">
-        <div class="step-hdr">
-          <div class="step-num">02</div>
-          <div>
-            <div class="step-title">Family-Level Comparison</div>
-            <div class="step-desc">
-              How do the five families compare on average specs? The bars show typical vCPU count and RAM while
-              the line shows average hourly cost. GPU and Memory families trade raw price for specialized hardware.
-              General Purpose sits in the middle of everything.
-            </div>
-          </div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-hd">
-            <div class="chart-title">Average Specs per Instance Family</div>
-            <div class="chart-sub">Aggregated across all instances in selected region · bars = vCPUs &amp; RAM (GiB) ·
-              line = avg cost ($/hr)</div>
-          </div>
-          <div class="chart-body" id="chart5" style="height:310px"></div>
-        </div>
-
-        <!-- Family Highlights -->
-        <div class="chart-card" style="padding:20px">
-          <div class="chart-hd" style="margin-bottom:16px">
-            <div class="chart-title">Family Highlights</div>
-            <div class="chart-sub">Cheapest, most powerful, and best value instance per family</div>
-          </div>
-          <div class="fh-grid" id="familyHighlights"></div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 03 — Instance Family Architecture Reference
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-2" id="step-arch">
-        <div class="step-hdr">
-          <div class="step-num">03</div>
-          <div>
-            <div class="step-title">Hardware Architecture Reference</div>
-            <div class="step-desc">
-              CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
-              <strong>Filters automatically with your selected family above.</strong>
-            </div>
-          </div>
-        </div>
-        <div class="chart-card" style="padding:0;overflow:hidden">
-          <!-- filter bar -->
-          <div class="arch-filter-bar">
-            <div class="arch-filter-left">
-              <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
-                class="arch-search-inp" />
-              <span id="archFilterTag" class="arch-active-filter" style="display:none"></span>
-            </div>
-            <div class="arch-legend">
-              <span class="avb intel">Intel</span>
-              <span class="avb amd">AMD</span>
-              <span class="avb aws">AWS Graviton</span>
-              <span class="isab x86">x86_64</span>
-              <span class="isab arm">ARM64</span>
-            </div>
-          </div>
-          <!-- table -->
-          <div class="table-wrap" style="max-height:520px">
-            <table id="archTable"></table>
-          </div>
-          <div id="archCount" class="arch-count-bar"></div>
-        </div>
       </section>
 
       <!-- ═══════════════════════════════════════════════
@@ -342,7 +367,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-2" id="step-drill">
         <div class="step-hdr">
-          <div class="step-num">04</div>
+          <div class="step-num">03</div>
           <div>
             <div class="step-title">Set Your Priorities &amp; Drill Down</div>
             <div class="step-desc">
@@ -370,6 +395,18 @@
             </div>
           </div>
           <div class="controls-body">
+            <div class="help-callout" style="margin-bottom:14px">
+              <div class="help-callout-title">What do these weights do?</div>
+              <div class="help-callout-text">
+                The advisor scores every candidate across Price, CPU, Memory, Network, and GPU, then blends them using
+                your weight levels. Think of it as: <strong>“rank what I care about most”</strong>.
+                If you increase <strong>Price</strong>, cheaper instances climb. If you increase <strong>GPU</strong>, GPU instances climb.
+              </div>
+              <ul class="help-list">
+                <li><strong>Start simple</strong>: pick a preset, then adjust 1–2 weights.</li>
+                <li><strong>Relative matters</strong>: “Price High + CPU Low” is meaningful; the exact numbers aren’t.</li>
+              </ul>
+            </div>
             <div class="prio-label">Click a level to set how important each criterion is for your recommendation</div>
             <div class="prio-grid">
 
@@ -535,8 +572,8 @@
         <div class="chart-card" style="margin-bottom:14px">
           <div class="bar-hd">
             <div>
-              <div class="chart-title">Top 10 Instance Comparison</div>
-              <div class="chart-sub">Select a metric to compare side-by-side</div>
+              <div class="chart-title">Instance Comparison</div>
+              <div class="chart-sub">Select a metric to compare every ranked instance side-by-side</div>
             </div>
             <div class="bar-hd-r">
               <label>Metric:</label>
@@ -569,7 +606,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-rec">
         <div class="step-hdr">
-          <div class="step-num">05</div>
+          <div class="step-num">04</div>
           <div>
             <div class="step-title">Your Best Match</div>
             <div class="step-desc">
@@ -578,6 +615,14 @@
               then scroll down to browse and click-compare every candidate in the full table.
             </div>
           </div>
+        </div>
+        <div class="help-callout">
+          <div class="help-callout-title">How to read this section</div>
+          <ul class="help-list">
+            <li><strong>Score</strong>: relative ranking within your current region + filters + weights.</li>
+            <li><strong>Why this instance</strong>: breakdown + explanation show what contributed most given your weights.</li>
+            <li><strong>Don’t stop at #1</strong>: check runners‑up and use the compare table if you need tradeoffs (cost vs. RAM, etc.).</li>
+          </ul>
         </div>
 
         <!-- KPI strip -->
@@ -693,7 +738,7 @@
             <div class="chart-title" id="regionalTitle">Regional Price Comparison</div>
             <div class="chart-sub">Top recommendation's on-demand price across all available AWS regions</div>
           </div>
-          <div class="chart-body" id="chart4" style="height:240px"></div>
+          <div class="chart-body" id="chart4" style="height:340px"></div>
         </div>
       </section>
 
@@ -702,7 +747,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-browse">
         <div class="step-hdr">
-          <div class="step-num">06</div>
+          <div class="step-num">05</div>
           <div>
             <div class="step-title">Browse All Candidates</div>
             <div class="step-desc">
@@ -711,6 +756,14 @@
               Use <kbd>/</kbd> to focus the search field.
             </div>
           </div>
+        </div>
+        <div class="help-callout">
+          <div class="help-callout-title">Fast ways to shortlist</div>
+          <ul class="help-list">
+            <li><strong>Search</strong> by prefix (e.g., <span class="help-kbd">m7g</span>, <span class="help-kbd">c6i</span>) to focus on one family generation.</li>
+            <li><strong>Click‑compare</strong> 2–3 close contenders to see where they differ (RAM, network, price).</li>
+            <li><strong>Use this as a “top N”</strong>: you rarely need to read the entire table end‑to‑end.</li>
+          </ul>
         </div>
         <div class="chart-card" style="padding:0;overflow:hidden">
           <div class="table-toolbar">
@@ -731,7 +784,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-calc">
         <div class="step-hdr">
-          <div class="step-num">07</div>
+          <div class="step-num">06</div>
           <div>
             <div class="step-title">Monthly TCO Estimator</div>
             <div class="step-desc">
@@ -741,6 +794,18 @@
           </div>
         </div>
         <div class="chart-card" style="padding:20px">
+          <div class="help-callout" style="margin-bottom:14px">
+            <div class="help-callout-title">What’s included in this estimate?</div>
+            <ul class="help-list">
+              <li><strong>Compute</strong>: hourly instance price × hours × count (pricing snapshot).</li>
+              <li><strong>Storage</strong>: EBS $/GB‑month × storage size.</li>
+              <li><strong>Egress</strong>: tiered public internet data transfer (rough estimate).</li>
+            </ul>
+            <div class="help-callout-text" style="margin-top:6px">
+              This is for planning and comparisons—not exact billing. AWS invoices can differ due to discounts,
+              free tiers, credits, inter‑AZ traffic, CloudFront, PrivateLink, and more.
+            </div>
+          </div>
 
           <!-- ── Billing model toggle ── -->
           <div class="billing-toggle-row">
@@ -755,6 +820,21 @@
                 Savings Plans
                 <span class="billing-badge">~20% off</span>
               </button>
+            </div>
+          </div>
+
+          <!-- ── Instance selector for estimate ── -->
+          <div class="calc-grid" style="grid-template-columns:1.6fr 2.4fr;margin-top:4px;margin-bottom:8px">
+            <div class="calc-input-wrap">
+              <label>Instance for estimate</label>
+              <select id="calcInstanceSelect" class="calc-inp calc-select">
+                <option value="">Loading…</option>
+              </select>
+            </div>
+            <div class="calc-input-wrap" style="display:flex;align-items:flex-end;padding-bottom:1px">
+              <p style="font-size:11px;color:var(--muted);margin:0;line-height:1.6">
+                Defaults to your current #1 recommendation. Change this to estimate monthly TCO for any instance in the ranked list.
+              </p>
             </div>
           </div>
 
@@ -863,18 +943,89 @@
         </div>
       </section>
 
+      <!-- ═══════════════════════════════════════════════
+         STEP 07 — Family-Level Comparison (deeper context)
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-2" id="step-agg">
+        <div class="step-hdr">
+          <div class="step-num">07</div>
+          <div>
+            <div class="step-title">Family-Level Comparison</div>
+            <div class="step-desc">
+              A high-level view to sanity-check the recommendation. The bars show typical vCPU count and RAM while the line
+              shows average hourly cost. Use this to understand the broad tradeoffs between families.
+            </div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hd">
+            <div class="chart-title">Average Specs per Instance Family</div>
+            <div class="chart-sub">Aggregated across all instances in selected region · bars = vCPUs &amp; RAM (GiB) ·
+              line = avg cost ($/hr)</div>
+          </div>
+          <div class="chart-body" id="chart5" style="height:310px"></div>
+        </div>
+
+        <!-- Family Highlights -->
+        <div class="chart-card" style="padding:20px">
+          <div class="chart-hd" style="margin-bottom:16px">
+            <div class="chart-title">Family Highlights</div>
+            <div class="chart-sub">Cheapest, most powerful, and best value instance per family</div>
+          </div>
+          <div class="fh-grid" id="familyHighlights"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+         STEP 08 — Hardware Architecture Reference (deep dive)
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-2" id="step-arch">
+        <div class="step-hdr">
+          <div class="step-num">08</div>
+          <div>
+            <div class="step-title">Hardware Architecture Reference</div>
+            <div class="step-desc">
+              CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
+              <strong>Filters automatically with your selected family above.</strong>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <!-- filter bar -->
+          <div class="arch-filter-bar">
+            <div class="arch-filter-left">
+              <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
+                class="arch-search-inp" />
+              <span id="archFilterTag" class="arch-active-filter" style="display:none"></span>
+            </div>
+            <div class="arch-legend">
+              <span class="avb intel">Intel</span>
+              <span class="avb amd">AMD</span>
+              <span class="avb aws">AWS Graviton</span>
+              <span class="isab x86">x86_64</span>
+              <span class="isab arm">ARM64</span>
+            </div>
+          </div>
+          <!-- table -->
+          <div class="table-wrap" style="max-height:520px">
+            <table id="archTable"></table>
+          </div>
+          <div id="archCount" class="arch-count-bar"></div>
+        </div>
+      </section>
+
 
       <!-- ═══════════════════════════════════════════════
          STEP 07 — Methodology  (explain scoring before reference tables)
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-methodology">
         <div class="step-hdr">
-          <div class="step-num">08</div>
+          <div class="step-num">09</div>
           <div>
             <div class="step-title">Scoring Methodology</div>
             <div class="step-desc">
               How our engine ranks instances. The EC2 Instance Advisor uses Multi-Criteria Decision Analysis (MCDA)
-              — an established operations-research framework — to produce objective, bias-free recommendations.
+              — an established operations-research framework — to produce consistent, explainable rankings.
             </div>
           </div>
         </div>
@@ -885,106 +1036,50 @@
             <div class="method-icon">🎯</div>
             <div class="method-name">Weighted Scoring Model (WSM)</div>
             <div class="method-text">
-              Each EC2 instance is evaluated across five criteria: price, vCPUs, memory, network, and GPU count.
-              Your slider inputs directly set the mathematical weight for each criterion.
+              Each EC2 instance is scored across five criteria: price efficiency, vCPUs, memory, network, and GPU count.
+              Your weight levels define how much each criterion contributes to the final composite score.
             </div>
             <div class="method-formula">
               <strong>Composite Score =</strong><br>
-              (w<sub>price</sub> × NormPrice) + (w<sub>cpu</sub> × NormCPU) +<br>
-              (w<sub>mem</sub> × NormMem) + (w<sub>net</sub> × NormNet) +<br>
-              (w<sub>gpu</sub> × NormGPU)<br><br>
-              Where each w<sub>i</sub> = slider_value / sum_of_all_sliders
+              (w<sub>price</sub> × scoreP) + (w<sub>cpu</sub> × scoreC) + (w<sub>mem</sub> × scoreM) +<br>
+              (w<sub>net</sub> × scoreN) + (w<sub>gpu</sub> × scoreG)<br><br>
+              Where each w<sub>i</sub> = slider_value / sum(slider_values)
             </div>
           </div>
 
           <!-- Normalization -->
           <div class="method-card mc-normalize">
             <div class="method-icon">📊</div>
-            <div class="method-name">Metric Normalization</div>
+            <div class="method-name">Rank Normalization (robust)</div>
             <div class="method-text">
-              Raw metrics span vastly different scales (e.g., $0.01/hr vs 768 GiB RAM). Each is
-              <strong>min-max normalized</strong> to [0, 1] within the active filter set.
-              Hardware metrics use direct normalization (higher = better); price uses inverse (lower = better).
+              Raw metrics have wildly different scales (e.g., $/hr vs GiB RAM). To avoid outliers dominating the range,
+              each metric is normalized to [0, 1] by <strong>fractional rank</strong> within the current candidate set.
+              Higher hardware specs rank higher; lower price efficiency ranks higher (inverse).
             </div>
             <div class="method-formula">
-              <strong>Direct:</strong> score = (value − min) / (max − min)<br>
-              <strong>Inverse:</strong> score = 1 − (value − min) / (max − min)<br><br>
-              A $0.01/hr instance scores high on price; a 96-vCPU instance scores high on compute.
+              Let \(n\) = number of candidates, and rank(value) ∈ [0, n−1].<br>
+              <strong>Direct (higher is better):</strong> score = rank(value) / (n − 1)<br>
+              <strong>Inverse (lower is better):</strong> score = 1 − rank(value) / (n − 1)<br><br>
+              Ties share the average of their ranks.
             </div>
           </div>
 
           <!-- User Weights -->
           <div class="method-card mc-weights">
             <div class="method-icon">⚖️</div>
-            <div class="method-name">User-Defined Weights</div>
+            <div class="method-name">Price Efficiency (not raw price)</div>
             <div class="method-text">
-              Sliders (0–100) are normalized to weights summing to 1.0.
-              Only the <strong>relative priority</strong> between criteria matters, not absolute values.
-              Price=70, CPU=10 produces the same ranking as Price=7, CPU=1.
+              The “price” criterion is computed as <strong>cost per compute unit</strong>, not raw $/hr.
+              This prevents tiny cheap instances from always winning on price, and better matches real planning tradeoffs.
+              Your weights are still normalized to sum to 1.0; only relative importance matters.
             </div>
             <div class="method-formula">
-              <strong>Example — Balanced Preset:</strong><br>
-              Price: 35 → 0.35 &nbsp;·&nbsp; CPU: 25 → 0.25 &nbsp;·&nbsp; Mem: 20 → 0.20<br>
-              Network: 10 → 0.10 &nbsp;·&nbsp; GPU: 10 → 0.10<br><br>
-              Sum = 100 → Each weight = slider / 100
+              <strong>Compute units =</strong><br>
+              vCPUs + (0.25 × GiB RAM) + (4 × GPU count)<br><br>
+              <strong>Price efficiency =</strong><br>
+              price_usd_hour / max(compute_units, 0.01)<br><br>
+              Lower is better → inverse-rank normalized into scoreP.
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 08 — Typical Workload Mapping
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-3" id="step-workload-map">
-        <div class="step-hdr">
-          <div class="step-num">09</div>
-          <div>
-            <div class="step-title">Workload → Family Quick Reference</div>
-            <div class="step-desc">
-              Match your primary bottleneck to the right EC2 family. Use this alongside the recommendation above.
-            </div>
-          </div>
-        </div>
-        <div class="chart-card" style="padding:0;overflow:hidden">
-          <div class="table-wrap" style="max-height:none">
-            <table>
-              <thead>
-                <tr>
-                  <th>Workload Type</th>
-                  <th>Recommended Family</th>
-                  <th>Characteristics</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Web &amp; App Servers</strong></td>
-                  <td><strong>General Purpose (M/T)</strong></td>
-                  <td>Balanced CPU and memory. T-series for burstable dev/test; M-series for steady production traffic.
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>High-Traffic APIs &amp; HPC</strong></td>
-                  <td><strong>Compute Optimized (C)</strong></td>
-                  <td>High vCPU-to-memory ratio. Scientific modeling, batch processing, and dedicated game servers.</td>
-                </tr>
-                <tr>
-                  <td><strong>In-Memory Databases</strong></td>
-                  <td><strong>Memory Optimized (R/X)</strong></td>
-                  <td>8:1+ RAM-to-vCPU ratio. Redis, SAP HANA, real-time analytics, large JVM heaps.</td>
-                </tr>
-                <tr>
-                  <td><strong>NoSQL &amp; Data Warehousing</strong></td>
-                  <td><strong>Storage Optimized (I/D)</strong></td>
-                  <td>Local NVMe SSDs for millions of low-latency IOPS. MongoDB, Cassandra, high-speed logging.</td>
-                </tr>
-                <tr>
-                  <td><strong>AI Training &amp; Inference</strong></td>
-                  <td><strong>Accelerated (P/G/Trn/Inf)</strong></td>
-                  <td>P-series for GPU training; G-series for inference &amp; rendering; trn1/inf2 for AWS ML silicon.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -1125,16 +1220,6 @@
 
   </div><!-- /.funnel-wrap -->
 
-  <!-- Footer disclaimer -->
-  <footer
-    style="text-align:center;padding:28px 16px 14px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line);background:#fff;line-height:1.9;margin-top:8px">
-    ⚠️ This tool is <strong>not affiliated with, endorsed by, or an official channel of Amazon Web Services
-      (AWS)</strong>.<br>
-    Independent personal project for educational &amp; portfolio purposes only. Pricing data may be outdated.
-    always verify on <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
-      style="color:var(--accent);text-decoration:none">aws.amazon.com/ec2/pricing</a>.
-  </footer>
-
   <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   </div><!-- /#app -->
@@ -1167,10 +1252,11 @@
     const state = {
       rows:            [],       // raw CSV rows
       regions:         [],       // sorted region list
-      regionIdx:       0,        // index into state.regions
-      scoredRows:      [],       // rows after scoring + sort
-      selectedFamilies: new Set(), // categories shown in line chart
-      tableLimit:      30,       // current "load more" page limit
+      regionIdx:         0,        // index into state.regions
+      scoredRows:        [],       // rows after scoring + sort
+      selectedFamilies:  new Set(), // categories shown in line chart
+      tableLimit:        30,       // current "load more" page limit
+      calcInstanceType:  null,     // instance_type currently used for TCO calculator
     };
 
     /** Slider IDs for the priority weights. */
@@ -1433,7 +1519,18 @@
 
     /* ── ScrollSpy ─────────────────────────────────────────── */
     (function initScrollSpy() {
-      const ids = ['step-families', 'step-agg', 'step-drill', 'step-rec', 'step-browse', 'step-calc', 'step-methodology', 'step-workload-map', 'step-arch', 'step-bibliography'];
+      const ids = [
+        'step-workload-map',
+        'step-families',
+        'step-drill',
+        'step-rec',
+        'step-browse',
+        'step-calc',
+        'step-agg',
+        'step-arch',
+        'step-methodology',
+        'step-bibliography',
+      ];
       let ticking = false;
       window.addEventListener('scroll', () => {
         if (ticking) return;
@@ -1682,6 +1779,26 @@
     const PLOTLY_BASE = {
       paper_bgcolor: 'transparent', plot_bgcolor: '#fafbff',
       font: { family: 'Inter,sans-serif', size: 11, color: '#64748b' },
+      hoverlabel: {
+        bgcolor: '#0f172a',
+        bordercolor: 'rgba(148,163,184,.35)',
+        font: { family: 'Inter,sans-serif', size: 12, color: '#e2e8f0' },
+        namelength: 28,
+      },
+      xaxis: {
+        gridcolor: '#e2e8f0',
+        zeroline: false,
+        tickfont: { size: 11, color: '#475569' },
+        titlefont: { size: 12, color: '#0f172a' },
+      },
+      yaxis: {
+        gridcolor: '#e2e8f0',
+        zeroline: false,
+        tickfont: { size: 11, color: '#475569' },
+        titlefont: { size: 12, color: '#0f172a' },
+      },
+      legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
+      margin: { t: 16, r: 18, b: 70, l: 60 },
     };
 
     /* ── Family filter helpers ──────────────────────────────── */
@@ -1824,7 +1941,7 @@
         ...PLOTLY_BASE, barmode: 'group',
         xaxis: { gridcolor: '#e2e8f0' },
         yaxis: { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
-        yaxis2: { title: 'Avg Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
+        yaxis2: { title: 'Avg Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false, tickprefix: '$', tickformat: '.4f' },
         legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
         margin: { t: 16, r: 65, b: 70, l: 55 }, hovermode: 'x unified',
       }, { responsive: true, displayModeBar: false });
@@ -1898,6 +2015,7 @@
       const activeCats = [...new Set(filtered.map(r => r.instance_category))];
       let names = [];
       let vcpus = [], memory = [], prices = [];
+      let meta = [];
 
       if (activeCats.length >= 3) {
         // Broad view: For each category, get the best and worst instance
@@ -1906,8 +2024,9 @@
           if (!catRows.length) return;
           const best = catRows[0];
           const worst = catRows[catRows.length - 1];
-          // Format names to explicitly show they represent the category extremes
-          names.push(`${cat} (Best: ${best.instance_type})`, `${cat} (Lowest: ${worst.instance_type})`);
+          // Use clean x labels (instance types). Put the context into the hover.
+          names.push(best.instance_type, worst.instance_type);
+          meta.push({ cat, kind: 'Best in filter' }, { cat, kind: 'Lowest in filter' });
           vcpus.push(best.vcpus, worst.vcpus);
           memory.push(best.memory_gib, worst.memory_gib);
           prices.push(best.price_usd_hour, worst.price_usd_hour);
@@ -1920,34 +2039,39 @@
         vcpus = top.map(r => r.vcpus);
         memory = top.map(r => r.memory_gib);
         prices = top.map(r => r.price_usd_hour);
+        meta = top.map(r => ({ cat: r.instance_category, kind: 'Candidate' }));
       }
 
+      const cd = meta.map(m => [m.cat || '—', m.kind || '—']);
       Plotly.react('chart', [
         {
           name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: vcpus,
+          customdata: cd,
           line: { color: '#3b82f6', width: 2.5, shape: 'spline' },
           marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
-          hovertemplate: '<b>%{x}</b><br>vCPUs: <b>%{y}</b><extra></extra>',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>vCPUs: <b>%{y}</b><extra></extra>',
         },
         {
           name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: memory,
+          customdata: cd,
           line: { color: '#10b981', width: 2.5, shape: 'spline' },
           marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
-          hovertemplate: '<b>%{x}</b><br>RAM: <b>%{y} GiB</b><extra></extra>',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>RAM: <b>%{y} GiB</b><extra></extra>',
         },
         {
           name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: prices,
+          customdata: cd,
           line: { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
           marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
-          hovertemplate: '<b>%{x}</b><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
         },
       ], {
         ...PLOTLY_BASE,
-        xaxis: { tickangle: -35, gridcolor: '#e2e8f0', automargin: true },
+        xaxis: { ...PLOTLY_BASE.xaxis, tickangle: -35, automargin: true, tickfont: { size: 10, color: '#475569' } },
         yaxis: { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
         yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
-        legend: { orientation: 'h', y: -0.32, x: 0, font: { size: 11 } },
-        margin: { t: 12, r: 55, b: 80, l: 50 }, hovermode: 'x unified',
+        legend: { ...PLOTLY_BASE.legend, y: -0.32 },
+        margin: { t: 12, r: 55, b: 90, l: 58 }, hovermode: 'x unified',
       }, { responsive: true, displayModeBar: false });
     }
 
@@ -2058,16 +2182,30 @@
 
     /* ── Bar chart ──────────────────────────────────────────── */
     function renderBar(rows, metric) {
-      const top10 = rows.slice(0, 10);
-      const yvals = top10.map(r => metric === 'composite' ? +r.composite.toFixed(4) : r[metric]);
+      if (!rows || !rows.length) {
+        Plotly.react('chart2', [], { ...PLOTLY_BASE }, { responsive: true, displayModeBar: false });
+        return;
+      }
+      const yvals = rows.map(r => metric === 'composite' ? +r.composite.toFixed(4) : r[metric]);
+      const yTitle = METRIC_LABEL[metric] || metric;
+      const yHover =
+        metric === 'price_usd_hour' ? '$%{y:.4f}/hr'
+          : metric === 'composite' ? '%{y:.3f}'
+            : metric === 'memory_gib' ? '%{y} GiB'
+              : '%{y}';
       Plotly.react('chart2', [{
-        x: top10.map(r => r.instance_type), y: yvals, type: 'bar',
-        marker: { color: top10.map(r => CAT_COLOR[r.instance_category] || '#4f46e5'), opacity: .85 },
-        hovertemplate: '<b>%{x}</b><br>' + METRIC_LABEL[metric] + ': %{y}<extra></extra>',
+        x: rows.map(r => r.instance_type), y: yvals, type: 'bar',
+        marker: { color: rows.map(r => CAT_COLOR[r.instance_category] || '#4f46e5'), opacity: .85 },
+        hovertemplate: '<b>%{x}</b><br>' + yTitle + ': <b>' + yHover + '</b><extra></extra>',
       }], {
         ...PLOTLY_BASE,
-        xaxis: { title: 'Instance Type', tickangle: -28, gridcolor: '#e2e8f0' },
-        yaxis: { title: METRIC_LABEL[metric], gridcolor: '#e2e8f0', zeroline: false },
+        xaxis: {
+          title: 'Instance Type',
+          tickangle: -28,
+          gridcolor: '#e2e8f0',
+          automargin: true,
+        },
+        yaxis: { title: yTitle, gridcolor: '#e2e8f0', zeroline: false },
         margin: { t: 12, r: 12, b: 80, l: 52 },
       }, { responsive: true, displayModeBar: false });
     }
@@ -2181,13 +2319,20 @@
     function renderParallelCoordinates(rows) {
       if (!rows || rows.length < 2) return;
       const top30 = rows.slice(0, Math.min(30, rows.length));
-      const catIndex = { CPU: 0, GPU: 1, Memory: 2, Storage: 3, General: 4 };
-      const catColors = [CAT_COLOR.CPU, CAT_COLOR.GPU, CAT_COLOR.Memory, CAT_COLOR.Storage, CAT_COLOR.General];
+      // Color-code by sub-family prefix (e.g. m7g, c6i, r7i) for better readability
+      const famKeys = [...new Set(top30.map(r => getFamily(r.instance_type)))].sort();
+      const palette = ['#6366f1', '#10b981', '#f97316', '#ec4899', '#0ea5e9', '#facc15', '#8b5cf6', '#14b8a6'];
+      const famColor = fam => palette[famKeys.indexOf(fam) % palette.length] || '#64748b';
+      const famIndex = Object.fromEntries(famKeys.map((k, i) => [k, i]));
+      // Build a discrete colorscale that maps integer indices -> colors
+      const colorscale = famKeys.length <= 1
+        ? [[0, famColor(famKeys[0] || '')], [1, famColor(famKeys[0] || '')]]
+        : famKeys.map((fam, i) => [i / (famKeys.length - 1), famColor(fam)]);
       Plotly.react('chartParallel', [{
         type: 'parcoords',
         line: {
-          color: top30.map(r => catIndex[r.instance_category] ?? 4),
-          colorscale: catColors.map((c, i) => [[i / (catColors.length - 1), c]]).flat().concat([[1, CAT_COLOR.General]]),
+          color: top30.map(r => famIndex[getFamily(r.instance_type)] ?? 0),
+          colorscale,
           showscale: false,
         },
         dimensions: [
@@ -2230,13 +2375,14 @@
 
       // Build custom legend
       const legendHtml = top30.map((r) => {
-        const catColor = CAT_COLOR[r.instance_category] || CAT_COLOR.General;
-        const bg = catColor + '15'; // 15% opacity hex
+        const fam = getFamily(r.instance_type);
+        const c = famColor(fam);
+        const bg = c + '15'; // 15% opacity hex
         return `<div style="
           display:inline-flex; align-items:center; gap:4px; padding:2px 8px;
-          border-radius:999px; background:${bg}; color:${catColor}; border:1px solid ${catColor}40;
+          border-radius:999px; background:${bg}; color:${c}; border:1px solid ${c}40;
           font-size:10px; font-weight:700; font-family:var(--mono); flex-shrink:0;
-        "><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${catColor}"></span>${r.instance_type}</div>`;
+        "><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${c}"></span>${r.instance_type}</div>`;
       }).join('');
       const legendEl = el('parcoordsLegend');
       if (legendEl) legendEl.innerHTML = legendHtml;
@@ -2245,25 +2391,95 @@
     /* ── Value Map scatter chart ────────────────────────────── */
     function renderScatterChart(rows) {
       if (!rows || !rows.length) return;
-      const cats = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
       const best = rows[0];
-      const traces = cats.map(cat => {
-        const r = rows.filter(x => x.instance_category === cat);
-        return {
-          name: cat, type: 'scatter', mode: 'markers',
-          x: r.map(d => d.price_usd_hour),
-          y: r.map(d => +d.composite.toFixed(4)),
-          text: r.map(d => d.instance_type),
-          customdata: r.map(d => d.vcpus),
-          marker: {
-            color: CAT_COLOR[cat] || '#6b7280',
-            size: r.map(d => 6 + d.vcpus * 1.2),
-            opacity: .82,
-            line: { color: '#fff', width: 1 },
-          },
-          hovertemplate: '<b>%{text}</b><br>Price: $%{x:.4f}/hr<br>Score: %{y:.3f}<br>vCPUs: %{customdata}<extra></extra>',
-        };
+
+      const activeCats = [...new Set(rows.map(r => r.instance_category))];
+      const singleFamilyView = activeCats.length === 1;
+      const traces = [];
+
+      if (singleFamilyView) {
+        // Colour-code by sub-family prefix (e.g. m7g, c6i) when looking at one instance family
+        const famBuckets = {};
+        rows.forEach(r => {
+          const fam = getFamily(r.instance_type);
+          (famBuckets[fam] = famBuckets[fam] || []).push(r);
+        });
+        const famKeys = Object.keys(famBuckets).sort();
+        const palette = ['#6366f1', '#10b981', '#f97316', '#ec4899', '#0ea5e9', '#facc15', '#8b5cf6', '#14b8a6'];
+
+        famKeys.forEach((fam, idx) => {
+          const r = famBuckets[fam];
+          const color = palette[idx % palette.length];
+          const sizes = r.map(d => Math.min(26, 8 + Math.sqrt(Math.max(1, d.vcpus)) * 4));
+          traces.push({
+            name: fam,
+            type: 'scatter',
+            mode: 'markers',
+            x: r.map(d => d.price_usd_hour),
+            y: r.map(d => +d.composite.toFixed(4)),
+            text: r.map(d => d.instance_type),
+            customdata: r.map(d => d.vcpus),
+            marker: {
+              color,
+              size: sizes,
+              sizemode: 'diameter',
+              opacity: .85,
+              line: { color: '#fff', width: 1 },
+            },
+            hovertemplate: '<b>%{text}</b><br>Family: ' + fam +
+              '<br>Price: $%{x:.4f}/hr<br>Score: %{y:.3f}<br>vCPUs: %{customdata}<extra></extra>',
+          });
+        });
+      } else {
+        // Multi-family view: colour by high-level instance category
+        const cats = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
+        cats.forEach(cat => {
+          const r = rows.filter(x => x.instance_category === cat);
+          if (!r.length) return;
+          const sizes = r.map(d => Math.min(26, 8 + Math.sqrt(Math.max(1, d.vcpus)) * 4));
+          traces.push({
+            name: cat,
+            type: 'scatter',
+            mode: 'markers',
+            x: r.map(d => d.price_usd_hour),
+            y: r.map(d => +d.composite.toFixed(4)),
+            text: r.map(d => d.instance_type),
+            customdata: r.map(d => d.vcpus),
+            marker: {
+              color: CAT_COLOR[cat] || '#6b7280',
+              size: sizes,
+              sizemode: 'diameter',
+              opacity: .82,
+              line: { color: '#fff', width: 1 },
+            },
+            hovertemplate: '<b>%{text}</b><br>Category: ' + cat +
+              '<br>Price: $%{x:.4f}/hr<br>Score: %{y:.3f}<br>vCPUs: %{customdata}<extra></extra>',
+          });
+        });
+      }
+
+      // Pareto frontier (price vs score): best-achievable score as price increases
+      const sorted = [...rows].slice().sort((a, b) => a.price_usd_hour - b.price_usd_hour);
+      const frontier = [];
+      let maxScore = -Infinity;
+      sorted.forEach(r => {
+        if (r.composite > maxScore + 1e-6) {
+          frontier.push(r);
+          maxScore = r.composite;
+        }
       });
+      if (frontier.length >= 2) {
+        traces.push({
+          name: 'Pareto frontier',
+          type: 'scatter',
+          mode: 'lines',
+          x: frontier.map(d => d.price_usd_hour),
+          y: frontier.map(d => +d.composite.toFixed(4)),
+          line: { color: '#0f172a', width: 2, dash: 'dash' },
+          hovertemplate: '<b>Pareto frontier</b><br>$%{x:.4f}/hr · Score %{y:.3f}<extra></extra>',
+        });
+      }
+
       // Star marker for #1 recommendation
       traces.push({
         name: '★ #1 pick', type: 'scatter', mode: 'markers+text',
@@ -2296,11 +2512,21 @@
       const rows = state.rows.filter(r => r.instance_type === bestType)
         .sort((a, b) => a.price_usd_hour - b.price_usd_hour);
       el('regionalTitle').textContent = `${bestType} — Regional Price Comparison`;
+
+      // Auto-scale chart height so labels remain readable
+      const isMobile = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
+      const perRow = isMobile ? 16 : 18;
+      const base = isMobile ? 170 : 190;
+      const minH = isMobile ? 300 : 360;
+      const maxH = isMobile ? 460 : 620;
+      const h = Math.max(minH, Math.min(maxH, base + rows.length * perRow));
+      const fmtPrice = p => p < 0.01 ? `$${p.toFixed(4)}` : `$${p.toFixed(3)}`;
+
       if (rows.length < 2) {
         Plotly.react('chart4', [{
           type: 'bar', x: [rows[0]?.price_usd_hour || 0], y: [rows[0]?.region || ''],
           orientation: 'h', marker: { color: '#4f46e5' },
-        }], { ...PLOTLY_BASE, margin: { t: 12, r: 60, b: 36, l: 90 } }, { responsive: true, displayModeBar: false });
+        }], { ...PLOTLY_BASE, height: h, margin: { t: 12, r: 60, b: 36, l: 90 } }, { responsive: true, displayModeBar: false });
         return;
       }
       const minP = rows[0].price_usd_hour;
@@ -2309,15 +2535,28 @@
         x: rows.map(r => r.price_usd_hour), y: rows.map(r => r.region),
         marker: { color: rows.map(r => r.price_usd_hour === minP ? '#10b981' : '#4f46e5'), opacity: .85 },
         text: rows.map(r => r.price_usd_hour === minP
-          ? `$${r.price_usd_hour.toFixed(4)}  ✅`
-          : `$${r.price_usd_hour.toFixed(4)} `),
+          ? `${fmtPrice(r.price_usd_hour)}  ✅`
+          : `${fmtPrice(r.price_usd_hour)} `),
         textposition: 'outside',
+        textfont: { size: isMobile ? 11 : 12, color: '#0f172a' },
+        cliponaxis: false,
         hovertemplate: '%{y}<br>$%{x:.4f}/hr<extra></extra>',
       }], {
         ...PLOTLY_BASE,
-        xaxis: { title: 'Price (USD/hr)', gridcolor: '#e2e8f0', zeroline: false },
-        yaxis: { automargin: true },
-        margin: { t: 12, r: 80, b: 40, l: 10 },
+        height: h,
+        xaxis: {
+          title: 'Price (USD/hr)',
+          gridcolor: '#e2e8f0',
+          zeroline: false,
+          tickprefix: '$',
+          tickformat: '.4f',
+          tickfont: { size: isMobile ? 10 : 11 },
+          titlefont: { size: isMobile ? 11 : 12 },
+        },
+        yaxis: { automargin: true, tickfont: { size: isMobile ? 10 : 11 } },
+        margin: { t: 12, r: 130, b: 46, l: 88 },
+        uniformtext: { mode: 'hide', minsize: isMobile ? 10 : 11 },
+        bargap: isMobile ? 0.18 : 0.22,
       }, { responsive: true, displayModeBar: false });
     }
 
@@ -2352,6 +2591,26 @@
     function closeCompare() { el('comparePanel').classList.remove('visible'); }
 
     /* ── TCO Calculator ─────────────────────────────────────── */
+    function renderCalcInstanceSelector(rows, best) {
+      const sel = el('calcInstanceSelect');
+      if (!sel) return;
+      if (!rows || !rows.length) {
+        sel.innerHTML = '<option value=\"\">No instances in view</option>';
+        sel.disabled = true;
+        state.calcInstanceType = null;
+        return;
+      }
+      const top = rows.slice(0, 40); // limit options to top N candidates
+      // Ensure current selection is valid, else fall back to best
+      const validCurrent = top.some(r => r.instance_type === state.calcInstanceType);
+      const current = validCurrent && state.calcInstanceType ? state.calcInstanceType : best.instance_type;
+      state.calcInstanceType = current;
+      sel.disabled = false;
+      sel.innerHTML = top.map(r =>
+        `<option value=\"${r.instance_type}\">${r.instance_type} — ${r.region}</option>`).join('');
+      sel.value = current;
+    }
+
     function renderCalculator(best) {
       const hours = Math.max(1, +el('calcHours').value || 730);
       const count = Math.max(1, +el('calcCount').value || 1);
@@ -2671,8 +2930,14 @@
       renderParallelCoordinates(rows);
       renderBar(rows, metric);
       renderScatterChart(rows);
-      renderRegional(best.instance_type);
-      renderCalculator(best);
+
+      // TCO + regional price charts share the same selected instance
+      renderCalcInstanceSelector(rows, best);
+      const calcRow = state.calcInstanceType
+        ? (rows.find(r => r.instance_type === state.calcInstanceType) || best)
+        : best;
+      renderRegional(calcRow.instance_type);
+      renderCalculator(calcRow);
       renderTable(rows, el('tableSearch').value);
       // Arch table re-filters whenever the main category changes
       renderArchTable(el('archSearch')?.value, category);
@@ -2742,6 +3007,13 @@
         ['calcHours', 'calcCount', 'calcStorageGb', 'calcEgress'].forEach(id =>
           el(id).addEventListener('input', render));
         el('calcEbsType').addEventListener('change', render);
+        const calcSel = el('calcInstanceSelect');
+        if (calcSel) {
+          calcSel.addEventListener('change', e => {
+            state.calcInstanceType = e.target.value || null;
+            render();
+          });
+        }
         el('billingToggle').querySelectorAll('.billing-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             el('billingToggle').querySelectorAll('.billing-btn').forEach(b => b.classList.remove('active'));
@@ -2784,7 +3056,18 @@
         }, 250);
 
         /* ── Scroll spy: highlight current step in nav ── */
-        const stepIds = ['step-families', 'step-agg', 'step-arch', 'step-drill', 'step-rec', 'step-browse', 'step-calc', 'step-methodology', 'step-workload-map', 'step-bibliography'];
+        const stepIds = [
+          'step-workload-map',
+          'step-families',
+          'step-drill',
+          'step-rec',
+          'step-browse',
+          'step-calc',
+          'step-agg',
+          'step-arch',
+          'step-methodology',
+          'step-bibliography',
+        ];
         const spyObs = new IntersectionObserver(entries => {
           entries.forEach(e => {
             const btn = document.querySelector(`.nav-step-btn[data-step="${e.target.id}"]`);
@@ -2815,7 +3098,7 @@
     <div class="footer-glow"></div>
     <div class="footer-inner">
 
-      <div class="footer-grid footer-grid-2col">
+      <div class="footer-grid footer-grid-3col">
 
         <!-- Brand -->
         <div>
@@ -2837,10 +3120,10 @@
           </div>
         </div>
 
-        <!-- Open Source + Shortcuts -->
+        <!-- Open Source -->
         <div>
           <div class="footer-section-title">Open Source</div>
-          <ul class="footer-links" style="margin-bottom: 24px;">
+          <ul class="footer-links">
             <li><a href="https://github.com/varad-more/ec2-instance-advisor" target="_blank" rel="noopener">
                 <span class="fl-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -2853,7 +3136,10 @@
                 <span class="fl-icon">👤</span> Varad More
               </a></li>
           </ul>
+        </div>
 
+        <!-- Keyboard Shortcuts -->
+        <div>
           <div class="footer-section-title">Keyboard Shortcuts</div>
           <div class="footer-kbds">
             <div class="footer-kbd-row">
@@ -2896,12 +3182,14 @@
               style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(129,140,248,.3);">
             <div>
               <div style="font-size: 13px; font-weight: 800; color: #f8fafc; letter-spacing: -.02em;">Varad More</div>
-              <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">Creator & Developer</div>
+              <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">Creator &amp; Developer</div>
             </div>
           </a>
           <span style="width: 1px; height: 24px; background: rgba(255,255,255,.1);"></span>
           <span class="footer-copy">
-            Data sourced from the AWS public pricing API
+            Data sourced from the AWS public pricing API. Pricing snapshot may be outdated — always verify on
+            <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
+              style="color:#c4b5fd;text-decoration:none;">aws.amazon.com/ec2/pricing</a>.
           </span>
         </div>
         <span class="footer-disclaimer">
@@ -2911,7 +3199,8 @@
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
-          Not affiliated with Amazon Web Services
+          Not affiliated with, endorsed by, or an official channel of Amazon Web Services (AWS). Independent personal
+          project for educational &amp; portfolio purposes only.
         </span>
       </div>
 
