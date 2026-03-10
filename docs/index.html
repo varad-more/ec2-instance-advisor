@@ -80,6 +80,15 @@
               <line x1="6" y1="20" x2="6" y2="14" />
             </svg></span><span class="step-lbl">Compare</span>
         </button>
+        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
+          title="Hardware Architecture Reference">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg></span><span class="step-lbl">Arch</span>
+        </button>
         <button class="nav-step-btn" data-step="step-drill" onclick="scrollToStep('step-drill')"
           title="Set Priorities &amp; Drill Down">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -149,15 +158,6 @@
               <line x1="8" y1="2" x2="8" y2="18" />
               <line x1="16" y1="6" x2="16" y2="22" />
             </svg></span><span class="step-lbl">Workloads</span>
-        </button>
-        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
-          title="Instance Architecture Reference">
-          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg></span><span class="step-lbl">Arch</span>
         </button>
         <button class="nav-step-btn" data-step="step-bibliography" onclick="scrollToStep('step-bibliography')"
           title="References & Resources">
@@ -300,11 +300,49 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 03 — Configure Priorities & Drill Down
+         STEP 03 — Instance Family Architecture Reference
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-2" id="step-arch">
+        <div class="step-hdr">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">Hardware Architecture Reference</div>
+            <div class="step-desc">
+              CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
+              <strong>Filters automatically with your selected family above.</strong>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <!-- filter bar -->
+          <div class="arch-filter-bar">
+            <div class="arch-filter-left">
+              <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
+                class="arch-search-inp" />
+              <span id="archFilterTag" class="arch-active-filter" style="display:none"></span>
+            </div>
+            <div class="arch-legend">
+              <span class="avb intel">Intel</span>
+              <span class="avb amd">AMD</span>
+              <span class="avb aws">AWS Graviton</span>
+              <span class="isab x86">x86_64</span>
+              <span class="isab arm">ARM64</span>
+            </div>
+          </div>
+          <!-- table -->
+          <div class="table-wrap" style="max-height:520px">
+            <table id="archTable"></table>
+          </div>
+          <div id="archCount" class="arch-count-bar"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+         STEP 04 — Configure Priorities & Drill Down
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-2" id="step-drill">
         <div class="step-hdr">
-          <div class="step-num">03</div>
+          <div class="step-num">04</div>
           <div>
             <div class="step-title">Set Your Priorities &amp; Drill Down</div>
             <div class="step-desc">
@@ -469,10 +507,10 @@
             <div class="family-filter-bar" id="familyFilter"></div>
             <div class="chart-body" id="chart" style="height:280px"></div>
           </div>
-          <div class="chart-card">
+          <div class="chart-card" id="radarCard">
             <div class="chart-hd">
-              <div class="chart-title">Dimension Radar: Top 5</div>
-              <div class="chart-sub">Normalized [0–1] scores across all five dimensions</div>
+              <div class="chart-title">Dimension Radar: All Families</div>
+              <div class="chart-sub">Average normalized [0–1] scores per instance category</div>
             </div>
             <div class="chart-body" id="chart3" style="height:320px"></div>
           </div>
@@ -531,7 +569,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-rec">
         <div class="step-hdr">
-          <div class="step-num">04</div>
+          <div class="step-num">05</div>
           <div>
             <div class="step-title">Your Best Match</div>
             <div class="step-desc">
@@ -660,11 +698,11 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 05 — Browse All Candidates
+         STEP 06 — Browse All Candidates
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-browse">
         <div class="step-hdr">
-          <div class="step-num">05</div>
+          <div class="step-num">06</div>
           <div>
             <div class="step-title">Browse All Candidates</div>
             <div class="step-desc">
@@ -689,11 +727,11 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 06 — Monthly TCO Estimator
+         STEP 07 — Monthly TCO Estimator
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-calc">
         <div class="step-hdr">
-          <div class="step-num">06</div>
+          <div class="step-num">07</div>
           <div>
             <div class="step-title">Monthly TCO Estimator</div>
             <div class="step-desc">
@@ -831,7 +869,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-methodology">
         <div class="step-hdr">
-          <div class="step-num">07</div>
+          <div class="step-num">08</div>
           <div>
             <div class="step-title">Scoring Methodology</div>
             <div class="step-desc">
@@ -899,7 +937,7 @@
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-workload-map">
         <div class="step-hdr">
-          <div class="step-num">08</div>
+          <div class="step-num">09</div>
           <div>
             <div class="step-title">Workload → Family Quick Reference</div>
             <div class="step-desc">
@@ -952,45 +990,11 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP RA — Instance Family Architecture Reference
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-3" id="step-arch">
-        <div class="step-hdr">
-          <div class="step-num" style="font-size:11px;letter-spacing:.5px">RA</div>
-          <div>
-            <div class="step-title">Instance Family Architecture Reference</div>
-            <div class="step-desc">
-              Underlying CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for every EC2 family in this
-              dataset.
-            </div>
-          </div>
-        </div>
-        <div class="chart-card" style="padding:0;overflow:hidden">
-          <!-- filter bar -->
-          <div class="arch-filter-bar">
-            <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
-              class="arch-search-inp" />
-            <div class="arch-legend">
-              <span class="avb intel">Intel</span>
-              <span class="avb amd">AMD</span>
-              <span class="avb aws">AWS</span>
-              <span class="isab x86">x86_64</span>
-              <span class="isab arm">ARM64</span>
-            </div>
-          </div>
-          <!-- table -->
-          <div class="table-wrap" style="max-height:none">
-            <table id="archTable"></table>
-          </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 09 — References
+         STEP 10 — References
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-bibliography">
         <div class="step-hdr">
-          <div class="step-num">09</div>
+          <div class="step-num">10</div>
           <div>
             <div class="step-title">References</div>
             <div class="step-desc">
@@ -1136,34 +1140,78 @@
   </div><!-- /#app -->
 
   <script>
-    /* ── Constants & state ──────────────────────────────────── */
-    const CSV_URL = './data/ec2_aws_snapshot.csv';
-    const state = { rows: [], regions: [], regionIdx: 0, scoredRows: [], selectedFamilies: new Set(), tableLimit: 30 };
-    const SLIDERS = ['wPrice', 'wCpu', 'wMem', 'wNet', 'wGpu'];
+    /* ═══════════════════════════════════════════════════════════
+       EC2 Instance Advisor — Main Application Script
+       -------------------------------------------------------
+       Sections:
+         1. App state & DOM helpers
+         2. UI constants  (colours, labels, presets)
+         3. Segment-bar widget
+         4. Pricing constants  (EBS, egress, RI/SP discounts)
+         5. ARCH_MAP  — hardware architecture reference data
+         6. REGION_META / GEO_ORDER  — region geo groupings
+         7. FAMILY_INFO  — instance-category cards data
+         8. Utility helpers      (toast, sidebar, preset, animateNum)
+         9. Scroll & nav helpers  (scrollToStep, scrollspy, scroll-reveal)
+        10. URL hash persistence  (saveHash, loadHash, shareURL)
+        11. CSV parser & data helpers  (parseCSV, norm, region sync)
+        12. Individual render functions  (charts, cards, table…)
+        13. Main render()  — orchestrates a full UI refresh
+        14. boot()  — fetch CSV, wire DOM, launch app
+    ═══════════════════════════════════════════════════════════ */
+
+    /* ── 1. App state & DOM helpers ─────────────────────────── */
+    const CSV_URL  = './data/ec2_aws_snapshot.csv';
+
+    /** Centralised mutable app state — never read the DOM for state. */
+    const state = {
+      rows:            [],       // raw CSV rows
+      regions:         [],       // sorted region list
+      regionIdx:       0,        // index into state.regions
+      scoredRows:      [],       // rows after scoring + sort
+      selectedFamilies: new Set(), // categories shown in line chart
+      tableLimit:      30,       // current "load more" page limit
+    };
+
+    /** Slider IDs for the priority weights. */
+    const SLIDERS   = ['wPrice', 'wCpu', 'wMem', 'wNet', 'wGpu'];
+    /** Keys persisted in the URL hash so results are shareable. */
     const HASH_KEYS = ['region', 'category', 'metric', ...SLIDERS];
+
+    /** Convenience alias for getElementById. */
     const el = id => document.getElementById(id);
 
+    /* ── 2. UI constants ────────────────────────────────────── */
+    /** Accent colours per instance category. */
     const CAT_COLOR = { CPU: '#3b82f6', GPU: '#8b5cf6', Memory: '#10b981', Storage: '#f59e0b', General: '#6b7280' };
-    const CAT_BG = { CPU: '#eff6ff', GPU: '#f5f3ff', Memory: '#ecfdf5', Storage: '#fffbeb', General: '#f9fafb' };
+    /** Pastel backgrounds per instance category. */
+    const CAT_BG    = { CPU: '#eff6ff', GPU: '#f5f3ff', Memory: '#ecfdf5', Storage: '#fffbeb', General: '#f9fafb' };
+
+    /** Human-readable axis/metric labels. */
     const METRIC_LABEL = {
       vcpus: 'vCPUs', memory_gib: 'Memory (GiB)', gpu_count: 'GPU Count',
       network_score: 'Network Score', price_usd_hour: 'Price (USD/hr)', composite: 'Composite Score',
     };
+
+    /** One-line tooltip shown on category chip hover. */
     const TYPE_EXPLAIN = {
-      CPU: 'Compute optimized: builds, encoding, high QPS APIs.',
-      GPU: 'Accelerated: ML training and inference, CUDA, rendering.',
-      Memory: 'Memory optimized: large caches, analytics, JVM.',
+      CPU:     'Compute optimized: builds, encoding, high QPS APIs.',
+      GPU:     'Accelerated: ML training and inference, CUDA, rendering.',
+      Memory:  'Memory optimized: large caches, analytics, JVM.',
       Storage: 'Storage optimized: high IOPS, low latency NVMe.',
       General: 'Balanced: web apps, microservices, mixed workloads.',
     };
+
+    /** Preset weight profiles for the priority sliders. */
     const PRESETS = {
-      balanced: { wPrice: 25, wCpu: 25, wMem: 25, wNet: 10, wGpu: 10 },
-      cost: { wPrice: 100, wCpu: 10, wMem: 10, wNet: 0, wGpu: 0 },
+      balanced:    { wPrice: 25, wCpu: 25, wMem: 25, wNet: 10, wGpu: 10 },
+      cost:        { wPrice: 100, wCpu: 10, wMem: 10, wNet: 0,  wGpu: 0  },
       performance: { wPrice: 10, wCpu: 50, wMem: 25, wNet: 10, wGpu: 10 },
-      ml: { wPrice: 10, wCpu: 25, wMem: 25, wNet: 10, wGpu: 50 },
+      ml:          { wPrice: 10, wCpu: 25, wMem: 25, wNet: 10, wGpu: 50 },
     };
 
-    /* ── Segment bar helpers ─────────────────────────────── */
+    /* ── 3. Segment-bar widget ──────────────────────────────── */
+    /** Allowed weight levels; clicking a segment snaps the slider to one of these. */
     const SEG_LEVELS = [0, 10, 25, 50, 100];
     function syncSegBar(inputId, val) {
       const bar = document.querySelector(`.seg-bar[data-for="${inputId}"]`);
@@ -1200,8 +1248,9 @@
       });
     });
 
-    /* ── Pricing constants (US-East-1) ──────────────────── */
-    const EBS_RATES = { gp3: 0.08, gp2: 0.10, io1: 0.125, io2: 0.125, st1: 0.045, sc1: 0.015 };
+    /* ── 4. Pricing constants  (EBS · egress · RI/SP discounts) */
+    /** EBS volume type → $/GiB/month (us-east-1 list price). */
+    const EBS_RATES ={ gp3: 0.08, gp2: 0.10, io1: 0.125, io2: 0.125, st1: 0.045, sc1: 0.015 };
     // 1-Year No-Upfront Reserved multipliers by instance-type prefix
     const RESERVED_1YR_MULT = { t: 0.65, m: 0.64, c: 0.636, r: 0.665, x: 0.67, i: 0.677, d: 0.70, g: 0.71, p: 0.71, inf: 0.68, trn: 0.68 };
     const DEFAULT_RESERVED_MULT = 0.66;
@@ -1214,10 +1263,10 @@
       { limit: Infinity, rate: 0.05 }, // 150 TB+
     ];
 
-    /* ── Architecture reference map ─────────────────────
-       Keys = instance-family prefix (mat       rst token before '.')
-       Fields: cat, vendo    roc, isa, hyp, accel, yr
-    ─────────────────────────────────────────────────────── */
+    /* ── 5. ARCH_MAP  — hardware architecture reference ────────
+       Keys   = instance-family prefix (first token before '.')
+       Fields : cat · vendor · proc · isa · hyp · accel · yr
+    ─────────────────────────────────────────────────────────── */
     const ARCH_MAP = {
       // ── General Purpose ──────────────────────────────────
       t3: { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8000 (Skylake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
@@ -1266,9 +1315,9 @@
       trn1: { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium', yr: 2022 },
     };
 
-    /* ── Region metadata (geo grou       endly name) ─────────
-       Groups mirror the AWS Manag    t Console region picker.
-    ─────────────────────────────────────────────────────── */
+    /* ── 6. REGION_META / GEO_ORDER  — region geo groupings ───
+       Groups mirror the AWS Management Console region picker.
+    ─────────────────────────────────────────────────────────── */
     const REGION_META = {
       // US East
       'us-east-1': { geo: 'US East',      label: 'N. Virginia' },
@@ -1315,7 +1364,7 @@
       'Europe', 'Middle East', 'Africa', 'Asia Pacific',
     ];
 
-    /*  card metadata */
+    /* ── 7. FAMILY_INFO  — instance-category card metadata ───── */
     const FAMILY_INFO = {
       All: {
         icon: '🗂️', name: 'All Families', tag: 'All',
@@ -1361,7 +1410,9 @@
       },
     };
 
-    /* ── Toast ──────────────────────────────────────────────── */
+    /* ── 8. Utility helpers  (toast · sidebar · preset · anim) ─ */
+
+    /** Show a brief non-blocking notification at the bottom of the screen. */
     function toast(msg, dur = 2200) {
       const t = document.createElement('div');
       t.className = 'toast'; t.textContent = msg;
@@ -1373,7 +1424,9 @@
     /* No sidebar in this layout */
     function toggleSidebar() { }
 
-    /* ── Scroll to step ─────────────────────────────────────── */
+    /* ── 9. Scroll & nav helpers ────────────────────────────── */
+
+    /** Smooth-scroll to a section by id. */
     function scrollToStep(id) {
       el(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -1423,7 +1476,9 @@
       renderTable(state.scoredRows, el('tableSearch').value);
     }
 
-    /* ── URL hash state ─────────────────────────────────────── */
+    /* ── 10. URL hash persistence ───────────────────────────── */
+
+    /** Serialise current filter state into the URL hash (shareable links). */
     function saveHash() {
       const p = new URLSearchParams();
       HASH_KEYS.forEach(k => { const n = el(k); if (n) p.set(k, n.value); });
@@ -1466,7 +1521,12 @@
       render();
     }
 
-    /* ── Data helpers ───────────────────────────────────────── */
+    /* ── 11. CSV parser & data helpers ─────────────────────── */
+
+    /**
+     * Parse a CSV string into an array of row objects.
+     * Numeric fields (vcpus, memory_gib, etc.) are cast to Number.
+     */
     function parseCSV(text) {
       const [header, ...lines] = text.trim().split('\n');
       const cols = header.split(',');
@@ -1479,11 +1539,45 @@
         return obj;
       });
     }
+    /**
+     * Min-max normalise an array to [0, 1].
+     * @param {number[]} values  - raw metric values
+     * @param {boolean}  reverse - true for "lower is better" axes (e.g. price)
+     * @returns {number[]} normalised scores in [0, 1]
+     * NOTE: Used only for radar-chart axes where absolute scale matters.
+     *       The composite scorer uses rankNorm() instead.
+     */
     function norm(values, reverse = false) {
       const min = values.reduce((a, b) => a < b ? a : b, Infinity);
       const max = values.reduce((a, b) => a > b ? a : b, -Infinity);
       if (max === min) return values.map(() => 1);
       return values.map(v => reverse ? 1 - (v - min) / (max - min) : (v - min) / (max - min));
+    }
+
+    /**
+     * Rank-based normaliser — maps values to [0, 1] by fractional rank.
+     * Unlike min-max, this gives a uniform distribution regardless of outliers:
+     * a single $32/hr GPU instance will no longer collapse all non-GPU price
+     * scores to ~1.0.  Tied values share the average of their ranks.
+     * @param {number[]} values  - raw metric values
+     * @param {boolean}  reverse - true for "lower is better" axes (e.g. price)
+     * @returns {number[]} rank scores in [0, 1]
+     */
+    function rankNorm(values, reverse = false) {
+      const n = values.length;
+      if (n <= 1) return values.map(() => 1);
+      const order = values.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]);
+      const result = new Array(n);
+      // Assign tied values the average of the ranks they would occupy
+      let i = 0;
+      while (i < n) {
+        let j = i;
+        while (j < n && order[j][0] === order[i][0]) j++;
+        const avgRank = (i + j - 1) / 2;
+        for (let k = i; k < j; k++) result[order[k][1]] = avgRank / (n - 1);
+        i = j;
+      }
+      return reverse ? result.map(v => 1 - v) : result;
     }
 
     /* ── Region sync ────────────────────────────────────────── */
@@ -1522,6 +1616,8 @@
       });
       el('weightTotal').textContent = sum > 0 ? '100%' : '0% ⚠️';
     }
+
+    /* ── 12. Individual render functions ────────────────────── */
 
     /* ── KPI strip ──────────────────────────────────────────── */
     function renderKPIs(rows) {
@@ -1856,52 +1952,86 @@
     }
 
     /* ── Radar chart ────────────────────────────────────────── */
-    const RADAR_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
+    /**
+     * Only renders (and shows) the radar when ALL families are in view.
+     * For a single-family filter the polygon collapses to a single shape,
+     * which adds no insight — so we hide the card and expand the
+     * adjacent line-chart to fill the row instead.
+     */
     function renderRadar(rows) {
-      /* Broad view (3+ categories): Best vs Lowest range per category for a clearer picture.
-         Focused view (1-2 categories): top 5 by score. */
-      const activeCats = [...new Set(rows.map(r => r.instance_category))];
-      const theta = ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU', 'Price Eff.'];
+      const radarCard  = el('radarCard');
+      const charts2    = radarCard?.closest('.charts-2');
+      const category   = el('category')?.value || 'All';
+
+      // Hide radar for single-family views; show only when "All" is selected
+      const showRadar  = category === 'All';
+      if (radarCard)  radarCard.style.display  = showRadar ? '' : 'none';
+      if (charts2)    charts2.classList.toggle('radar-hidden', !showRadar);
+      if (!showRadar) return;
+
+      /*
+       * Broad view (3+ categories): one polygon per category showing
+       * the AVERAGE rank-score across all instances in that category.
+       *
+       * Axes: Price Eff · CPU · Memory · Network
+       * GPU axis added only when GPU/Accelerated instances are present.
+       */
+      const activeCats  = [...new Set(rows.map(r => r.instance_category))];
+      const hasGPU      = activeCats.some(c => c === 'GPU' || c === 'Accelerated');
+      const broadView   = activeCats.length >= 3;
+
+      // Choose axes depending on whether we're looking at GPU instances
+      const axes = hasGPU
+        ? ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU']
+        : ['Price Eff.', 'CPU', 'Memory', 'Network'];
+      // Close the polygon by repeating the first axis
+      const theta = [...axes, axes[0]];
+
+      const scoreKeys = hasGPU
+        ? ['scoreP', 'scoreC', 'scoreM', 'scoreN', 'scoreG']
+        : ['scoreP', 'scoreC', 'scoreM', 'scoreN'];
+
+      const avg = (arr, key) => arr.reduce((s, r) => s + (r[key] || 0), 0) / arr.length;
+
       let traces = [];
 
-      if (activeCats.length >= 3) {
-        // Broad view: plot best and lowest of each category and shade the region between
+      if (broadView) {
+        // One filled polygon per active category, using category averages
         FILTER_CATS.forEach(cat => {
           const catRows = rows.filter(r => r.instance_category === cat);
           if (!catRows.length) return;
-
-          const best = catRows[0];
-          const worst = catRows[catRows.length - 1];
           const color = CAT_COLOR[cat] || '#4f46e5';
+          const r_vals = scoreKeys.map(k => +avg(catRows, k).toFixed(3));
+          // close the polygon
+          r_vals.push(r_vals[0]);
 
-          // Trace 1: Lowest instance (invisible line to define inner fill boundary)
+          const hoverLines = axes.map((ax, i) => ax + ': <b>' + r_vals[i].toFixed(2) + '</b>').join('<br>');
           traces.push({
             type: 'scatterpolar',
-            r: [worst.scoreP, worst.scoreC, worst.scoreM, worst.scoreN, worst.scoreG, worst.scoreP],
-            theta, mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'none'
-          });
-
-          // Trace 2: Best instance (filled to the lowest instance)
-          traces.push({
-            type: 'scatterpolar',
-            r: [best.scoreP, best.scoreC, best.scoreM, best.scoreN, best.scoreG, best.scoreP],
-            theta, mode: 'lines', fill: 'tonext', name: cat,
-            line: { color: color, width: 2 },
-            fillcolor: color + '22', // transparent shade
-            hovertemplate: '<b>' + cat + ' (Best)</b>: ' + best.instance_type + '<br><b>(Lowest)</b>: ' + worst.instance_type + '<extra></extra>',
+            r: r_vals,
+            theta,
+            fill: 'toself',
+            name: cat + ' avg',
+            line: { color, width: 2.5 },
+            fillcolor: color + '28',
+            hovertemplate: '<b>' + cat + '</b> (avg of ' + catRows.length + ')<br>' + hoverLines + '<extra></extra>',
           });
         });
       } else {
-        // Focused view: top 5 individual instances
+        // Focused: top-5 individual instances as separate polygons
         const top5 = rows.slice(0, Math.min(5, rows.length));
         traces = top5.map((r, i) => {
-          const color = CAT_COLOR[r.instance_category] || RADAR_COLORS[i % RADAR_COLORS.length];
+          const color  = CAT_COLOR[r.instance_category] || '#6366f1';
+          const r_vals = scoreKeys.map(k => +(r[k] || 0).toFixed(3));
+          r_vals.push(r_vals[0]);
           return {
             type: 'scatterpolar',
-            r: [r.scoreP, r.scoreC, r.scoreM, r.scoreN, r.scoreG, r.scoreP],
-            theta, fill: 'toself', name: r.instance_type,
-            line: { color: color, width: 2 },
-            fillcolor: color + '22',
+            r: r_vals,
+            theta,
+            fill: 'toself',
+            name: r.instance_type,
+            line: { color, width: 2 },
+            fillcolor: color + '28',
             hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
           };
         });
@@ -1911,11 +2041,18 @@
         ...PLOTLY_BASE,
         polar: {
           bgcolor: '#fafbff',
-          radialaxis: { visible: true, range: [0, 1], gridcolor: '#e2e8f0', tickfont: { size: 9 }, tickformat: '.1f' },
-          angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: 10 } },
+          radialaxis: {
+            visible: true,
+            range: [0, 1],
+            gridcolor: '#e2e8f0',
+            tickfont: { size: 9 },
+            tickformat: '.1f',
+            dtick: 0.25,
+          },
+          angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: 11, color: '#475569' } },
         },
-        legend: { orientation: 'h', y: -0.2, x: 0, font: { size: 10 } },
-        margin: { t: 12, r: 12, b: 50, l: 12 },
+        legend: { orientation: 'h', y: -0.22, x: 0, font: { size: 11 } },
+        margin: { t: 20, r: 20, b: 60, l: 20 },
       }, { responsive: true, displayModeBar: false });
     }
 
@@ -2290,43 +2427,83 @@
     }
 
     /* ── Architecture Reference Table ───────────────────────── */
-    function renderArchTable(query) {
-      const q = (query || '').toLowerCase().trim();
-      const allFams = Object.keys(ARCH_MAP);
-      const families = q
-        ? allFams.filter(f => {
+    // Maps FAMILY_INFO category keys → ARCH_MAP cat values
+    const ARCH_CAT_MAP = {
+      All:     null,                          // null = show all
+      CPU:     ['Compute'],
+      GPU:     ['GPU', 'HPC', 'Accelerated'],
+      Memory:  ['Memory'],
+      Storage: ['Storage'],
+      General: ['General'],
+    };
+
+    function renderArchTable(query, categoryFilter) {
+      const q           = (query || '').toLowerCase().trim();
+      const filterKey   = categoryFilter || 'All';
+      const allowedCats = ARCH_CAT_MAP[filterKey] ?? null;
+
+      // 1. Start from all families, then narrow by selected category
+      let families = Object.keys(ARCH_MAP);
+      if (allowedCats) families = families.filter(f => allowedCats.includes(ARCH_MAP[f].cat));
+
+      // 2. Further narrow by free-text search
+      if (q) {
+        families = families.filter(f => {
           const d = ARCH_MAP[f];
           return f.includes(q) || d.vendor.toLowerCase().includes(q) ||
             d.proc.toLowerCase().includes(q) || d.cat.toLowerCase().includes(q) ||
             d.isa.toLowerCase().includes(q) || d.accel.toLowerCase().includes(q);
-        })
-        : allFams;
+        });
+      }
+
+      // 3. Update the active-filter badge next to the search input
+      const tag = el('archFilterTag');
+      if (tag) {
+        if (filterKey !== 'All') {
+          const info = FAMILY_INFO[filterKey];
+          tag.textContent = (info?.icon || '') + ' ' + (info?.name || filterKey);
+          tag.style.display    = 'inline-flex';
+          tag.style.background = info?.bg    || '#eef2ff';
+          tag.style.color      = info?.color || '#4f46e5';
+        } else {
+          tag.style.display = 'none';
+        }
+      }
+
+      // 4. Update the count footer
+      const countBar = el('archCount');
+      if (countBar) {
+        countBar.textContent = families.length
+          ? families.length + ' famil' + (families.length === 1 ? 'y' : 'ies') + ' shown'
+          : '';
+      }
 
       const tbl = el('archTable');
       if (!tbl) return;
 
       if (!families.length) {
-        tbl.innerHTML = '<tbody><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">No families match "' + query + '"</td></tr></tbody>';
+        tbl.innerHTML = '<tbody><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">' +
+          (q ? 'No families match "' + q + '"' : 'No families in this category') +
+          '</td></tr></tbody>';
         return;
       }
 
-      // Sort by category order, then family name
-      const catOrder = ['General', 'Compute', 'Memory', 'Storage', 'GPU', 'HPC', 'Accelerated'];
+      // 5. Sort: canonical category order, then alphabetically by family prefix
+      const CAT_ORDER = ['General', 'Compute', 'Memory', 'Storage', 'GPU', 'HPC', 'Accelerated'];
       families.sort((a, b) => {
-        const ci = catOrder.indexOf(ARCH_MAP[a].cat);
-        const cj = catOrder.indexOf(ARCH_MAP[b].cat);
+        const ci = CAT_ORDER.indexOf(ARCH_MAP[a].cat);
+        const cj = CAT_ORDER.indexOf(ARCH_MAP[b].cat);
         return ci !== cj ? ci - cj : a.localeCompare(b);
       });
 
-      const vBadge = v => {
-        const cls = ({ Intel: 'intel', AMD: 'amd', AWS: 'aws' })[v] || '';
-        return '<span class="avb ' + cls + '">' + v + '</span>';
-      };
+      // 6. Badge renderers
+      const vBadge = v => '<span class="avb ' + ({ Intel: 'intel', AMD: 'amd', AWS: 'aws' }[v] || '') + '">' + v + '</span>';
       const iBadge = i => '<span class="isab ' + (i === 'ARM64' ? 'arm' : 'x86') + '">' + i + '</span>';
       const aBadge = a => a !== '—' ? '<span class="accel-badge">' + a + '</span>' : '<span class="arch-dash">—</span>';
 
+      // 7. Build table rows, inserting a category separator row when category changes
       let bodyRows = '';
-      let lastCat = '';
+      let lastCat  = '';
       for (const fam of families) {
         const d = ARCH_MAP[fam];
         if (d.cat !== lastCat) {
@@ -2372,12 +2549,15 @@
       el('table').innerHTML =
         `<thead><tr><th>#</th><th>Instance</th><th>Category</th><th>Region</th><th>vCPU</th><th>Mem (GiB)</th><th>GPU</th><th>Net</th><th>$/hr</th><th>Score</th></tr>
      <tr><td colspan="10" style="font-size:10px;color:var(--muted);padding:4px 10px 5px;background:#fafbff;font-weight:600">💡 Click any row to compare specs &amp; scores vs the top pick</td></tr></thead>` +
-        `<tbody>${shown.map(r => {
+        `<tbody>${shown.map((r, shownIdx) => {
           const cc = CAT_COLOR[r.instance_category] || '#6b7280';
           const cbg = CAT_BG[r.instance_category] || '#f9fafb';
-          const idx = rows.indexOf(r);
-          return `<tr class="${idx === 0 ? 'rank-1' : ''}" style="cursor:pointer" onclick="handleRowClick(${idx})">
-        <td style="color:var(--muted);font-weight:800;font-size:11px">${idx === 0 ? '🥇' : idx + 1}</td>
+          // globalIdx → used for click handler (state.scoredRows lookup) and top-pick badge
+          const globalIdx = rows.indexOf(r);
+          // shownIdx+1 → always sequential (1, 2, 3…) within the current view/filter
+          const serialNum = shownIdx + 1;
+          return `<tr class="${globalIdx === 0 ? 'rank-1' : ''}" style="cursor:pointer" onclick="handleRowClick(${globalIdx})">
+        <td style="color:var(--muted);font-weight:800;font-size:11px">${globalIdx === 0 ? '🥇' : serialNum}</td>
         <td style="font-weight:700">${r.instance_type}</td>
         <td><span class="cat-pill" style="background:${cbg};color:${cc}">${r.instance_category}</span></td>
         <td>${r.region}</td><td>${r.vcpus}</td><td>${r.memory_gib}</td>
@@ -2399,7 +2579,13 @@
     }
     function handleRowClick(idx) { const row = state.scoredRows[idx]; if (row) renderInstanceCompare(row); }
 
-    /* ── Main render ────────────────────────────────────────── */
+    /* ── 13. Main render()  — orchestrates a full UI refresh ── */
+
+    /**
+     * Re-score, re-sort, and repaint every widget.
+     * Called on any filter/weight change. Reads state from DOM controls
+     * and writes results back to state.scoredRows.
+     */
     function render() {
       SLIDERS.forEach(s => {
         const v = el(s + 'Val');
@@ -2435,11 +2621,32 @@
       const sum = Object.values(w).reduce((a, b) => a + b, 0) || 1;
       renderWeightBar(w, sum);
 
-      const p = norm(rows.map(r => r.price_usd_hour), true);
-      const c = norm(rows.map(r => r.vcpus));
-      const m = norm(rows.map(r => r.memory_gib));
-      const n = norm(rows.map(r => r.network_score));
-      const g = norm(rows.map(r => r.gpu_count));
+      /*
+       * Composite scoring — rank-based normalization (rankNorm):
+       *   · All five dimensions mapped to [0, 1] by fractional rank within the
+       *     current candidate set.  This is more robust than min-max: a single
+       *     $32/hr GPU instance no longer collapses every non-GPU price score to ~1.
+       *
+       *   · Price Efficiency (scoreP): ranks instances by $/compute-unit rather
+       *     than raw price.  compute_units = vCPUs + RAM*0.25 + GPUs*4
+       *     → a large, cheap instance beats a tiny cheap one on this axis.
+       *
+       *   · CPU (scoreC), Memory (scoreM), Network (scoreN), GPU (scoreG):
+       *     ranked by the raw spec value — higher is better.
+       *
+       *   · composite = weighted sum of the five rank scores, using the priority
+       *     sliders as weights.
+       *
+       *   · perf = objective performance score (fixed weights, user-independent)
+       *     used only for "Best Performer" KPI — does not drive the ranking.
+       */
+      const pricePerUnit = rows.map(r =>
+        r.price_usd_hour / Math.max(r.vcpus + r.memory_gib * 0.25 + r.gpu_count * 4, 0.01));
+      const p = rankNorm(pricePerUnit, true);   // higher rank = better $/compute-unit
+      const c = rankNorm(rows.map(r => r.vcpus));
+      const m = rankNorm(rows.map(r => r.memory_gib));
+      const n = rankNorm(rows.map(r => r.network_score));
+      const g = rankNorm(rows.map(r => r.gpu_count));
 
       rows = rows.map((r, i) => ({
         ...r,
@@ -2467,10 +2674,18 @@
       renderRegional(best.instance_type);
       renderCalculator(best);
       renderTable(rows, el('tableSearch').value);
+      // Arch table re-filters whenever the main category changes
+      renderArchTable(el('archSearch')?.value, category);
       saveHash();
     }
 
-    /* ── Boot ───────────────────────────────────────────────── */
+    /* ── 14. boot()  — fetch CSV · wire DOM · launch app ────── */
+
+    /**
+     * Application entry point.
+     * Fetches the CSV dataset, populates selects, restores URL hash state,
+     * wires all event listeners, and calls render() for the first time.
+     */
     async function boot() {
       try {
         const resp = await fetch(CSV_URL);
@@ -2537,7 +2752,7 @@
         el('tableSearch').addEventListener('input', () =>
           renderTable(state.scoredRows, el('tableSearch').value));
         el('archSearch').addEventListener('input', e =>
-          renderArchTable(e.target.value));
+          renderArchTable(e.target.value, el('category').value));
 
         /* Keyboard shortcuts */
         document.addEventListener('keydown', e => {
@@ -2553,7 +2768,7 @@
         });
 
         render();
-        renderArchTable(); // static — rendered once from ARCH_MAP
+        renderArchTable(el('archSearch')?.value, el('category').value);
 
         el('loader').style.display = 'none';
         const app = el('app');
@@ -2569,7 +2784,7 @@
         }, 250);
 
         /* ── Scroll spy: highlight current step in nav ── */
-        const stepIds = ['step-families', 'step-agg', 'step-drill', 'step-rec', 'step-browse', 'step-calc'];
+        const stepIds = ['step-families', 'step-agg', 'step-arch', 'step-drill', 'step-rec', 'step-browse', 'step-calc', 'step-methodology', 'step-workload-map', 'step-bibliography'];
         const spyObs = new IntersectionObserver(entries => {
           entries.forEach(e => {
             const btn = document.querySelector(`.nav-step-btn[data-step="${e.target.id}"]`);
@@ -2600,70 +2815,29 @@
     <div class="footer-glow"></div>
     <div class="footer-inner">
 
-      <div class="footer-grid">
+      <div class="footer-grid footer-grid-2col">
 
         <!-- Brand -->
         <div>
           <div class="footer-brand">EC2 <em>Advisor</em></div>
           <p class="footer-tagline">
-            A simple tool that checks over 500 AWS EC2 server options to help you find the best fit. Compare price,
-            memory, and speed to pick the perfect server for your project easily.
+            An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for
+            your workload — scored by price efficiency, compute, memory, network, and GPU using
+            rank-based multi-criteria analysis.
           </p>
           <div class="footer-badge">
             <span class="footer-badge-dot"></span>
             Using Live AWS Pricing Data
           </div>
-        </div>
-
-        <!-- Quick Navigation -->
-        <div>
-          <div class="footer-section-title">Quick Navigation</div>
-          <ul class="footer-links">
-            <li><a href="#step-families" onclick="scrollToStep('step-families');return false;">
-                <span class="fl-icon">🏷️</span> Instance Families
-              </a></li>
-            <li><a href="#step-agg" onclick="scrollToStep('step-agg');return false;">
-                <span class="fl-icon">📊</span> Family Comparison
-              </a></li>
-            <li><a href="#step-drill" onclick="scrollToStep('step-drill');return false;">
-                <span class="fl-icon">⚙️</span> Set Priorities
-              </a></li>
-            <li><a href="#step-rec" onclick="scrollToStep('step-rec');return false;">
-                <span class="fl-icon">⭐</span> Top Recommendation
-              </a></li>
-            <li><a href="#step-browse" onclick="scrollToStep('step-browse');return false;">
-                <span class="fl-icon">🔍</span> Browse All
-              </a></li>
-            <li><a href="#step-calc" onclick="scrollToStep('step-calc');return false;">
-                <span class="fl-icon">💰</span> Cost Calculator
-              </a></li>
-          </ul>
-        </div>
-
-        <!-- Dataset Stats -->
-        <div>
-          <div class="footer-section-title">Interactive Data</div>
-          <div class="footer-stats">
-            <div class="footer-stat">
-              <span class="footer-stat-label">Instances Analyzed</span>
-              <span class="footer-stat-val" id="footerInstances">—</span>
-            </div>
-            <div class="footer-stat">
-              <span class="footer-stat-label">Hardware Families</span>
-              <span class="footer-stat-val" id="footerFamilies">—</span>
-            </div>
-            <div class="footer-stat">
-              <span class="footer-stat-label">Global Regions</span>
-              <span class="footer-stat-val" id="footerRegions">—</span>
-            </div>
-            <div class="footer-stat">
-              <span class="footer-stat-label">Data Source</span>
-              <span class="footer-stat-val">AWS Snapshot</span>
-            </div>
+          <div class="footer-tech-stack">
+            <span class="footer-tech">Vanilla JS</span>
+            <span class="footer-tech">Plotly.js</span>
+            <span class="footer-tech">AWS Pricing API</span>
+            <span class="footer-tech">Static · No backend</span>
           </div>
         </div>
 
-        <!-- Links and Shortcuts -->
+        <!-- Open Source + Shortcuts -->
         <div>
           <div class="footer-section-title">Open Source</div>
           <ul class="footer-links" style="margin-bottom: 24px;">
@@ -2676,11 +2850,11 @@
                 </span> GitHub Repository
               </a></li>
             <li><a href="https://github.com/varad-more" target="_blank" rel="noopener">
-                <span class="fl-icon">👤</span> Follow Varad More
+                <span class="fl-icon">👤</span> Varad More
               </a></li>
           </ul>
 
-          <div class="footer-section-title">Shortcuts</div>
+          <div class="footer-section-title">Keyboard Shortcuts</div>
           <div class="footer-kbds">
             <div class="footer-kbd-row">
               <span class="footer-kbd-key">B</span>
@@ -2691,8 +2865,20 @@
               <span class="footer-kbd-desc">Cost-first preset</span>
             </div>
             <div class="footer-kbd-row">
+              <span class="footer-kbd-key">P</span>
+              <span class="footer-kbd-desc">Performance preset</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">M</span>
+              <span class="footer-kbd-desc">ML / GPU preset</span>
+            </div>
+            <div class="footer-kbd-row">
               <span class="footer-kbd-key">← →</span>
               <span class="footer-kbd-desc">Cycle AWS regions</span>
+            </div>
+            <div class="footer-kbd-row">
+              <span class="footer-kbd-key">/</span>
+              <span class="footer-kbd-desc">Focus search</span>
             </div>
           </div>
         </div>
@@ -2734,19 +2920,6 @@
 
   </div><!-- /app -->
 
-  <script>
-    /* Mirror hero stat values into footer after boot */
-    document.addEventListener('DOMContentLoaded', () => {
-      const sync = () => {
-        ['Instances', 'Families', 'Regions'].forEach(k => {
-          const src = document.getElementById('hero' + k);
-          const dst = document.getElementById('footer' + k);
-          if (src && dst && src.textContent !== '—') dst.textContent = src.textContent;
-        });
-      };
-      setTimeout(sync, 1200);
-    });
-  </script>
 
 </body>
 
