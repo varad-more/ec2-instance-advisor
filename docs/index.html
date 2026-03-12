@@ -69,7 +69,7 @@
         </svg>
       </button>
       <div class="nav-brand">
-        <div class="nav-brand-logo">☁️</div>
+        <div class="nav-brand-logo" aria-hidden="true">☁️</div>
         <span class="text">EC2 <em>Advisor</em></span>
       </div>
             <div class="nav-steps" id="navSteps">
@@ -193,6 +193,14 @@
                 d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
             </svg></span><span class="step-lbl">Methods</span>
         </button>
+        <button class="nav-step-btn" data-step="step-bibliography" onclick="scrollToStep('step-bibliography')"
+          title="References">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg></span><span class="step-lbl">Refs</span>
+        </button>
       </div>
       <div class="nav-actions">
         <div class="nav-region-select" title="Change AWS Region">
@@ -269,6 +277,10 @@
               <div class="hero-stat-val" id="heroRegions">—</div>
               <div class="hero-stat-lbl">AWS Regions</div>
             </div>
+          </div>
+          <div class="hero-snapshot-badge" title="Pricing data is a point-in-time snapshot, not live AWS pricing">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Snapshot: Mar 9, 2026 · Not live pricing
           </div>
         </div>
 
@@ -834,7 +846,7 @@
         <div class="nlg-panel">
           <div class="nlg-hdr">
             <div class="nlg-icon">💡</div>
-            <div class="nlg-title">AI Insight: Why This Recommendation?</div>
+            <div class="nlg-title">Why This Recommendation?</div>
           </div>
           <div class="nlg-text" id="nlgText">
             Adjust the weight sliders above to see a personalized explanation of why a specific instance was
@@ -1065,7 +1077,8 @@
             <div class="step-title">Monthly TCO Estimator</div>
             <div class="step-desc">
               Compare billing models side-by-side. Factor in EBS storage type, data egress, and fleet
-              size to get a realistic monthly TCO. Defaults to US-East-1 (Linux/UNIX) pricing.
+              size to get a realistic monthly TCO. Compute prices use the selected region snapshot;
+              EBS and egress constants are us-east-1 reference rates — verify on AWS for other regions.
             </div>
           </div>
         </div>
@@ -1213,7 +1226,8 @@
           </div>
 
           <p style="font-size:11px;color:var(--muted);margin-top:12px">
-            Pricing based on US-East-1, Linux/UNIX, shared tenancy. Reserved discounts are instance-family
+            Compute price uses the selected region's snapshot. EBS and egress constants are us-east-1
+            reference rates — actual costs vary by region. Reserved discounts are instance-family
             weighted averages. Savings Plans reflect 1-year Compute Savings Plan rates. Egress excludes
             CloudFront, Direct Connect, and inter-region transfers. Always verify on
             <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
@@ -1639,6 +1653,7 @@
     /* ── 3. Segment-bar widget ──────────────────────────────── */
     /** Allowed weight levels; clicking a segment snaps the slider to one of these. */
     const SEG_LEVELS = [0, 10, 25, 50, 100];
+    const SEG_LABELS = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
     function syncSegBar(inputId, val) {
       const bar = document.querySelector(`.seg-bar[data-for="${inputId}"]`);
       if (!bar) return;
@@ -1650,8 +1665,7 @@
       });
       const valEl = el(inputId + 'Val');
       if (valEl) {
-        const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
-        valEl.textContent = labels[snapped] || snapped;
+        valEl.textContent = SEG_LABELS[snapped] || snapped;
       }
     }
     // Initialize segment click handlers
@@ -1691,8 +1705,7 @@
             bar.querySelectorAll('.seg').forEach(b => b.classList.toggle('seg-active', +b.dataset.val === val));
             const valEl = el(inputId + 'Val');
             if (valEl) {
-              const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
-              valEl.textContent = labels[val] || val;
+              valEl.textContent = SEG_LABELS[val] || val;
             }
             render();
           });
@@ -1964,6 +1977,12 @@
 
     /* ── 8. Utility helpers  (toast · sidebar · preset · anim) ─ */
 
+    /** Debounce: return a function that delays invoking fn until after wait ms. */
+    function debounce(fn, wait = 150) {
+      let timer;
+      return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), wait); };
+    }
+
     /** Show a brief non-blocking notification at the bottom of the screen. */
     function toast(msg, dur = 2200) {
       const t = document.createElement('div');
@@ -1973,9 +1992,6 @@
       setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
     }
 
-    /* No sidebar in this layout */
-    function toggleSidebar() { }
-
     /* ── 9. Scroll & nav helpers ────────────────────────────── */
 
     /** Smooth-scroll to a section by id. */
@@ -1983,39 +1999,7 @@
       el(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /* ── ScrollSpy ─────────────────────────────────────────── */
-    (function initScrollSpy() {
-      const ids = [
-        'step-workload-map',
-        'step-families',
-        'step-agg',
-        'step-drill',
-        'step-rec',
-        'step-arch',
-        'step-viz',
-        'step-browse',
-        'step-calc',
-        'step-region',
-        'step-methodology',
-        'step-bibliography',
-      ];
-      let ticking = false;
-      window.addEventListener('scroll', () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => {
-          let active = ids[0];
-          for (const id of ids) {
-            const section = el(id);
-            if (section && section.getBoundingClientRect().top <= 120) active = id;
-          }
-          document.querySelectorAll('.nav-step-btn').forEach(btn => {
-            btn.classList.toggle('ns-active', btn.dataset.step === active);
-          });
-          ticking = false;
-        });
-      }, { passive: true });
-    })();
+    /* ScrollSpy is handled by the IntersectionObserver in boot() */
 
     /* ── Scroll Reveal Observer ─────────────────────────────── */
     (function initScrollReveal() {
@@ -2028,12 +2012,6 @@
         });
       }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
       document.addEventListener('DOMContentLoaded', () => {
-      document.body.addEventListener('change', (e) => {
-        const t = e.target;
-        if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
-        const watch = ['region','category','metric','wPrice','wCpu','wMem','wNet','wGpu'];
-        if (watch.includes(t.id)) trackEvent('ui_change', { field: t.id, value: String(t.value).slice(0,64) });
-      }, true);
         document.querySelectorAll('.chart-card, .kpi, .score-breakdown-card, .nlg-panel, .runner-card, .method-card, .bib-card, .rec-hero, .controls-card').forEach(card => {
           card.classList.add('scroll-reveal');
           observer.observe(card);
@@ -2096,14 +2074,34 @@
 
     /**
      * Parse a CSV string into an array of row objects.
+     * Handles RFC 4180 quoted fields (commas and newlines inside quotes).
      * Numeric fields (vcpus, memory_gib, etc.) are cast to Number.
      */
     function parseCSV(text) {
-      const [header, ...lines] = text.trim().split('\n');
-      const cols = header.split(',');
-      return lines.filter(Boolean).map(line => {
-        const vals = line.split(','); const obj = {};
-        cols.forEach((c, i) => obj[c] = vals[i]);
+      // Split a single CSV line respecting double-quoted fields
+      function splitLine(line) {
+        const fields = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i + 1] === '"') { cur += '"'; i++; } // escaped quote
+            else inQ = !inQ;
+          } else if (ch === ',' && !inQ) {
+            fields.push(cur); cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        fields.push(cur);
+        return fields;
+      }
+      const lines = text.trim().split('\n');
+      const cols = splitLine(lines[0]);
+      return lines.slice(1).filter(Boolean).map(line => {
+        const vals = splitLine(line);
+        const obj = {};
+        cols.forEach((c, i) => obj[c] = vals[i] ?? '');
         obj.vcpus = +obj.vcpus; obj.memory_gib = +obj.memory_gib;
         obj.network_score = +obj.network_score; obj.gpu_count = +obj.gpu_count;
         obj.price_usd_hour = +obj.price_usd_hour;
@@ -2450,7 +2448,7 @@
     /* ── Family aggregate chart ─────────────────────────────── */
     function renderFamilyAggChart(regionRows) {
       if (!regionRows || !regionRows.length) return;
-      const cats = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
+      const cats = FILTER_CATS;
       const agg = cats.map(cat => {
         const r = regionRows.filter(x => x.instance_category === cat);
         if (!r.length) return { avgVcpu: 0, avgMem: 0, avgPrice: 0 };
@@ -3585,8 +3583,7 @@
         });
       } else {
         // Multi-family view: colour by high-level instance category
-        const cats = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
-        cats.forEach(cat => {
+        FILTER_CATS.forEach(cat => {
           const r = rows.filter(x => x.instance_category === cat);
           if (!r.length) return;
           const sizes = r.map(d => Math.min(26, 8 + Math.sqrt(Math.max(1, d.vcpus)) * 4));
@@ -3993,11 +3990,11 @@
         `<tbody>${shown.map((r, shownIdx) => {
           const cc = CAT_COLOR[r.instance_category] || '#6b7280';
           const cbg = CAT_BG[r.instance_category] || '#f9fafb';
-          // globalIdx → used for click handler (state.scoredRows lookup) and top-pick badge
-          const globalIdx = rows.indexOf(r);
+          // _idx is pre-assigned in render() — O(1), no indexOf needed
+          const globalIdx = r._idx ?? shownIdx;
           // shownIdx+1 → always sequential (1, 2, 3…) within the current view/filter
           const serialNum = shownIdx + 1;
-          return `<tr class="${globalIdx === 0 ? 'rank-1' : ''}" style="cursor:pointer" onclick="handleRowClick(${globalIdx})">
+          return `<tr class="${globalIdx === 0 ? 'rank-1' : ''}" style="cursor:pointer" tabindex="0" role="button" aria-label="Compare ${r.instance_type}" onclick="handleRowClick(${globalIdx})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(${globalIdx})}">
         <td style="color:var(--muted);font-weight:800;font-size:11px">${globalIdx === 0 ? '🥇' : serialNum}</td>
         <td style="font-weight:700">${r.instance_type}</td>
         <td><span class="cat-pill" style="background:${cbg};color:${cc}">${r.instance_category}</span></td>
@@ -4032,8 +4029,7 @@
         const v = el(s + 'Val');
         if (v) {
           const val = +el(s).value;
-          const labels = { 0: 'Off', 10: 'Low', 25: 'Med', 50: 'High', 100: 'Max' };
-          v.textContent = labels[val] || val;
+          v.textContent = SEG_LABELS[val] || val;
         }
       });
       const region = el('region').value;
@@ -4097,12 +4093,12 @@
         scoreP: p[i], scoreC: c[i], scoreM: m[i], scoreN: n[i], scoreG: g[i],
       })).sort((a, b) => b.composite - a.composite);
 
+      rows.forEach((r, i) => { r._idx = i; }); // O(1) lookup in renderTable
       state.scoredRows = rows;
       state.tableLimit = 30;   // reset to first page on filter change
       const best = rows[0];
 
       // Score ALL region rows (all categories) for the Family Highlights card
-      const fhCats = ['CPU', 'GPU', 'Memory', 'Storage', 'General'];
       const fhPpu = regionRows.map(r => r.price_usd_hour / Math.max(r.vcpus + r.memory_gib * 0.25 + r.gpu_count * 4, 0.01));
       const fhP = rankNorm(fhPpu, true), fhC = rankNorm(regionRows.map(r => r.vcpus));
       const fhM = rankNorm(regionRows.map(r => r.memory_gib)), fhN = rankNorm(regionRows.map(r => r.network_score));
@@ -4111,7 +4107,7 @@
         ...r,
         composite: (w.price / sum) * fhP[i] + (w.cpu / sum) * fhC[i] + (w.mem / sum) * fhM[i] + (w.net / sum) * fhN[i] + (w.gpu / sum) * fhG[i],
       }));
-      renderFamilyHighlights(fhScored, fhCats);
+      renderFamilyHighlights(fhScored, FILTER_CATS);
 
       renderRecCard(best, rows);
       renderScoreBreakdown(rows, w, sum);
@@ -4223,10 +4219,10 @@
             render();
           });
         });
-        el('tableSearch').addEventListener('input', () =>
-          renderTable(state.scoredRows, el('tableSearch').value));
-        el('archSearch').addEventListener('input', e =>
-          renderArchTable(e.target.value, state.selectedCategories));
+        el('tableSearch').addEventListener('input', debounce(() =>
+          renderTable(state.scoredRows, el('tableSearch').value)));
+        el('archSearch').addEventListener('input', debounce(() =>
+          renderArchTable(el('archSearch').value, state.selectedCategories)));
 
         /* Keyboard shortcuts */
         document.addEventListener('keydown', e => {

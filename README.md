@@ -1,323 +1,259 @@
-## EC2 Instance Advisor
+# EC2 Instance Advisor
 
-Interactive static web app to compare AWS EC2 instances by **price vs. performance** and quickly shortlist the best fit for your workload.
+An interactive tool to compare AWS EC2 instances by price, performance, and workload fit — and get a transparent, explainable recommendation in minutes.
 
-- **Live app**: `http://varadmore.me/ec2-instance-advisor/`
-- **Repo**: `varad-more/ec2-instance-advisor`
-
----
-
-### Why this project exists
-
-Picking EC2 instances is usually a mix of guesswork, tribal knowledge, and dozens of tabs in the AWS console and docs.  
-This project tries to answer a single question in a **transparent, reproducible** way:
-
-> **“Given my workload and budget, which EC2 instance families and types should I start with?”**
-
-It combines:
-
-- **Regional on‑demand pricing snapshot** (pulled once via AWS public pricing API)
-- **Instance specs** (vCPU, memory, GPU count, a simple network score)
-- **Weighted scoring** across **Price / CPU / Memory / Network / GPU**
-- **Visual comparison views** (Plotly charts, tables, highlights)
-- A **clear recommendation card** with runners‑up and a **cost calculator**
-
-Everything runs as a static site – there is **no live call into AWS** from the browser.
+**[Live App](https://varadmore.me/ec2-instance-advisor/)** · **[Report a Bug](https://github.com/varad-more/ec2-instance-advisor/issues)**
 
 ---
 
-## 1. Quick user guide
+## What it does
 
-Use this section as a “how‑to” for people landing on the app for the first time.
+AWS offers 500+ EC2 instance types. Choosing the right one usually means juggling dozens of console tabs, docs pages, and spreadsheets. This tool answers one question:
 
-### Step 1 – Choose your AWS region
+> **Given my workload priorities and budget, which EC2 instance should I start with?**
 
-- Use the **AWS Region** dropdown in the hero.
-- All prices, availability and rankings are **specific to this region**.
-- The hero stats will update to show how many instances and families are available there.
+It combines a regional pricing snapshot, instance specs (vCPU, memory, GPU, network), and a weighted scoring model into a single guided workflow — all running as a static site with zero backend.
 
-### Step 2 – Explore instance families
+### Key capabilities
 
-- Scroll to **“Understand Instance Families”**.
-- Each card explains a family in plain English:
-  - What it is optimized for (CPU, memory, storage, GPU, etc.)
-  - Typical workloads
-  - Example instance types.
-- Clicking a card:
-  - Filters charts, tables, and recommendations down to that family.
-  - Or keep **All families** selected for a broad search.
-
-### Step 3 – Set your priorities
-
-- In the **“Set priorities & drill down”** section you’ll see sliders for:
-  - **Price**, **CPU**, **Memory**, **Network**, **GPU**.
-- These sliders control **how much the scoring cares about each dimension**:
-  - Slide **Price** up if cost is critical.
-  - Slide **CPU / Memory / GPU** up if you care more about performance than dollars.
-- Use presets like **Balanced**, **Cost‑optimized**, **ML / GPU‑heavy** to get sane starter settings.
-
-### Step 4 – Review the recommendation & runners‑up
-
-- The **Top match** card shows:
-  - The **instance type** and family.
-  - The **advisor score** (0–100) based on your priorities.
-  - Key specs (vCPUs, memory, GPU, network score, region‑specific price).
-  - A short **“why this instance”** explanation.
-- Underneath, you’ll see **runners‑up**, so you can compare 3–5 strong options instead of the full catalog.
-
-### Step 5 – Use the table & cost calculator for final checks
-
-- The **table view** lets you:
-  - Sort / search instances.
-  - See normalized scores and raw specs in one place.
-- The **cost calculator** takes:
-  - Instance type, count, hours per month,
-  - Optional EBS + data transfer assumptions,
-  - And estimates a **monthly bill** using the same snapshot pricing.
+- **Guided 4-phase funnel**: Learn families → Compare specs → Get recommendations → Estimate costs
+- **Weighted scoring**: Tune Price / CPU / Memory / Network / GPU priorities with presets (Balanced, Cost, Performance, ML)
+- **Interactive charts**: Plotly-powered parallel coordinates, radar, bar, scatter, and line charts
+- **Transparent scoring**: Every recommendation includes a breakdown explaining _why_ that instance ranked #1
+- **TCO calculator**: Estimate monthly costs across On-Demand, Reserved, and Savings Plan billing models
+- **Regional pricing**: Compare prices across 26+ AWS regions
+- **Shareable URLs**: Current filters and weights are encoded in the URL hash
 
 ---
 
-## 2. Features at a glance
+## Quick start
 
-- **Region and category filters**
-  - CPU / GPU / Memory / Storage / General.
-  - Instance‑family cards double as an explanation and a filter.
-- **Priority sliders + presets**
-  - Tune how important Price vs. CPU vs. Memory vs. Network vs. GPU are for _your_ workload.
-  - Presets for common patterns (balanced, cost‑focused, ML, performance).
-- **Charts & visualizations**
-  - Family‑level bar / line charts for cost vs. performance.
-  - Score breakdown and architecture reference tables.
-- **Top recommendation + transparent scoring**
-  - Advisor score out of 100 with a text explanation and breakdown.
-  - Runners‑up list so you can compare alternatives quickly.
-- **Cost calculator**
-  - On‑demand hourly pricing → estimated monthly / yearly cost.
-  - Optional storage + data transfer knobs.
-- **Static deployment (GitHub Pages‑friendly)**
-  - Everything lives under `docs/` and can be hosted from any static site host.
-
----
-
-## 3. Data & scoring methodology (high‑level)
-
-This section is written for users who want to understand _how_ the scores are produced without reading the entire codebase.
-
-### 3.1 Data source
-
-- Data is pulled from the **official AWS public pricing API** using `scripts/fetch_aws_prices_once.py`.
-- For each region and instance type in `TARGET_REGIONS` and `TARGET_TYPES`, the script extracts:
-  - On‑demand **Linux hourly price**.
-  - **vCPU count**, **memory (GiB)**, **GPU count**, **network performance string**.
-  - A coarse **network score** from 1–5 derived from phrases like “Moderate”, “10 Gigabit”, “Very High”.
-- The script writes two identical CSVs:
-  - `data/ec2_aws_snapshot.csv` (local use)
-  - `docs/data/ec2_aws_snapshot.csv` (used by the web app)
-
-### 3.2 Instance categorization
-
-Instances are mapped into categories to make the UI easier to reason about:
-
-- **General**: M/T families and others that don’t obviously skew towards a single resource.
-- **CPU**: C family and HPC variants (compute‑optimized, high vCPU‑to‑memory ratio).
-- **Memory**: R/X/Z families (high memory‑to‑vCPU ratio).
-- **Storage**: I/D/Im families (local NVMe, high IOPS / throughput).
-- **GPU**: G/P/Trn/Inf families (accelerated compute).
-
-The `workload_tag` field in the CSV mirrors this at a high level (compute / gpu / memory / storage / general).
-
-### 3.3 Normalization & scoring
-
-For each instance in the current region:
-
-1. **Normalize** each metric (price, vCPUs, memory, network, GPU count) to a 0–1 range so that:
-   - The cheapest instance gets a better normalized **price score**.
-   - The highest spec instances get better **CPU / Memory / GPU / Network scores**.
-2. Apply your **slider weights**:
-   - Each slider is interpreted as a percentage weight (0–100).
-   - Internally the app normalizes these to sum to 1.0.
-3. Compute a **composite score**:
-   - \( \text{Score} = w_\text{price} \cdot S_\text{price} + w_\text{cpu} \cdot S_\text{cpu} + \dots \)
-4. Sort by composite score (descending) within the selected filters.
-
-The final “Advisor score” you see in the UI is a scaled version of this composite value (0–100).
-
-### 3.4 Limitations
-
-- Prices are a **point‑in‑time snapshot** and will drift from live AWS console prices over time.
-- Only **Linux on‑demand, shared tenancy** SKUs are considered (no RIs, SPs, or Windows licensing in the score itself).
-- Networking is represented as a coarse ordinal score, not real‑world throughput.
-- The tool is designed to **shortlist** strong candidates – you should still benchmark your actual workload.
-
----
-
-## 4. Project structure
-
-```text
-.
-├── docs/
-│   ├── index.html                    # Main static app (HTML, CSS, JS)
-│   ├── styles.css                    # Single-page styling + responsive layout
-│   └── data/
-│       └── ec2_aws_snapshot.csv      # Snapshot used by hosted app
-├── data/
-│   └── ec2_aws_snapshot.csv          # Local copy of the same snapshot
-├── scripts/
-│   └── fetch_aws_prices_once.py      # One-time AWS pricing pull script
-└── README.md
-```
-
-- There is **no build step**: the browser loads `index.html`, `styles.css`, `plotly.js`, and the CSV.
-- All interaction logic (charts, sliders, scoring, routing between sections) lives in inline `<script>` in `docs/index.html`.
-
----
-
-## 5. Running locally
+### Run locally
 
 ```bash
 git clone https://github.com/varad-more/ec2-instance-advisor.git
 cd ec2-instance-advisor
 python3 -m http.server 8080 --directory docs
+# Open http://localhost:8080
 ```
 
-Then open `http://localhost:8080` in your browser.
+> A local HTTP server is required because the app uses `fetch()` to load CSV data (`file://` won't work).
 
-> Use an HTTP server (not `file://`) because the app fetches CSV data via `fetch()`.
-
----
-
-## 6. Refreshing the pricing snapshot
-
-To refresh the CSV with the latest AWS on‑demand prices for the selected regions and instance types:
+### Refresh pricing data
 
 ```bash
 python3 scripts/fetch_aws_prices_once.py
 ```
 
-This writes:
-
-- `data/ec2_aws_snapshot.csv`
-- `docs/data/ec2_aws_snapshot.csv`
-
-Regions covered in `TARGET_REGIONS` (see the script for the current full list) include:
-
-- North America: `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2`, `ca-central-1`, `ca-west-1`, `mx-central-1`
-- Europe: `eu-west-1`, `eu-west-2`, `eu-west-3`, `eu-central-1`, `eu-central-2`, `eu-north-1`, `eu-south-1`, `eu-south-2`
-- Asia Pacific: `ap-south-1`, `ap-south-2`, `ap-southeast-1`, `ap-southeast-2`, `ap-southeast-3`, `ap-southeast-4`, `ap-northeast-1`, `ap-northeast-2`, `ap-northeast-3`, `ap-east-1`
-- Others: `sa-east-1`, `me-south-1`, `me-central-1`, `af-south-1`, `il-central-1`
+This pulls current on-demand Linux prices from the AWS public pricing API and writes to both `data/` and `docs/data/`.
 
 ---
 
-## 7. Hosting / deployment
+## How to use
 
-The project is designed for **static hosting**.
+### 1. Pick a region
+Use the globe dropdown in the navbar. All scores, prices, and charts update instantly. Arrow keys (`←` / `→`) cycle through regions.
 
-### 7.1 GitHub Pages
+### 2. Explore instance families
+The family cards in Phase 1 explain what each category is optimized for. Click a card to filter everything to that family, or keep "All" selected.
 
-In repo settings:
+### 3. Set your priorities
+In the **Top Match** section, use the segment bars to set how much you care about each dimension:
+- **Off** / **Low** / **Med** / **High** / **Max** for Price, CPU, Memory, Network, GPU
+- Or use presets: press `B` (Balanced), `C` (Cost), `P` (Performance), `M` (ML)
 
-- **Branch**: `main`
-- **Folder**: `/docs`
+### 4. Review results
+The recommendation card shows the #1 match with a score breakdown, runners-up, and a natural-language explanation. Click any row in the Browse table to compare it side-by-side against the top pick.
 
-GitHub Pages will then serve the app from:
-
-- `https://<username>.github.io/ec2-instance-advisor/` (or your custom domain).
-
-### 7.2 Hosting under `https://varadmore.me/projects/ec2-instance-advisor`
-
-If your main site repo is `varad-more.github.io`, one simple setup is:
-
-1. In `varad-more.github.io`, create:
-   - `projects/ec2-instance-advisor/`
-2. Copy from this repo:
-   - `docs/index.html`
-   - `docs/styles.css`
-   - `docs/data/ec2_aws_snapshot.csv` → `projects/ec2-instance-advisor/data/ec2_aws_snapshot.csv`
-3. Commit + push.
-4. Open:
-   - `https://varadmore.me/projects/ec2-instance-advisor/`
-
-Alternatively, if the app is already served at `/ec2-instance-advisor/`, your web server can proxy:
-
-- `/projects/ec2-instance-advisor/*` → `/ec2-instance-advisor/*`
+### 5. Estimate costs
+The TCO calculator factors in compute hours, EBS storage, and data egress across three billing models.
 
 ---
 
-## 8. Design & UX notes
+## Project structure
 
-This repo intentionally includes quite a bit of UI polish so it feels like a **product**, not just a demo:
-
-- **Mobile‑first layout**
-  - Multiple breakpoints for grids, cards, charts, and tables.
-  - Horizontal scrolling only where dense data demands it (e.g., the main table).
-- **Guided funnel**
-  - The app reads roughly as: **Families → Aggregates → Architecture → Priorities → Recommendation → Browse → Cost → Methodology**.
-- **Copy‑friendly recommendation**
-  - A “copy recommendation” button lets you paste the suggested instance + rationale into tickets, docs, or chats.
-
-If you extend the app, try to keep new features aligned with these principles: **clear steps, transparent scoring, and workload‑first language.**
-
----
-
-## 9. Typical workload mapping (cheat‑sheet)
-
-Use this as a quick reference when you are not sure where to start.
-
-| Workload Type | Recommended Family | Characteristics |
-| --- | --- | --- |
-| Web & app servers | General Purpose (M/T) | Balanced CPU and memory. Use T‑series (burstable) for dev/test and M‑series for steady production traffic. |
-| High‑traffic APIs & HPC | Compute Optimized (C) | High vCPU‑to‑memory ratio. Great for scientific modeling, batch processing, and dedicated game servers. |
-| In‑memory databases | Memory Optimized (R/X) | High RAM‑to‑vCPU ratio (8:1 or higher). Ideal for Redis, SAP HANA, and real‑time analytics. |
-| NoSQL & data warehousing | Storage Optimized (I/D) | Local NVMe SSDs for millions of low‑latency IOPS. Good for MongoDB, Cassandra, logging, and OLAP stores. |
-| AI training & rendering | Accelerated (P/G/Trn/Inf) | GPU or accelerator‑heavy. Use P‑series for deep learning training, G‑series for inference / graphics, Trn/Inf for AWS‑native ML workloads. |
-
----
-
-## 10. Contributing / extending
-
-Ideas for future improvements:
-
-- Add more **workload templates** that automatically set families + weights.
-- Integrate a simple **“guided wizard”** that asks a few natural‑language questions and sets the sliders for you.
-- Support more pricing models (RIs, Savings Plans) as toggleable views.
-- Persist **user notes** per instance so people can record why they picked a given type.
-
-If you open a PR, briefly describe:
-
-- What UX or understanding problem it solves.
-- Whether it changes the scoring behavior.
-- Any new assumptions about pricing or regions.
-
-This helps keep the advisor opinionated but predictable.
-
-
-## Analytics setup (same style as varadmore.me)
-
-This project now supports optional GA4-style tracking in the static app.
-
-### Enable Google Analytics
-
-Set a GA4 measurement id in one of these ways:
-
-1. Global runtime variable in `docs/index.html` host page:
-
-```html
-<script>
-  window.EC2_ADVISOR_GA4_ID = "G-XXXXXXXXXX";
-</script>
+```
+ec2-instance-advisor/
+├── docs/                          # Static site (deploy this folder)
+│   ├── index.html                 # App: HTML structure + inline JS (~4,400 lines)
+│   ├── styles.css                 # All styling + responsive breakpoints (~6,000 lines)
+│   ├── data/
+│   │   └── ec2_aws_snapshot.csv   # Pricing snapshot (2,571 rows × 10 columns)
+│   ├── favicon.svg
+│   ├── apple-touch-icon.png
+│   ├── ogcard.png                 # Open Graph social card
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   └── .nojekyll                  # Disables Jekyll processing on GitHub Pages
+├── data/
+│   └── ec2_aws_snapshot.csv       # Local copy (identical to docs/)
+├── scripts/
+│   └── fetch_aws_prices_once.py   # AWS pricing API pull script (Python 3)
+└── README.md
 ```
 
-2. Or from browser console/localStorage for quick testing:
+### Architecture
+
+The app is a **zero-dependency static SPA** (aside from Plotly.js loaded via CDN):
+
+- **No build step** — open `index.html` in a browser (via HTTP server)
+- **No framework** — vanilla HTML/CSS/JS
+- **No backend** — all scoring runs client-side
+- **Centralized state** — a single `state` object holds all app data; the DOM is never read for state
+
+### Code organization (`index.html` script sections)
+
+| Section | What it does |
+|---------|-------------|
+| 1. App state & DOM helpers | `state` object, `el()` alias, analytics setup |
+| 2. UI constants | Category colors, metric labels, preset definitions |
+| 3. Segment-bar widget | Click handlers for the 5-level priority buttons |
+| 4. Pricing constants | EBS rates, RI/SP discount multipliers, egress tiers |
+| 5. ARCH_MAP | Hardware architecture reference (CPU vendor, ISA, hypervisor per family) |
+| 6. REGION_META | Region labels and geographic groupings |
+| 7. FAMILY_INFO | Instance category card metadata (icons, descriptions, use cases) |
+| 8. Utility helpers | `toast()`, `debounce()`, preset application, animated counters |
+| 9. Scroll & nav helpers | `scrollToStep()`, scroll-reveal observer |
+| 10. URL hash persistence | `saveHash()`, `loadHash()`, `shareURL()` |
+| 11. CSV parser & data helpers | `parseCSV()` (RFC 4180), `rankNorm()`, region sync |
+| 12. Render functions | Individual chart/card/table renderers |
+| 13. `render()` | Main orchestrator — re-scores and repaints all widgets |
+| 14. `boot()` | Entry point — fetch CSV, wire events, first render |
+
+---
+
+## Scoring methodology
+
+The advisor uses **Multi-Criteria Decision Analysis (MCDA)** with rank-based normalization.
+
+### How scores are computed
+
+1. **Filter** instances by region and selected categories
+2. **Rank-normalize** each metric to [0, 1] using fractional ranks (not min-max — avoids outlier collapse):
+   - **Price Efficiency**: `$/compute_unit` where `compute_units = vCPUs + 0.25×RAM + 4×GPUs` (lower is better, inverse-ranked)
+   - **CPU**: ranked by vCPU count
+   - **Memory**: ranked by GiB
+   - **Network**: ranked by network score (1–5 ordinal)
+   - **GPU**: ranked by GPU count
+3. **Weighted sum**: `composite = Σ(weight_i × score_i)` where weights come from the user's priority settings, normalized to sum to 1.0
+4. **Sort** by composite score (descending) → #1 is the recommendation
+
+### Why rank normalization?
+
+Min-max normalization collapses when a single $32/hr GPU instance sets the price ceiling — every sub-$1 instance gets a price score of ~1.0 and they become indistinguishable. Rank normalization distributes scores uniformly regardless of outliers.
+
+### Limitations
+
+- Prices are a **point-in-time snapshot** — they drift from live AWS pricing over time
+- Only **Linux on-demand, shared tenancy** SKUs are scored
+- Network is a coarse ordinal score (1–5), not actual throughput
+- EBS/egress costs in the TCO calculator use **us-east-1 reference rates** — actual rates vary by region
+- This is a **shortlisting tool** — always benchmark your actual workload before committing
+
+---
+
+## Deployment
+
+### GitHub Pages
+
+In repo Settings → Pages:
+- **Source**: Deploy from a branch
+- **Branch**: `main`, folder: `/docs`
+
+The app will be live at `https://<username>.github.io/ec2-instance-advisor/`.
+
+### Any static host
+
+Copy the contents of `docs/` to your web root. No server-side processing is needed.
+
+---
+
+## Data source
+
+Data is pulled from the [AWS public pricing API](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/index.json) using `scripts/fetch_aws_prices_once.py`.
+
+### CSV schema
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `instance_type` | string | e.g., `m7g.xlarge` |
+| `family` | string | e.g., `Compute optimized` |
+| `instance_category` | string | `CPU`, `GPU`, `Memory`, `Storage`, or `General` |
+| `region` | string | AWS region code, e.g., `us-east-1` |
+| `vcpus` | int | vCPU count |
+| `memory_gib` | float | RAM in GiB |
+| `network_score` | int | 1–5 ordinal derived from network performance strings |
+| `gpu_count` | int | Number of GPUs (0 for non-GPU instances) |
+| `price_usd_hour` | float | On-demand hourly price (USD) |
+| `workload_tag` | string | High-level category tag |
+
+### Covered regions (26)
+
+**Americas**: us-east-1, us-east-2, us-west-1, us-west-2, ca-central-1, ca-west-1, mx-central-1, sa-east-1
+**Europe**: eu-west-1/2/3, eu-central-1/2, eu-north-1, eu-south-1/2
+**Asia Pacific**: ap-south-1/2, ap-southeast-1/2/3/4, ap-northeast-1/2/3, ap-east-1
+**Middle East & Africa**: me-south-1, me-central-1, af-south-1, il-central-1
+
+---
+
+## Keyboard shortcuts
+
+| Key | Action |
+|-----|--------|
+| `←` / `→` | Cycle AWS regions |
+| `B` | Balanced preset |
+| `C` | Cost-optimized preset |
+| `P` | Performance preset |
+| `M` | ML/GPU-heavy preset |
+| `/` | Focus the instance search box |
+
+---
+
+## Analytics (optional)
+
+The app supports optional GA4 tracking. To enable:
 
 ```js
+// Option 1: Global variable (add before the app script)
+window.EC2_ADVISOR_GA4_ID = "G-XXXXXXXXXX";
+
+// Option 2: localStorage (for quick testing)
 localStorage.setItem('ec2AdvisorGaId', 'G-XXXXXXXXXX');
-location.reload();
 ```
 
-### Tracked events
+**Tracked events**: `page_view`, `ui_click` (preset/CTA buttons), `ui_change` (filter/weight controls). Analytics stays fully disabled if no ID is configured.
 
-- `page_view`
-- `ui_click` for key CTA/preset buttons
-- `ui_change` for key filters and weight controls
+---
 
-If GA id is not configured, analytics silently stays disabled.
+## Workload quick reference
+
+| Workload | Family | Why |
+|----------|--------|-----|
+| Web servers, microservices | General Purpose (M/T) | Balanced CPU and memory; T-series for burstable dev/test |
+| High-traffic APIs, HPC | Compute Optimized (C) | High vCPU-to-memory ratio for sustained throughput |
+| In-memory databases, caches | Memory Optimized (R/X) | 8:1+ RAM-to-vCPU ratio for Redis, SAP HANA, analytics |
+| NoSQL, data warehousing | Storage Optimized (I/D) | Local NVMe SSDs for low-latency IOPS |
+| ML training, inference | Accelerated (P/G/Trn/Inf) | GPU/accelerator workloads; Trn/Inf for AWS ML silicon |
+
+---
+
+## Contributing
+
+If you open a PR, briefly describe:
+- What UX or understanding problem it solves
+- Whether it changes scoring behavior
+- Any new pricing or region assumptions
+
+Ideas for future work:
+- Guided wizard (questions → auto-set weights)
+- RI / Savings Plan pricing toggles in scoring
+- Column visibility toggle in the Browse table
+- Dark mode
+
+---
+
+## License
+
+This project is not affiliated with, endorsed by, or sponsored by Amazon Web Services. EC2 and AWS are trademarks of Amazon.com, Inc. Pricing data comes from publicly available AWS APIs.
+
+Built by [Varad More](https://varadmore.me).

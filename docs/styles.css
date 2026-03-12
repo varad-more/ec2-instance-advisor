@@ -226,9 +226,9 @@
       }
     }
 
-    /* Chips only appear alongside labels on very wide screens (>1500px).
-       Below that, labels + chips together overflow a typical 1280-1440px nav. */
-    @media (max-width: 1500px) {
+    /* Hide the "Not official AWS" chip only on genuinely small screens where
+       space is very tight. On 1280-1440px desktops it must remain visible. */
+    @media (max-width: 860px) {
       .nav-chip.hide-sm {
         display: none;
       }
@@ -5928,4 +5928,41 @@ tr.row-selected td {
 }
 .cmp-multi-wrap::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* ── Hero snapshot badge ────────────────────────────────── */
+.hero-snapshot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 999px;
+  padding: 5px 12px;
+  letter-spacing: .02em;
+}
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .hero-dot {
+    animation: none;
+  }
+
+  .scroll-reveal,
+  .fade-up-1,
+  .fade-up-2,
+  .fade-up-3 {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
