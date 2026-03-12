@@ -105,7 +105,7 @@
         <span class="nav-divider"></span>
         <!-- DECIDE phase -->
         <button class="nav-step-btn" data-step="step-drill" onclick="scrollToStep('step-drill')"
-          title="Set Priorities">
+          title="Spec Comparison">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="4" y1="21" x2="4" y2="14" />
@@ -117,7 +117,7 @@
               <line x1="1" y1="14" x2="7" y2="14" />
               <line x1="9" y1="8" x2="15" y2="8" />
               <line x1="17" y1="16" x2="23" y2="16" />
-            </svg></span><span class="step-lbl">Priorities</span>
+            </svg></span><span class="step-lbl">Specs</span>
         </button>
         <button class="nav-step-btn" data-step="step-rec" onclick="scrollToStep('step-rec')" title="Your Best Match">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -125,6 +125,15 @@
               <polygon
                 points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg></span><span class="step-lbl">Top Match</span>
+        </button>
+        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
+          title="Hardware Architecture">
+          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg></span><span class="step-lbl">Arch</span>
         </button>
         <span class="nav-divider"></span>
         <!-- ANALYZE phase -->
@@ -167,15 +176,6 @@
         </button>
         <span class="nav-divider"></span>
         <!-- REFERENCE phase -->
-        <button class="nav-step-btn" data-step="step-arch" onclick="scrollToStep('step-arch')"
-          title="Hardware Architecture">
-          <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg></span><span class="step-lbl">Arch</span>
-        </button>
         <button class="nav-step-btn" data-step="step-region" onclick="scrollToStep('step-region')"
           title="Region & Pricing">
           <span class="step-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -196,13 +196,28 @@
       </div>
       <div class="nav-actions">
         <div class="nav-region-select" title="Change AWS Region">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          <select id="region"></select>
+          <span class="nav-region-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </span>
+          <div class="nav-region-copy" aria-hidden="true">
+            <span class="nav-region-kicker">AWS Region</span>
+            <span class="nav-region-current">
+              <span id="navRegionLabel">N. Virginia</span>
+              <span class="nav-region-code" id="navRegionCode">us-east-1</span>
+            </span>
+          </div>
+          <span class="nav-region-caret" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </span>
+          <select id="region" aria-label="Select AWS region"></select>
         </div>
         <span class="nav-chip warn hide-sm">Not official AWS</span>
         <button class="nav-btn" onclick="shareURL()">
@@ -270,8 +285,8 @@
         <div class="howto-body">
           <ol class="howto-steps">
             <li><strong>Learn the families</strong> — browse workload types and instance families to understand what fits your use case.</li>
-            <li><strong>Set priorities</strong> — use presets + weight levels (Price, CPU, Memory, Network, GPU) to tell the advisor what matters most.</li>
-            <li><strong>Review the Top Match</strong> — see your #1 recommendation, score breakdown, and runners-up. Click any row for a head-to-head comparison.</li>
+            <li><strong>Compare specs first</strong> — use charts and comparison views to understand tradeoffs before ranking.</li>
+            <li><strong>Set priorities in Top Match</strong> — apply presets and tune weights after you understand the data.</li>
             <li><strong>Estimate cost</strong> — use the Monthly TCO calculator (compute + EBS + egress) to plan your budget.</li>
             <li><strong>Pick a region</strong> — change your AWS region anytime via the globe chip in the navbar, or explore regional pricing at the bottom.</li>
           </ol>
@@ -419,44 +434,164 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-           PHASE: DECIDE — Set priorities & get your match
+           PHASE: DECIDE — Understand tradeoffs, then decide
       ════════════════════════════════════════════════ -->
       <div class="phase-divider">
         <span class="phase-label">Phase 2</span>
         <span class="phase-title">Decide</span>
-        <span class="phase-sub">Set priorities &amp; get your best match</span>
+        <span class="phase-sub">Understand tradeoffs, then choose your best match</span>
       </div>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 04 — Set Your Priorities
+         STEP 04 — Compare Specs & Tradeoffs
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-2" id="step-drill">
         <div class="step-hdr">
           <div class="step-num">04</div>
           <div>
-            <div class="step-title">Set Your Priorities</div>
+            <div class="step-title">Compare Specs &amp; Tradeoffs</div>
             <div class="step-desc">
-              Adjust the sliders to reflect what matters most for your workload.
-              Start with a preset, then fine-tune. The scoring and charts update live.
-              Use the instance family filter below the spec chart to isolate specific sub-families.
+              Use these charts to understand instance behavior before changing ranking logic.
+              Start with family-level comparison, then switch to instance mode for direct spec tradeoffs.
+              Weight controls and presets are in <strong>Your Best Match</strong> (Step 05) so decisions come after context.
+            </div>
+            <div id="step04FamilyBridge" class="step04-family-bridge" style="display:none">
+              <span class="step04-bridge-lbl">Filtering to:</span>
+              <span id="step04FamilyChips"></span>
+              <button class="step04-bridge-clear" onclick="clearAllFamilies()">Clear</button>
             </div>
           </div>
         </div>
+        <!-- Instance Spec Comparison + Radar -->
+        <div class="charts-2">
+          <div class="chart-card">
+            <div class="chart-hd" style="display:flex;align-items:flex-start;gap:12px">
+              <div style="flex:1;min-width:0">
+                <div class="chart-title">Instance Spec Comparison</div>
+                <div class="chart-sub"><span style="color:#0ea5e9">● vCPUs</span> · <span style="color:#ec4899">● RAM (GiB)</span> · <span style="color:#ef4444">● Cost ($/hr, right axis)</span></div>
+                <div id="specChartContext" class="spec-chart-context"></div>
+              </div>
+              <button id="resetZoomLine" class="chart-action-btn" style="flex-shrink:0;display:none;margin-top:2px" title="Reset zoom">⟳ Reset zoom</button>
+            </div>
+            <!-- Mode toggle: By Family | By Instance -->
+            <div class="spec-mode-bar">
+              <span class="spec-mode-lbl">Compare by:</span>
+              <button class="spec-mode-btn active" id="specModeFamily" onclick="setSpecMode('family')">By Family</button>
+              <button class="spec-mode-btn" id="specModeInstance" onclick="setSpecMode('instance')">By Instance</button>
+              <span id="specModeHint" class="spec-mode-hint">Select families using the pills below</span>
+            </div>
+            <div class="family-filter-bar" id="familyFilter"></div>
+            <!-- Instance picker (hidden by default) -->
+            <div class="instance-picker" id="instancePicker" style="display:none">
+              <div class="ip-search-row">
+                <input type="text" class="ip-search" id="ipSearch"
+                       placeholder="Search instance type (e.g. m5.large, c6g…)"
+                       autocomplete="off"
+                       oninput="updateInstanceSuggestions()"
+                       onblur="setTimeout(()=>{ const s=document.getElementById('ipSuggestions'); if(s) s.style.display='none'; },180)">
+                <button class="ip-clear-btn" onclick="clearAllInstances()">✕ Clear all</button>
+              </div>
+              <div class="ip-suggestions" id="ipSuggestions" style="display:none"></div>
+              <div class="ip-tags" id="ipTags">
+                <span class="ip-empty-hint">No instances selected — search above to add</span>
+              </div>
+            </div>
+            <div class="chart-scroll-outer">
+              <div class="chart-body" id="chart" style="height:360px"></div>
+            </div>
+          </div>
+          <div class="chart-card" id="radarCard" style="overflow:hidden">
+            <div class="chart-hd">
+              <div class="chart-title">Family Radar — Cheapest vs Most Powerful</div>
+              <div class="chart-sub">Scores normalized [0–1] across 4 dimensions. Solid fill = most powerful · Dashed = cheapest per family.</div>
+            </div>
+            <div class="radar-split">
+              <!-- Left: explanatory panel -->
+              <div class="radar-explainer">
+                <div class="re-section">
+                  <div class="re-heading">How to read</div>
+                  <p class="re-text">Each polygon is one instance. A <b>larger area</b> means stronger overall capability. Overlapping polygons show where instances compete closely.</p>
+                </div>
+                <div class="re-section">
+                  <div class="re-heading">Axes</div>
+                  <div class="re-axes">
+                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#0ea5e9"></span><b>Price Eff.</b> — value per dollar</div>
+                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#8b5cf6"></span><b>CPU</b> — normalised vCPU count</div>
+                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#ec4899"></span><b>Memory</b> — normalised RAM</div>
+                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#10b981"></span><b>Network</b> — relative throughput</div>
+                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#f59e0b"></span><b>GPU</b> — shown for GPU families</div>
+                  </div>
+                </div>
+                <!-- Dynamic legend with toggles — populated by renderRadar() -->
+                <div id="radarLegendSection" style="display:none">
+                  <div class="re-heading" style="margin-top:12px">Instances</div>
+                  <div id="radarLegendList" class="re-legend-list"></div>
+                </div>
+                <!-- Page controls for single-family — populated by renderRadar() -->
+                <div id="radarPageControls" class="re-page-controls" style="display:none"></div>
+                <div id="radarGuideNote" class="re-tip" style="margin-top:10px"></div>
+              </div>
+              <!-- Right: the chart -->
+              <div class="radar-chart-wrap">
+                <div class="chart-body" id="chart3" style="min-height:420px;height:100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="help-callout decision-handoff">
+          <div class="help-callout-title">Read First, Decide After</div>
+          <ul class="help-list">
+            <li><strong>Step 04 is for understanding</strong>: inspect families, specs, and tradeoffs before tuning ranking logic.</li>
+            <li><strong>No hidden scoring changes here</strong>: ranking weights and presets are applied only in Step 05.</li>
+            <li><strong>Then make your call</strong>: jump to Top Match when you are ready to prioritize.</li>
+          </ul>
+          <button class="chart-action-btn" onclick="scrollToStep('step-rec')">Continue to Step 05</button>
+        </div>
 
-        <!-- Inline controls card -->
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
+         STEP 05 — Your Best Match
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-3" id="step-rec">
+        <div class="step-hdr">
+          <div class="step-num">05</div>
+          <div>
+            <div class="step-title">Your Best Match</div>
+            <div class="step-desc">
+              This is the decision step: apply presets, tune weights, and see how your top recommendation changes in real time.
+              The score ring shows the current composite rank (0–1). Use runners-up and compare mode before finalizing.
+            </div>
+          </div>
+        </div>
+        <div class="help-callout">
+          <div class="help-callout-title">How to read this section</div>
+          <ul class="help-list">
+            <li><strong>Score</strong>: relative ranking within your current region + filters + weights.</li>
+            <li><strong>Why this instance</strong>: breakdown + explanation show what contributed most given your weights.</li>
+            <li><strong>Don’t stop at #1</strong>: check runners‑up and use the compare table if you need tradeoffs (cost vs. RAM, etc.).</li>
+          </ul>
+        </div>
         <div class="controls-card">
           <div class="controls-top">
-            <span class="controls-top-lbl">Quick Presets</span>
-            <div style="display:flex;gap:7px;flex-wrap:wrap">
-              <button class="preset-btn" id="pr-balanced" onclick="setPreset('balanced')">⚖️ Balanced</button>
-              <button class="preset-btn" id="pr-cost" onclick="setPreset('cost')">💰 Cost First</button>
-              <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
-              <button class="preset-btn" id="pr-ml" onclick="setPreset('ml')">🤖 ML / AI</button>
+            <div class="controls-top-head">
+              <div class="controls-head-title">Ranking Controls</div>
+              <div class="controls-head-sub">Pick a category and apply a preset for instant re-ranking.</div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span
-                style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Category:</span>
-              <select id="category"></select>
+            <div class="controls-toolbar">
+              <div class="controls-category-wrap">
+                <span class="controls-mini-lbl">Instance Family</span>
+                <select id="category"></select>
+              </div>
+              <div class="controls-presets-wrap">
+                <span class="controls-mini-lbl">Presets</span>
+                <div class="controls-presets" role="group" aria-label="Ranking presets">
+                  <button class="preset-btn" id="pr-balanced" onclick="setPreset('balanced')">⚖️ Balanced</button>
+                  <button class="preset-btn" id="pr-cost" onclick="setPreset('cost')">💰 Cost First</button>
+                  <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
+                  <button class="preset-btn" id="pr-ml" onclick="setPreset('ml')">🤖 ML / AI</button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="controls-body">
@@ -468,7 +603,7 @@
                 If you increase <strong>Price</strong>, cheaper instances climb. If you increase <strong>GPU</strong>, GPU instances climb.
               </div>
               <ul class="help-list">
-                <li><strong>Start simple</strong>: pick a preset, then adjust 1–2 weights.</li>
+                <li><strong>Make one change at a time</strong>: adjust 1–2 criteria, then review why the top match changed.</li>
                 <li><strong>Relative matters</strong>: “Price High + CPU Low” is meaningful; the exact numbers aren’t.</li>
               </ul>
             </div>
@@ -609,51 +744,6 @@
           </div>
         </div>
 
-        <!-- Instance Spec Comparison + Radar -->
-        <div class="charts-2">
-          <div class="chart-card">
-            <div class="chart-hd">
-              <div class="chart-title">Instance Spec Comparison</div>
-              <div class="chart-sub">vCPUs · RAM (GiB) · Cost ($/hr). Filter by instance family below</div>
-            </div>
-            <div class="family-filter-bar" id="familyFilter"></div>
-            <div class="chart-body" id="chart" style="height:280px"></div>
-          </div>
-          <div class="chart-card" id="radarCard">
-            <div class="chart-hd">
-              <div class="chart-title">Dimension Radar: All Families</div>
-              <div class="chart-sub">Average normalized [0–1] scores per instance category</div>
-            </div>
-            <div class="chart-body" id="chart3" style="height:320px"></div>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 05 — Your Best Match
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-3" id="step-rec">
-        <div class="step-hdr">
-          <div class="step-num">05</div>
-          <div>
-            <div class="step-title">Your Best Match</div>
-            <div class="step-desc">
-              Based on your region, category filter, and scoring weights, here's the #1 ranked instance.
-              The score ring shows its composite score (0–1). See how its price compares across all regions below,
-              then scroll down to browse and click-compare every candidate in the full table.
-            </div>
-          </div>
-        </div>
-        <div class="help-callout">
-          <div class="help-callout-title">How to read this section</div>
-          <ul class="help-list">
-            <li><strong>Score</strong>: relative ranking within your current region + filters + weights.</li>
-            <li><strong>Why this instance</strong>: breakdown + explanation show what contributed most given your weights.</li>
-            <li><strong>Don’t stop at #1</strong>: check runners‑up and use the compare table if you need tradeoffs (cost vs. RAM, etc.).</li>
-          </ul>
-        </div>
-
         <!-- KPI strip -->
         <div class="kpi-strip">
           <div class="kpi">
@@ -705,6 +795,7 @@
                   <span class="score-ring-sub">Score</span>
                 </div>
               </div>
+              <div class="score-ring-hint">0 → 1 · higher is better</div>
               <div id="recRankTxt" class="rec-rank-txt"></div>
               <div id="recCatLabel" class="rec-cat-label"></div>
             </div>
@@ -764,6 +855,42 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
+         STEP 06 — Hardware Architecture Reference
+    ════════════════════════════════════════════════ -->
+      <section class="funnel-step fade-up-2" id="step-arch">
+        <div class="step-hdr">
+          <div class="step-num">06</div>
+          <div>
+            <div class="step-title">Hardware Architecture Reference</div>
+            <div class="step-desc">
+              CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
+              <strong>Use this earlier to validate platform fit before finalizing your top match.</strong>
+            </div>
+          </div>
+        </div>
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <div class="arch-filter-bar">
+            <div class="arch-filter-left">
+              <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
+                class="arch-search-inp" />
+              <span id="archFilterTag" class="arch-active-filter" style="display:none"></span>
+            </div>
+            <div class="arch-legend">
+              <span class="avb intel">Intel</span>
+              <span class="avb amd">AMD</span>
+              <span class="avb aws">AWS Graviton</span>
+              <span class="isab x86">x86_64</span>
+              <span class="isab arm">ARM64</span>
+            </div>
+          </div>
+          <div class="table-wrap" style="max-height:520px">
+            <table id="archTable"></table>
+          </div>
+          <div id="archCount" class="arch-count-bar"></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════
            PHASE: ANALYZE — Deep dive into data
       ════════════════════════════════════════════════ -->
       <div class="phase-divider">
@@ -773,11 +900,11 @@
       </div>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 06 — Deep Dive Charts
+         STEP 07 — Deep Dive Charts
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-2" id="step-viz">
         <div class="step-hdr">
-          <div class="step-num">06</div>
+          <div class="step-num">07</div>
           <div>
             <div class="step-title">Visual Analysis</div>
             <div class="step-desc">
@@ -791,21 +918,67 @@
         <div class="chart-card parallel-coord-card">
           <div class="chart-hd" style="display:flex;align-items:flex-start;gap:12px">
             <div style="flex:1;min-width:0">
-              <div class="chart-title">Parallel Coordinates: Multi-Dimensional Comparison</div>
-              <div class="chart-sub"><strong>Drag on any axis</strong> to filter instances by range · drag the range band to slide it · lines highlight matching instances</div>
+              <div class="chart-title">Parallel Coordinates — Multi-Dimensional Explorer</div>
+              <div class="chart-sub">Each line is an instance flowing across all specs. Find your ideal trade-off visually.</div>
             </div>
             <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;padding-top:2px">
               <button id="resetParcoords" class="chart-action-btn" title="Clear all axis filters">✕ Clear filters</button>
             </div>
           </div>
+
+          <!-- How to read guide -->
+          <div class="pc-guide">
+            <div class="pc-guide-item pc-guide-item-highlight">
+              <span class="pc-guide-icon pc-guide-drag-icon">↕</span>
+              <span><strong>Drag on any axis</strong> to filter — only matching instances stay visible</span>
+            </div>
+            <div class="pc-guide-item">
+              <span class="pc-guide-icon">☰</span>
+              <span><strong>Slide the band</strong> up or down to shift your selection range</span>
+            </div>
+            <div class="pc-guide-item">
+              <span class="pc-guide-icon">🎨</span>
+              <span><strong>Line color</strong> = category or sub-family — toggle below</span>
+            </div>
+            <div class="pc-guide-item">
+              <span class="pc-guide-icon">✕</span>
+              <span><strong>Click "Clear filters"</strong> to reset all brushes</span>
+            </div>
+          </div>
+
+          <!-- Axis toggles + color mode -->
+          <div class="pc-controls">
+            <div class="pc-ctrl-group">
+              <span class="pc-ctrl-lbl">Axes:</span>
+              <div id="pcAxesPills" class="pc-axes-pills"></div>
+            </div>
+            <div class="pc-ctrl-group">
+              <span class="pc-ctrl-lbl">Color by:</span>
+              <button class="pc-color-btn active" id="pcColorCat" onclick="setPcColorMode('category')">Category</button>
+              <button class="pc-color-btn" id="pcColorFam" onclick="setPcColorMode('family')">Sub-family</button>
+            </div>
+          </div>
+
+          <!-- Legend (moved above chart for context) -->
+          <div id="parcoordsLegend" class="parcoords-legend-wrap"></div>
+
+          <!-- Filter status bar -->
           <div class="parcoords-hint">
-            <span>Select ranges on multiple axes simultaneously to narrow down instances</span>
+            <span id="pcFilterStatus">Loading…</span>
           </div>
           <div style="position:relative">
-            <div class="chart-body" id="chartParallel" style="height:380px"></div>
+            <div class="chart-body" id="chartParallel" style="height:500px"></div>
             <div id="parcoordsTooltip" class="parcoords-tooltip"></div>
+            <div id="pcDragHint" class="pc-drag-hint">
+              <span class="pc-drag-hint-icon">↕</span> Drag on any axis to filter
+            </div>
           </div>
-          <div id="parcoordsLegend" class="parcoords-legend-wrap"></div>
+
+          <!-- Summary stats -->
+          <div id="pcSummaryStats" class="pc-summary-stats"></div>
+
+          <!-- Filtered instances result list -->
+          <div id="pcFilteredList" class="pc-filtered-list"></div>
         </div>
 
         <!-- Bar chart -->
@@ -813,7 +986,7 @@
           <div class="bar-hd">
             <div>
               <div class="chart-title">Instance Comparison <span id="barChartCount" style="font-size:12px;font-weight:500;color:var(--muted);margin-left:4px"></span></div>
-              <div class="chart-sub">Top 25 ranked instances · color = category · zoom to inspect · drag bars or use toolbar</div>
+              <div class="chart-sub">Top 25 instances · price shown per bar · color = category · zoom to inspect</div>
             </div>
             <div class="bar-hd-r" style="display:flex;align-items:center;gap:8px">
               <button id="resetZoomBar" class="chart-action-btn" style="display:none" title="Reset zoom">⟳ Reset zoom</button>
@@ -846,11 +1019,11 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 07 — Browse All Candidates
+         STEP 08 — Browse All Candidates
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-browse">
         <div class="step-hdr">
-          <div class="step-num">07</div>
+          <div class="step-num">08</div>
           <div>
             <div class="step-title">Browse All Candidates</div>
             <div class="step-desc">
@@ -883,11 +1056,11 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-         STEP 08 — Monthly TCO Estimator
+         STEP 09 — Monthly TCO Estimator
     ════════════════════════════════════════════════ -->
       <section class="funnel-step fade-up-3" id="step-calc">
         <div class="step-hdr">
-          <div class="step-num">08</div>
+          <div class="step-num">09</div>
           <div>
             <div class="step-title">Monthly TCO Estimator</div>
             <div class="step-desc">
@@ -913,6 +1086,9 @@
           <!-- ── Billing model toggle ── -->
           <div class="billing-toggle-row">
             <span class="billing-toggle-label">Billing Model</span>
+            <span class="tco-freshness-badge" title="EBS and egress prices are hardcoded snapshots — verify current rates on aws.amazon.com">
+              Prices as of 2025 · Verify on AWS
+            </span>
             <div class="billing-toggle" id="billingToggle">
               <button class="billing-btn active" data-model="ondemand">On-Demand</button>
               <button class="billing-btn" data-model="reserved1yr">
@@ -1047,49 +1223,13 @@
       </section>
 
       <!-- ═══════════════════════════════════════════════
-           PHASE: REFERENCE — Architecture, region & docs
+           PHASE: REFERENCE — Region & docs
       ════════════════════════════════════════════════ -->
       <div class="phase-divider">
         <span class="phase-label">Phase 4</span>
         <span class="phase-title">Reference</span>
-        <span class="phase-sub">Architecture, region pricing &amp; methodology</span>
+        <span class="phase-sub">Region pricing &amp; methodology</span>
       </div>
-
-      <!-- ═══════════════════════════════════════════════
-         STEP 09 — Hardware Architecture Reference
-    ════════════════════════════════════════════════ -->
-      <section class="funnel-step fade-up-2" id="step-arch">
-        <div class="step-hdr">
-          <div class="step-num">09</div>
-          <div>
-            <div class="step-title">Hardware Architecture Reference</div>
-            <div class="step-desc">
-              CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
-              <strong>Filters automatically with your selected family above.</strong>
-            </div>
-          </div>
-        </div>
-        <div class="chart-card" style="padding:0;overflow:hidden">
-          <div class="arch-filter-bar">
-            <div class="arch-filter-left">
-              <input id="archSearch" type="search" placeholder="Filter by family, vendor, processor, ISA…"
-                class="arch-search-inp" />
-              <span id="archFilterTag" class="arch-active-filter" style="display:none"></span>
-            </div>
-            <div class="arch-legend">
-              <span class="avb intel">Intel</span>
-              <span class="avb amd">AMD</span>
-              <span class="avb aws">AWS Graviton</span>
-              <span class="isab x86">x86_64</span>
-              <span class="isab arm">ARM64</span>
-            </div>
-          </div>
-          <div class="table-wrap" style="max-height:520px">
-            <table id="archTable"></table>
-          </div>
-          <div id="archCount" class="arch-count-bar"></div>
-        </div>
-      </section>
 
       <!-- ═══════════════════════════════════════════════
          STEP 10 — Region & Pricing Explorer
@@ -1138,11 +1278,23 @@
               Each EC2 instance is scored across five criteria: price efficiency, vCPUs, memory, network, and GPU count.
               Your weight levels define how much each criterion contributes to the final composite score.
             </div>
-            <div class="method-formula">
-              <strong>Composite Score =</strong><br>
-              (w<sub>price</sub> × scoreP) + (w<sub>cpu</sub> × scoreC) + (w<sub>mem</sub> × scoreM) +<br>
-              (w<sub>net</sub> × scoreN) + (w<sub>gpu</sub> × scoreG)<br><br>
-              Where each w<sub>i</sub> = slider_value / sum(slider_values)
+            <div class="method-formula" aria-label="Weighted scoring formulas">
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Composite score</div>
+                <div class="formula-expr formula-expr-main">
+                  score = &Sigma;(w<sub>i</sub> &times; score<sub>i</sub>)
+                </div>
+                <div class="formula-expr formula-expr-compact">
+                  = (w<sub>price</sub> &times; scoreP) + (w<sub>cpu</sub> &times; scoreC) + (w<sub>mem</sub> &times; scoreM)<br>
+                  + (w<sub>net</sub> &times; scoreN) + (w<sub>gpu</sub> &times; scoreG)
+                </div>
+              </div>
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Normalized weight</div>
+                <div class="formula-expr formula-expr-compact">
+                  w<sub>i</sub> = slider_value<sub>i</sub> / &Sigma;(slider_values)
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1155,11 +1307,24 @@
               each metric is normalized to [0, 1] by <strong>fractional rank</strong> within the current candidate set.
               Higher hardware specs rank higher; lower price efficiency ranks higher (inverse).
             </div>
-            <div class="method-formula">
-              Let \(n\) = number of candidates, and rank(value) ∈ [0, n−1].<br>
-              <strong>Direct (higher is better):</strong> score = rank(value) / (n − 1)<br>
-              <strong>Inverse (lower is better):</strong> score = 1 − rank(value) / (n − 1)<br><br>
-              Ties share the average of their ranks.
+            <div class="method-formula" aria-label="Rank normalization formulas">
+              <div class="method-formula-meta">
+                <span class="formula-chip"><var>n</var> = candidate count</span>
+                <span class="formula-chip">rank(value) &isin; [0, n &minus; 1]</span>
+              </div>
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Direct (higher is better)</div>
+                <div class="formula-expr formula-expr-compact">
+                  score = rank(value) / (n &minus; 1)
+                </div>
+              </div>
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Inverse (lower is better)</div>
+                <div class="formula-expr formula-expr-compact">
+                  score = 1 &minus; rank(value) / (n &minus; 1)
+                </div>
+              </div>
+              <div class="method-formula-note">Ties use the average of their rank positions.</div>
             </div>
           </div>
 
@@ -1172,12 +1337,20 @@
               This prevents tiny cheap instances from always winning on price, and better matches real planning tradeoffs.
               Your weights are still normalized to sum to 1.0; only relative importance matters.
             </div>
-            <div class="method-formula">
-              <strong>Compute units =</strong><br>
-              vCPUs + (0.25 × GiB RAM) + (4 × GPU count)<br><br>
-              <strong>Price efficiency =</strong><br>
-              price_usd_hour / max(compute_units, 0.01)<br><br>
-              Lower is better → inverse-rank normalized into scoreP.
+            <div class="method-formula" aria-label="Price efficiency formulas">
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Compute units</div>
+                <div class="formula-expr formula-expr-compact">
+                  compute_units = vCPUs + (0.25 &times; RAM_GiB) + (4 &times; GPU_count)
+                </div>
+              </div>
+              <div class="method-formula-group">
+                <div class="method-formula-kicker">Price efficiency</div>
+                <div class="formula-expr formula-expr-compact">
+                  price_efficiency = price_usd_hour / max(compute_units, 0.01)
+                </div>
+              </div>
+              <div class="method-formula-note">Lower values are better, so this metric is inverse-rank normalized into scoreP.</div>
             </div>
           </div>
         </div>
@@ -1353,9 +1526,16 @@
       regions:         [],       // sorted region list
       regionIdx:         0,        // index into state.regions
       scoredRows:        [],       // rows after scoring + sort
-      selectedFamilies:  new Set(), // categories shown in line chart
-      tableLimit:        30,       // current "load more" page limit
-      calcInstanceType:  null,     // instance_type currently used for TCO calculator
+      selectedFamilies:   new Set(), // categories shown in line chart (spec chart)
+      selectedCategories: new Set(), // family cards multi-select (empty = All)
+      selectedInstances:  [],        // specific instances for spec chart instance mode
+      specMode:           'family',  // 'family' | 'instance'
+      radarPage:          0,         // current page for single-family radar (5 per page)
+      radarHidden:        new Set(), // instance types toggled off in radar legend
+      pcActiveAxes: new Set(['price', 'vcpus', 'memory', 'network', 'score']),
+      pcColorMode:  'category',      // 'category' | 'family'
+      tableLimit:         30,        // current "load more" page limit
+      calcInstanceType:   null,      // instance_type currently used for TCO calculator
     };
 
     /** Slider IDs for the priority weights. */
@@ -1403,6 +1583,35 @@
     const CAT_COLOR = { CPU: '#3b82f6', GPU: '#8b5cf6', Memory: '#10b981', Storage: '#f59e0b', General: '#6b7280' };
     /** Pastel backgrounds per instance category. */
     const CAT_BG    = { CPU: '#eff6ff', GPU: '#f5f3ff', Memory: '#ecfdf5', Storage: '#fffbeb', General: '#f9fafb' };
+    const TRACE_VARIANT_PALETTE = [
+      '#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#0891b2',
+      '#db2777', '#65a30d', '#ea580c', '#0f766e', '#4338ca', '#be123c',
+    ];
+
+    function buildColorVariants(base, count) {
+      if (count <= 1) return [base];
+      const variants = [base, ...TRACE_VARIANT_PALETTE.filter(color => color.toLowerCase() !== String(base).toLowerCase())];
+      while (variants.length < count) {
+        variants.push(TRACE_VARIANT_PALETTE[(variants.length - 1) % TRACE_VARIANT_PALETTE.length]);
+      }
+      return variants.slice(0, count);
+    }
+
+    function getCategoryTraceColors(items, categoryOf = item => item.instance_category) {
+      const colors = new Array(items.length);
+      const groups = new Map();
+      items.forEach((item, idx) => {
+        const key = categoryOf(item) || '';
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(idx);
+      });
+      groups.forEach((indices, key) => {
+        const base = CAT_COLOR[key] || '#6b7280';
+        const variants = buildColorVariants(base, indices.length);
+        indices.forEach((origIdx, pos) => { colors[origIdx] = variants[pos]; });
+      });
+      return colors;
+    }
 
     /** Human-readable axis/metric labels. */
     const METRIC_LABEL = {
@@ -1511,51 +1720,151 @@
        Fields : cat · vendor · proc · isa · hyp · accel · yr
     ─────────────────────────────────────────────────────────── */
     const ARCH_MAP = {
-      // ── General Purpose ──────────────────────────────────
-      t3: { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8000 (Skylake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
-      t3a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Rome (Zen 1+)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
-      t4g: { cat: 'General', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
-      m5: { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum (Skylake / Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
-      m6a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
-      m6g: { cat: 'General', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
-      m6i: { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
-      m7a: { cat: 'General', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
-      m7g: { cat: 'General', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
-      m7i: { cat: 'General', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
-      m8g: { cat: 'General', vendor: 'AWS', proc: 'Graviton4', isa: 'ARM64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      // ── Burstable / General Purpose ──────────────────────
+      t2:           { cat: 'General', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',        isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2014 },
+      t3:           { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8000 (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      t3a:          { cat: 'General', vendor: 'AMD',   proc: 'EPYC 7571 (Zen 1)',                 isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      t4g:          { cat: 'General', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      a1:           { cat: 'General', vendor: 'AWS',   proc: 'Graviton1',                         isa: 'ARM64',  hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      // ── General Purpose M-series ─────────────────────────
+      m4:           { cat: 'General', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',        isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2015 },
+      m5:           { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
+      m5a:          { cat: 'General', vendor: 'AMD',   proc: 'EPYC 7571 (Zen 1)',                 isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      m5ad:         { cat: 'General', vendor: 'AMD',   proc: 'EPYC 7571 (Zen 1)',                 isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      m5d:          { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      m5dn:         { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      m5n:          { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      m5zn:         { cat: 'General', vendor: 'Intel', proc: 'Xeon Platinum 8252 (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      m6a:          { cat: 'General', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',         isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      m6g:          { cat: 'General', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      m6gd:         { cat: 'General', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      m6i:          { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      m6id:         { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      m6idn:        { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      m6in:         { cat: 'General', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      m7a:          { cat: 'General', vendor: 'AMD',   proc: 'EPYC 9R14 (Genoa / Zen 4)',         isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m7g:          { cat: 'General', vendor: 'AWS',   proc: 'Graviton3',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m7gd:         { cat: 'General', vendor: 'AWS',   proc: 'Graviton3',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m7i:          { cat: 'General', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',     isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      'm7i-flex':   { cat: 'General', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',     isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      m8g:          { cat: 'General', vendor: 'AWS',   proc: 'Graviton4',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      // ── Mac ──────────────────────────────────────────────
+      mac1:           { cat: 'Mac',     vendor: 'Intel', proc: 'Core i7-8700B (Coffee Lake)',      isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      mac2:           { cat: 'Mac',     vendor: 'Apple', proc: 'Apple M1 (8-core)',                isa: 'ARM64',  hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      'mac2-m1ultra': { cat: 'Mac',     vendor: 'Apple', proc: 'Apple M1 Ultra (20-core)',         isa: 'ARM64',  hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      'mac2-m2':      { cat: 'Mac',     vendor: 'Apple', proc: 'Apple M2 (8-core)',                isa: 'ARM64',  hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      'mac2-m2pro':   { cat: 'Mac',     vendor: 'Apple', proc: 'Apple M2 Pro (12-core)',           isa: 'ARM64',  hyp: 'Nitro v4', accel: '—', yr: 2023 },
       // ── Compute Optimized ────────────────────────────────
-      c5: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Platinum (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2016 },
-      c6a: { cat: 'Compute', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
-      c6g: { cat: 'Compute', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
-      c6i: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
-      c7a: { cat: 'Compute', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
-      c7g: { cat: 'Compute', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
-      c7i: { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c4:           { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Haswell (E5-2666 v3)',          isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2015 },
+      c5:           { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Platinum 8124M (Skylake)',      isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2016 },
+      c5a:          { cat: 'Compute', vendor: 'AMD',   proc: 'EPYC 7R32 (Rome / Zen 2)',          isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      c5ad:         { cat: 'Compute', vendor: 'AMD',   proc: 'EPYC 7R32 (Rome / Zen 2)',          isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      c5d:          { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Platinum 8124M (Skylake)',      isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      c5n:          { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Platinum 8124M (Skylake)',      isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      c6a:          { cat: 'Compute', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',         isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      c6g:          { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      c6gd:         { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      c6gn:         { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      c6i:          { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      c6id:         { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      c6in:         { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      c7a:          { cat: 'Compute', vendor: 'AMD',   proc: 'EPYC 9R14 (Genoa / Zen 4)',         isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c7g:          { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton3',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2022 },
+      c7gd:         { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton3',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c7gn:         { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton3E',                        isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c7i:          { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',     isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      'c7i-flex':   { cat: 'Compute', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',     isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      c8g:          { cat: 'Compute', vendor: 'AWS',   proc: 'Graviton4',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2024 },
       // ── Memory Optimized ─────────────────────────────────
-      r5: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum (Skylake / Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
-      r6a: { cat: 'Memory', vendor: 'AMD', proc: 'EPYC Milan (Zen 3)', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2022 },
-      r6g: { cat: 'Memory', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
-      r6i: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
-      r7a: { cat: 'Memory', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
-      r7g: { cat: 'Memory', vendor: 'AWS', proc: 'Graviton3', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
-      r7i: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
-      x2idn: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
-      z1d: { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Skylake (4.0 GHz turbo)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      r4:           { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',         isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2016 },
+      r5:           { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',        isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2017 },
+      r5a:          { cat: 'Memory', vendor: 'AMD',   proc: 'EPYC 7571 (Zen 1)',                  isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      r5ad:         { cat: 'Memory', vendor: 'AMD',   proc: 'EPYC 7571 (Zen 1)',                  isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      r5b:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)',   isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      r5d:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',        isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      r5dn:         { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)',   isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      r5n:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)',   isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      r6a:          { cat: 'Memory', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',          isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      r6g:          { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton2',                          isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      r6gd:         { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton2',                          isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      r6i:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2021 },
+      r6id:         { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      r6idn:        { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      r6in:         { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      r7a:          { cat: 'Memory', vendor: 'AMD',   proc: 'EPYC 9R14 (Genoa / Zen 4)',          isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r7g:          { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton3',                          isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r7gd:         { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton3',                          isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r7i:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r7iz:         { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      r8g:          { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton4',                          isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      // ── Memory: X / z / u (high-memory) ──────────────────
+      x1:           { cat: 'Memory', vendor: 'Intel', proc: 'Xeon E7-8880 v3 (Haswell)',           isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2016 },
+      x1e:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon E7-8880 v3 (Haswell)',           isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2017 },
+      x2gd:         { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton2',                          isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      x2idn:        { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      x2iedn:       { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      x2iezn:       { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8252 (Cascade Lake)',   isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      x8g:          { cat: 'Memory', vendor: 'AWS',   proc: 'Graviton4',                          isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      z1d:          { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8151 (Skylake, 4.0 GHz)', isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      'u-3tb1':     { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8176M (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      'u-6tb1':     { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8176M (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2018 },
+      'u-9tb1':     { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8176M (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      'u-12tb1':    { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8176M (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      'u-18tb1':    { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8280L (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2019 },
+      'u-24tb1':    { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Platinum 8280L (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2019 },
+      'u7i-6tb':    { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      'u7i-8tb':    { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      'u7i-12tb':   { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      'u7in-16tb':  { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      'u7in-24tb':  { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      'u7in-32tb':  { cat: 'Memory', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
       // ── Storage Optimized ────────────────────────────────
-      d3: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
-      i3: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Broadwell (E5 v4)', isa: 'x86_64', hyp: 'Nitro v1', accel: '—', yr: 2016 },
-      i4i: { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)', isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
-      im4gn: { cat: 'Storage', vendor: 'AWS', proc: 'Graviton2', isa: 'ARM64', hyp: 'Nitro v3', accel: '—', yr: 2021 },
-      // ── GPU ──────────────────────────────────────────────
-      g4dn: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v3', accel: 'NVIDIA T4', yr: 2019 },
-      g5: { cat: 'GPU', vendor: 'AMD', proc: 'EPYC Rome (Zen 2)', isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A10G', yr: 2021 },
-      g6: { cat: 'GPU', vendor: 'AMD', proc: 'EPYC Genoa (Zen 4)', isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA L4', yr: 2024 },
-      p3: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Broadwell (E5 v4)', isa: 'x86_64', hyp: 'Xen', accel: 'NVIDIA V100', yr: 2017 },
-      p4d: { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A100', yr: 2020 },
-      // ── HPC & Accelerated ────────────────────────────────
-      hpc7g: { cat: 'HPC', vendor: 'AWS', proc: 'Graviton3E', isa: 'ARM64', hyp: 'Nitro v4', accel: '—', yr: 2023 },
-      inf2: { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)', isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Inferentia2', yr: 2023 },
-      trn1: { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Cascade Lake', isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium', yr: 2022 },
+      d2:           { cat: 'Storage', vendor: 'Intel', proc: 'Xeon E5-2676 v3 (Haswell)',          isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2015 },
+      d3:           { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      d3en:         { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Platinum 8259 (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v3', accel: '—', yr: 2020 },
+      h1:           { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',        isa: 'x86_64', hyp: 'Xen',      accel: '—', yr: 2017 },
+      i3:           { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',        isa: 'x86_64', hyp: 'Nitro v1', accel: '—', yr: 2017 },
+      i3en:         { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',       isa: 'x86_64', hyp: 'Nitro v2', accel: '—', yr: 2019 },
+      i4g:          { cat: 'Storage', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v4', accel: '—', yr: 2023 },
+      i4i:          { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',            isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      i7ie:         { cat: 'Storage', vendor: 'Intel', proc: 'Xeon Emerald Rapids (5th Gen)',      isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      i8g:          { cat: 'Storage', vendor: 'AWS',   proc: 'Graviton4',                         isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2024 },
+      im4gn:        { cat: 'Storage', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      is4gen:       { cat: 'Storage', vendor: 'AWS',   proc: 'Graviton2',                         isa: 'ARM64',  hyp: 'Nitro v3', accel: '—', yr: 2021 },
+      // ── GPU — Graphics & Inference ───────────────────────
+      g3:           { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',            isa: 'x86_64', hyp: 'Xen',      accel: 'NVIDIA Tesla M60',     yr: 2017 },
+      g4ad:         { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R32 (Rome / Zen 2)',              isa: 'x86_64', hyp: 'Nitro v3', accel: 'AMD Radeon Pro V520',  yr: 2020 },
+      g4dn:         { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Platinum 8259CL (Cascade Lake)',    isa: 'x86_64', hyp: 'Nitro v3', accel: 'NVIDIA T4',            yr: 2019 },
+      g5:           { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R32 (Rome / Zen 2)',              isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A10G',          yr: 2021 },
+      g5g:          { cat: 'GPU', vendor: 'AWS',   proc: 'Graviton2',                             isa: 'ARM64',  hyp: 'Nitro v3', accel: 'NVIDIA T4G',           yr: 2021 },
+      g6:           { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA L4',            yr: 2024 },
+      g6e:          { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA L40S',          yr: 2024 },
+      gr6:          { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA L4',            yr: 2024 },
+      // ── GPU — HPC Training ───────────────────────────────
+      p2:           { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',            isa: 'x86_64', hyp: 'Xen',      accel: 'NVIDIA K80',           yr: 2016 },
+      p3:           { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Broadwell (E5-2686 v4)',            isa: 'x86_64', hyp: 'Xen',      accel: 'NVIDIA V100',          yr: 2017 },
+      p3dn:         { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Skylake)',           isa: 'x86_64', hyp: 'Nitro v2', accel: 'NVIDIA V100 (32 GB)',  yr: 2018 },
+      p4d:          { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Cascade Lake)',      isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A100 (40 GB)',  yr: 2020 },
+      p4de:         { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Platinum 8175 (Cascade Lake)',      isa: 'x86_64', hyp: 'Nitro v4', accel: 'NVIDIA A100 (80 GB)',  yr: 2022 },
+      p5:           { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA H100 (80 GB)',  yr: 2023 },
+      p5e:          { cat: 'GPU', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA H200 (141 GB)', yr: 2024 },
+      p5en:         { cat: 'GPU', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',         isa: 'x86_64', hyp: 'Nitro v5', accel: 'NVIDIA H200 (141 GB)', yr: 2024 },
+      // ── Accelerated — ML Inference / Training ────────────
+      inf1:         { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Platinum 8259CL (Cascade Lake)', isa: 'x86_64', hyp: 'Nitro v3', accel: 'AWS Inferentia',  yr: 2019 },
+      inf2:         { cat: 'Accelerated', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',           isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Inferentia2', yr: 2023 },
+      trn1:         { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Ice Lake 8375C (3rd Gen)',        isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium',   yr: 2022 },
+      trn1n:        { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',              isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium',   yr: 2023 },
+      trn2:         { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Sapphire Rapids (4th Gen)',       isa: 'x86_64', hyp: 'Nitro v5', accel: 'AWS Trainium2',  yr: 2024 },
+      dl1:          { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Platinum 8275CL (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v4', accel: 'Habana Gaudi HL-205', yr: 2021 },
+      dl2q:         { cat: 'Accelerated', vendor: 'Intel', proc: 'Xeon Cascade Lake',                   isa: 'x86_64', hyp: 'Nitro v4', accel: 'Qualcomm AI100',      yr: 2023 },
+      // ── Media / FPGA ─────────────────────────────────────
+      vt1:          { cat: 'Media',       vendor: 'Intel', proc: 'Xeon Platinum 8259CL (Cascade Lake)',  isa: 'x86_64', hyp: 'Nitro v3', accel: 'Xilinx U30 Media',     yr: 2021 },
+      f1:           { cat: 'FPGA',        vendor: 'Intel', proc: 'Xeon E5-2686 v4 (Broadwell)',          isa: 'x86_64', hyp: 'Xen',      accel: 'Xilinx UltraScale VU9P', yr: 2017 },
+      // ── HPC Optimized ────────────────────────────────────
+      hpc6a:        { cat: 'HPC', vendor: 'AMD',   proc: 'EPYC 7R13 (Milan / Zen 3)',             isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      hpc6id:       { cat: 'HPC', vendor: 'Intel', proc: 'Xeon Ice Lake (3rd Gen)',                isa: 'x86_64', hyp: 'Nitro v4', accel: '—', yr: 2022 },
+      hpc7a:        { cat: 'HPC', vendor: 'AMD',   proc: 'EPYC 9R14 (Genoa / Zen 4)',             isa: 'x86_64', hyp: 'Nitro v5', accel: '—', yr: 2023 },
+      hpc7g:        { cat: 'HPC', vendor: 'AWS',   proc: 'Graviton3E',                            isa: 'ARM64',  hyp: 'Nitro v5', accel: '—', yr: 2023 },
     };
 
     /* ── 6. REGION_META / GEO_ORDER  — region geo groupings ───
@@ -1682,10 +1991,10 @@
         'step-agg',
         'step-drill',
         'step-rec',
+        'step-arch',
         'step-viz',
         'step-browse',
         'step-calc',
-        'step-arch',
         'step-region',
         'step-methodology',
         'step-bibliography',
@@ -1843,9 +2152,17 @@
     }
 
     /* ── Region sync ────────────────────────────────────────── */
+    function syncRegionBadge(region = el('region').value) {
+      const meta = REGION_META[region];
+      const label = meta?.label || region || 'Select region';
+      if (el('navRegionLabel')) el('navRegionLabel').textContent = label;
+      if (el('navRegionCode')) el('navRegionCode').textContent = region || 'N/A';
+    }
     function syncRegionPager() {
-      const idx = state.regions.indexOf(el('region').value);
+      const region = el('region').value;
+      const idx = state.regions.indexOf(region);
       if (idx >= 0) state.regionIdx = idx;
+      syncRegionBadge(region);
     }
     function stepRegion(delta) {
       if (!state.regions.length) return;
@@ -1871,10 +2188,17 @@
     }
 
     /* ── Weight bar ─────────────────────────────────────────── */
+    const WB_LABEL = { price: 'Price', cpu: 'CPU', mem: 'Memory', net: 'Network', gpu: 'GPU' };
     function renderWeightBar(w, sum) {
       Object.entries(w).forEach(([k, val]) => {
         const seg = el(`wb-${k}`);
-        if (seg) seg.style.width = (sum > 0 ? (val / sum * 100) : 0) + '%';
+        if (!seg) return;
+        const pct = sum > 0 ? (val / sum * 100) : 0;
+        seg.style.width = pct + '%';
+        const label = WB_LABEL[k] || k;
+        seg.title = `${label}: ${pct.toFixed(0)}%`;
+        // Show label text inside segment when wide enough
+        seg.textContent = pct >= 12 ? `${label} ${pct.toFixed(0)}%` : pct >= 7 ? `${pct.toFixed(0)}%` : '';
       });
       el('weightTotal').textContent = sum > 0 ? '100%' : '0% ⚠️';
     }
@@ -1977,6 +2301,18 @@
       const cats = FILTER_CATS.filter(f => available.has(f));
       const allActive = cats.every(f => state.selectedFamilies.has(f));
       const noneActive = state.selectedFamilies.size === 0;
+
+      // Update Step 04 filter bridge
+      const bridge = el('step04FamilyBridge');
+      const chips = el('step04FamilyChips');
+      const activeFams = cats.filter(f => state.selectedFamilies.has(f));
+      const showBridge = activeFams.length > 0 && !allActive;
+      if (bridge) bridge.style.display = showBridge ? 'flex' : 'none';
+      if (chips) chips.innerHTML = activeFams.map(f => {
+        const col = CAT_COLOR[f] || '#4f46e5';
+        return `<span class="step04-fam-chip" style="color:${col};border-color:${col}40;background:${col}12">${f}</span>`;
+      }).join('');
+
       c.innerHTML =
         `<span class="family-filter-lbl">Category:</span>` +
         `<button class="family-pill pill-all ${allActive && !noneActive ? 'active' : ''}" onclick="selectAllFamilies()">All</button>` +
@@ -1989,16 +2325,17 @@
     }
     function selectAllFamilies() {
       [...new Set(state.scoredRows.map(r => r.instance_category))].forEach(f => state.selectedFamilies.add(f));
-      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
+      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows); renderRadar(state.scoredRows);
     }
     function clearAllFamilies() {
       state.selectedFamilies.clear();
-      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
+      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows); renderRadar(state.scoredRows);
     }
     function toggleFamily(cat) {
       if (state.selectedFamilies.has(cat)) { state.selectedFamilies.delete(cat); }
       else { state.selectedFamilies.add(cat); }
-      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows);
+      state.radarPage = 0; state.radarHidden.clear();
+      renderFamilyFilter(state.scoredRows); renderLineChart(state.scoredRows); renderRadar(state.scoredRows);
     }
     function syncFamilyFilter(rows) {
       const cur = new Set(rows.map(r => r.instance_category));
@@ -2014,14 +2351,14 @@
       const grid = el('familyCards');
       const allWrap = el('familyAllCard');
       if (!grid) return;
-      const sel = el('category').value || 'All';
+      const sc = state.selectedCategories;
+      const isAll = sc.size === 0;
 
       /* ── "All Families" highlight card (separate) ── */
       if (allWrap) {
         const allInfo = FAMILY_INFO.All;
-        const isActive = sel === 'All';
         allWrap.innerHTML = `
-        <div class="family-all-card${isActive ? ' fac-active' : ''}"
+        <div class="family-all-card${isAll ? ' fac-active' : ''}"
              onclick="selectFamilyCard('All')">
           <div class="fac-left">
             <span class="fac-icon">${allInfo.icon}</span>
@@ -2032,7 +2369,7 @@
           </div>
           <div class="fac-right">
             <span class="fac-count">${regionRows.length} types</span>
-            <span class="fac-cta">${isActive ? 'Active' : 'Compare All →'}</span>
+            <span class="fac-cta">${isAll ? 'Active' : 'Show All →'}</span>
           </div>
         </div>`;
       }
@@ -2042,6 +2379,8 @@
         const info = FAMILY_INFO[key];
         if (!info) return '';
         const count = regionRows.filter(r => r.instance_category === key).length;
+        const isSelected = sc.has(key);
+        const isDimmed = !isAll && !isSelected;
 
         const relatedFams = Object.values(ARCH_MAP).filter(d => d.cat === key);
         const uniqueVendors = [...new Set(relatedFams.map(d => d.vendor))];
@@ -2059,10 +2398,15 @@
           ? `<div class="fc-arch-flex">${pills.map(p => `<span class="fc-arch-pill">${p}</span>`).join('')}</div>`
           : '';
 
+        const classes = ['family-card'];
+        if (isSelected) classes.push('fc-active');
+        if (isDimmed) classes.push('fc-dimmed');
+
         return `
-      <div class="family-card${sel === key ? ' fc-active' : ''}"
+      <div class="${classes.join(' ')}"
            style="--fam-color:${info.color};--fam-bg:${info.bg}"
            onclick="selectFamilyCard('${key}')">
+        ${isSelected ? `<div class="fc-check" style="background:${info.color}">✓</div>` : ''}
         <div class="fc-power-badge">${idx + 1} of 5</div>
         <div class="fc-hdr">
           <span class="fc-icon">${info.icon}</span>
@@ -2079,16 +2423,28 @@
             ? `<div class="fc-examples"><b>${info.examples.split(',').slice(0, 3).map(s => s.trim()).join(', ')}</b></div>`
             : `<div class="fc-examples"></div>`}
           <span class="fc-count">${count} types</span>
-          <span class="fc-cta">Filter →</span>
+          <span class="fc-cta">${isSelected ? 'Selected ✓' : 'Select →'}</span>
         </div>
       </div>`;
       }).join('');
     }
 
     function selectFamilyCard(category) {
-      el('category').value = category;
+      const sc = state.selectedCategories;
+      if (category === 'All') {
+        sc.clear();
+      } else {
+        if (sc.has(category)) {
+          sc.delete(category);
+        } else {
+          sc.add(category);
+        }
+        // All selected = same as "All"
+        if (sc.size === FAMILY_ORDER.length) sc.clear();
+      }
+      // Sync hidden select for arch table / hash compat
+      el('category').value = sc.size === 0 ? 'All' : [...sc][0];
       render();
-      setTimeout(() => el('step-drill').scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
     }
 
     /* ── Family aggregate chart ─────────────────────────────── */
@@ -2180,94 +2536,361 @@
     }
 
     /* ── Instance Spec line chart ────────────────────────── */
-    function renderLineChart(rows) {
-      const MAX = 30; /* Filter to selected categories; empty = nothing */
-      const filtered = state.selectedFamilies.size
-        ? rows.filter(r => state.selectedFamilies.has(r.instance_category)) : [];
+    /* ── Spec chart mode toggle ─────────────────────────────── */
+    function setSpecMode(mode) {
+      state.specMode = mode;
+      const famFilter = el('familyFilter');
+      const instPicker = el('instancePicker');
+      if (famFilter) famFilter.style.display = mode === 'family' ? '' : 'none';
+      if (instPicker) instPicker.style.display = mode === 'instance' ? '' : 'none';
+      el('specModeFamily')?.classList.toggle('active', mode === 'family');
+      el('specModeInstance')?.classList.toggle('active', mode === 'instance');
+      const hint = el('specModeHint');
+      if (hint) hint.textContent = mode === 'family'
+        ? 'Select families using the pills below'
+        : 'Search and add specific instances to compare';
+      renderLineChart(state.scoredRows);
+      renderRadar(state.scoredRows);
+    }
 
-      if (!filtered.length) {
-        return Plotly.react('chart', [], {
-          ...PLOTLY_BASE, xaxis: { visible: false }, yaxis: { visible: false },
-          annotations: [{
-            xref: 'paper', yref: 'paper', x: .5, y: .5, showarrow: false,
-            text: 'Select a category above to compare instances', font: { size: 13, color: '#94a3b8' }
-          }],
-          margin: { t: 12, r: 55, b: 40, l: 50 },
-        }, { responsive: true, displayModeBar: false });
+    /* ── Instance picker (spec chart instance mode) ─────────── */
+    function updateInstanceSuggestions() {
+      const q = (el('ipSearch')?.value || '').trim().toLowerCase();
+      const sugBox = el('ipSuggestions');
+      if (!q || !sugBox) { if (sugBox) sugBox.style.display = 'none'; return; }
+      const already = new Set(state.selectedInstances);
+      const matches = state.scoredRows
+        .filter(r => r.instance_type.toLowerCase().includes(q) && !already.has(r.instance_type))
+        .slice(0, 12);
+      if (!matches.length) { sugBox.style.display = 'none'; return; }
+      sugBox.innerHTML = matches.map(r => {
+        const col = CAT_COLOR[r.instance_category] || '#6b7280';
+        return `<div class="ip-sug-item" onmousedown="addInstanceToCompare('${r.instance_type}')">
+          <span class="ip-sug-type" style="color:${col}">${r.instance_type}</span>
+          <span class="ip-sug-meta">${r.instance_category} · ${r.vcpus} vCPU · ${r.memory_gib} GiB · $${(+r.price_usd_hour).toFixed(4)}/hr</span>
+        </div>`;
+      }).join('');
+      sugBox.style.display = 'block';
+    }
+
+    function addInstanceToCompare(type) {
+      if (!state.selectedInstances.includes(type)) {
+        state.selectedInstances.push(type);
       }
+      if (el('ipSearch')) el('ipSearch').value = '';
+      const sugBox = el('ipSuggestions');
+      if (sugBox) sugBox.style.display = 'none';
+      renderInstancePicker();
+      renderLineChart(state.scoredRows);
+      renderRadar(state.scoredRows);
+    }
 
-      /* Smart sampling: broad view → plot Highest and Lowest for each active category;
-         focused view (1-2 cats) → top MAX */
-      const activeCats = [...new Set(filtered.map(r => r.instance_category))];
-      let names = [];
-      let vcpus = [], memory = [], prices = [];
-      let meta = [];
+    function removeInstanceFromCompare(type) {
+      state.selectedInstances = state.selectedInstances.filter(t => t !== type);
+      renderInstancePicker();
+      renderLineChart(state.scoredRows);
+      renderRadar(state.scoredRows);
+    }
 
-      if (activeCats.length >= 3) {
-        // Broad view: For each category, get the best and worst instance
-        activeCats.forEach(cat => {
-          const catRows = filtered.filter(r => r.instance_category === cat);
-          if (!catRows.length) return;
-          const best = catRows[0];
-          const worst = catRows[catRows.length - 1];
-          // Use clean x labels (instance types). Put the context into the hover.
-          names.push(best.instance_type, worst.instance_type);
-          meta.push({ cat, kind: 'Best in filter' }, { cat, kind: 'Lowest in filter' });
-          vcpus.push(best.vcpus, worst.vcpus);
-          memory.push(best.memory_gib, worst.memory_gib);
-          prices.push(best.price_usd_hour, worst.price_usd_hour);
-        });
-      } else {
-        // Focused view
-        let top = (filtered.filter(r => r.memory_gib <= 512).slice(0, MAX) || filtered.slice(0, MAX));
-        if (!top.length) top = filtered.slice(0, MAX);
-        names = top.map(r => r.instance_type);
-        vcpus = top.map(r => r.vcpus);
-        memory = top.map(r => r.memory_gib);
-        prices = top.map(r => r.price_usd_hour);
-        meta = top.map(r => ({ cat: r.instance_category, kind: 'Candidate' }));
+    function clearAllInstances() {
+      state.selectedInstances = [];
+      renderInstancePicker();
+      renderLineChart(state.scoredRows);
+      renderRadar(state.scoredRows);
+    }
+
+    function renderInstancePicker() {
+      const tags = el('ipTags');
+      if (!tags) return;
+      if (!state.selectedInstances.length) {
+        tags.innerHTML = '<span class="ip-empty-hint">No instances selected — search above to add</span>';
+        return;
       }
+      const selectedRows = state.selectedInstances.map(t => state.scoredRows.find(r => r.instance_type === t));
+      const traceColors = getCategoryTraceColors(selectedRows.filter(Boolean));
+      let colorIdx = 0;
+      tags.innerHTML = state.selectedInstances.map(t => {
+        const row = state.scoredRows.find(r => r.instance_type === t);
+        const col = row ? traceColors[colorIdx++] : '#6b7280';
+        return `<span class="ip-tag" style="border-color:${col}40;color:${col};background:${col}12">
+          ${t}
+          <button class="ip-tag-rm" onmousedown="removeInstanceFromCompare('${t}')" title="Remove">×</button>
+        </span>`;
+      }).join('');
+    }
 
-      const cd = meta.map(m => [m.cat || '—', m.kind || '—']);
-      // Use log scale if data range is extreme (max/min > 20x) to avoid outlier compression
+    /* ── Instance comparison bar chart ─────────────────────── */
+    function renderInstanceCompareChart(rows) {
+      const sel = state.selectedInstances;
+      const resetLine = el('resetZoomLine');
+      const scrollOuter = document.querySelector('.chart-scroll-outer');
+      if (!sel.length) {
+        setSpecChartContext('');
+        if (resetLine) resetLine.style.display = 'none';
+        if (scrollOuter) scrollOuter.style.display = 'none';
+        return;
+      }
+      if (scrollOuter) scrollOuter.style.display = '';
+
+      const data = sel.map(type => rows.find(r => r.instance_type === type)).filter(Boolean);
+      const traceColors = getCategoryTraceColors(data);
+
+      // Context: list selected instances with family color chips
+      const instChips = data.map((r, i) => {
+        const col = traceColors[i];
+        return `<span class="scc-chip" style="border-color:${col}40;color:${col};background:${col}12">${r.instance_type} <span style="opacity:.7;font-size:10px">${r.instance_category}</span></span>`;
+      }).join('');
+      setSpecChartContext(`Comparing ${data.length} instance${data.length > 1 ? 's' : ''} · ${instChips}`);
+      const names = data.map(r => r.instance_type);
+      const colors = traceColors;
+      const cd = data.map(r => [r.instance_category, r.instance_type]);
+
+      const vcpus  = data.map(r => r.vcpus);
+      const memory = data.map(r => r.memory_gib);
+      const prices = data.map(r => r.price_usd_hour);
+
       const allSpecY = [...vcpus, ...memory].filter(v => v > 0);
       const specYMax = Math.max(...allSpecY), specYMin = Math.min(...allSpecY);
       const useLogScale = allSpecY.length > 1 && specYMax / specYMin > 20;
+
+      const formattedNames = names.map((n, i) =>
+        `<span style="color:${colors[i]};font-weight:600">${n}</span>`
+      );
 
       Plotly.react('chart', [
         {
           name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: vcpus,
           customdata: cd,
-          line: { color: '#3b82f6', width: 2.5, shape: 'spline' },
-          marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
+          line: { color: '#0ea5e9', width: 2.5, shape: 'spline' },
+          marker: { color: '#0ea5e9', size: 7, line: { color: '#fff', width: 1.5 } },
+          yaxis: 'y',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]}</span><br>vCPUs: <b>%{y}</b><extra></extra>',
+        },
+        {
+          name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: memory,
+          customdata: cd,
+          line: { color: '#ec4899', width: 2.5, shape: 'spline' },
+          marker: { color: '#ec4899', size: 7, line: { color: '#fff', width: 1.5 } },
+          yaxis: 'y',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]}</span><br>RAM: <b>%{y} GiB</b><extra></extra>',
+        },
+        {
+          name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers+text', x: names, y: prices,
+          customdata: cd,
+          text: prices.map(p => '$' + (+p).toFixed(3)),
+          textposition: 'top right',
+          textfont: { size: 10, color: '#ef4444', family: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
+          line: { color: '#ef4444', width: 2.5, shape: 'spline', dash: 'dot' },
+          marker: { color: '#ef4444', size: 7, line: { color: '#fff', width: 1.5 } },
+          yaxis: 'y2',
+          hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]}</span><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
+        },
+      ], {
+        ...PLOTLY_BASE,
+        xaxis: {
+          ...PLOTLY_BASE.xaxis,
+          tickangle: -35,
+          automargin: true,
+          tickfont: { size: 10, color: '#475569' },
+          tickmode: 'array',
+          tickvals: names,
+          ticktext: formattedNames,
+        },
+        yaxis: {
+          title: useLogScale ? 'vCPUs / RAM — log scale' : 'vCPUs / RAM (GiB)',
+          type: useLogScale ? 'log' : 'linear',
+          tickvals: useLogScale ? [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048] : undefined,
+          gridcolor: '#e2e8f0', zeroline: false,
+        },
+        yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
+        legend: { ...PLOTLY_BASE.legend, y: -0.32 },
+        margin: { t: 20, r: 72, b: 90, l: 58 },
+        hovermode: 'x unified',
+      }, { responsive: true, displayModeBar: false });
+
+      if (resetLine) {
+        resetLine.style.display = 'inline-flex';
+        resetLine.onclick = () => Plotly.relayout('chart', { 'xaxis.autorange': true, 'yaxis.autorange': true, 'yaxis2.autorange': true });
+      }
+    }
+
+    function setSpecChartContext(html) {
+      const ctx = el('specChartContext');
+      if (ctx) ctx.innerHTML = html;
+    }
+
+    function renderLineChart(rows) {
+      /* Dispatch to instance mode if active */
+      if (state.specMode === 'instance') return renderInstanceCompareChart(rows);
+
+      const MAX = 40; /* Filter to selected categories; empty = nothing */
+      const filtered = state.selectedFamilies.size
+        ? rows.filter(r => state.selectedFamilies.has(r.instance_category)) : [];
+
+      const scrollOuter = document.querySelector('.chart-scroll-outer');
+      if (!filtered.length) {
+        setSpecChartContext('');
+        const resetLine = el('resetZoomLine');
+        if (resetLine) resetLine.style.display = 'none';
+        if (scrollOuter) scrollOuter.style.display = 'none';
+        return;
+      }
+      if (scrollOuter) scrollOuter.style.display = '';
+
+      const activeCats = [...new Set(filtered.map(r => r.instance_category))];
+      let names = [];
+      let vcpus = [], memory = [], prices = [];
+      let meta = [];
+
+      const catChips = activeCats.map(cat => {
+        const col = CAT_COLOR[cat] || '#6b7280';
+        return `<span class="scc-chip" style="border-color:${col}40;color:${col};background:${col}12">${cat}</span>`;
+      }).join('');
+
+      if (activeCats.length >= 4) {
+        // 4+ families: most powerful + cheapest per family (2 reps, deduped)
+        activeCats.forEach(cat => {
+          const catRows = filtered.filter(r => r.instance_category === cat);
+          if (!catRows.length) return;
+          const mostPowerful = [...catRows].sort((a, b) => b.vcpus - a.vcpus)[0];
+          const cheapest = [...catRows].sort((a, b) => a.price_usd_hour - b.price_usd_hour)[0];
+          const seen = new Set();
+          [{ r: mostPowerful, kind: 'Most powerful' }, { r: cheapest, kind: 'Cheapest' }]
+            .forEach(({ r, kind }) => {
+              if (seen.has(r.instance_type)) return;
+              seen.add(r.instance_type);
+              names.push(r.instance_type);
+              meta.push({ cat, kind });
+              vcpus.push(r.vcpus);
+              memory.push(r.memory_gib);
+              prices.push(r.price_usd_hour);
+            });
+        });
+        setSpecChartContext(`Showing <b>most powerful</b> + <b>cheapest</b> per family · ${catChips}`);
+      } else if (activeCats.length >= 2) {
+        // 2–3 families: cheapest + most powerful + best overall per family, always 3 distinct picks
+        activeCats.forEach(cat => {
+          const catRows = filtered.filter(r => r.instance_category === cat);
+          if (!catRows.length) return;
+          const byVcpu    = [...catRows].sort((a, b) => b.vcpus - a.vcpus);
+          const byPrice   = [...catRows].sort((a, b) => a.price_usd_hour - b.price_usd_hour);
+          const byScore   = catRows; // already sorted by composite score
+
+          // Pick 3 distinct instances: best → most powerful → cheapest, filling gaps with next-by-score
+          const picked3 = [];
+          const seen = new Set();
+          const addFirst = (sorted, kind) => {
+            const r = sorted.find(x => !seen.has(x.instance_type));
+            if (!r) return;
+            seen.add(r.instance_type);
+            picked3.push({ r, kind });
+          };
+          addFirst(byScore,  'Best overall');
+          addFirst(byVcpu,   'Most powerful');
+          addFirst(byPrice,  'Cheapest');
+          // Fill to 3 if family has enough instances
+          if (picked3.length < 3) addFirst(byScore, 'Runner-up');
+
+          picked3.forEach(({ r, kind }) => {
+            names.push(r.instance_type);
+            meta.push({ cat, kind });
+            vcpus.push(r.vcpus);
+            memory.push(r.memory_gib);
+            prices.push(r.price_usd_hour);
+          });
+        });
+        setSpecChartContext(`Showing <b>most powerful</b>, <b>best overall</b> + <b>cheapest</b> per family · ${catChips}`);
+      } else {
+        // 1 family: show all instances with scroll
+        const top = filtered.slice(0, MAX);
+        names = top.map(r => r.instance_type);
+        vcpus = top.map(r => r.vcpus);
+        memory = top.map(r => r.memory_gib);
+        prices = top.map(r => r.price_usd_hour);
+        meta = top.map(r => ({ cat: r.instance_category, kind: 'Candidate' }));
+        setSpecChartContext(`Showing all ${top.length} instances · ${catChips} · sorted by composite score`);
+      }
+
+      const cd = meta.map(m => [m.cat || '—', m.kind || '—']);
+      const allSpecY = [...vcpus, ...memory].filter(v => v > 0);
+      const specYMax = Math.max(...allSpecY), specYMin = Math.min(...allSpecY);
+      const useLogScale = allSpecY.length > 1 && specYMax / specYMin > 20;
+
+      const formattedNames = names.map((name, i) => {
+        const cat = meta[i].cat;
+        const color = CAT_COLOR[cat] || '#64748b';
+        return `<span style="color:${color};font-weight:600">${name}</span>`;
+      });
+
+      // Scroll sizing: expand chart width for focused view when instances overflow
+      const PX_PER_TICK = 64;
+      const containerW = scrollOuter ? scrollOuter.clientWidth : 900;
+      const needsScroll = activeCats.length === 1 && names.length > Math.floor(containerW / PX_PER_TICK);
+      const chartWidth = needsScroll ? Math.max(containerW, names.length * PX_PER_TICK) : containerW;
+      const chartDiv = el('chart');
+      if (chartDiv) chartDiv.style.width = '';
+
+      Plotly.react('chart', [
+        {
+          name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: vcpus,
+          customdata: cd,
+          line: { color: '#0ea5e9', width: 2.5, shape: 'spline' },
+          marker: { color: '#0ea5e9', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>vCPUs: <b>%{y}</b><extra></extra>',
         },
         {
           name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: memory,
           customdata: cd,
-          line: { color: '#10b981', width: 2.5, shape: 'spline' },
-          marker: { color: '#10b981', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
+          line: { color: '#ec4899', width: 2.5, shape: 'spline' },
+          marker: { color: '#ec4899', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>RAM: <b>%{y} GiB</b><extra></extra>',
         },
         {
           name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: prices,
           customdata: cd,
-          line: { color: '#f59e0b', width: 2.5, shape: 'spline', dash: 'dot' },
-          marker: { color: '#f59e0b', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
+          line: { color: '#ef4444', width: 2.5, shape: 'spline', dash: 'dot' },
+          marker: { color: '#ef4444', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
         },
       ], {
         ...PLOTLY_BASE,
-        xaxis: { ...PLOTLY_BASE.xaxis, tickangle: -35, automargin: true, tickfont: { size: 10, color: '#475569' } },
+        width: needsScroll ? chartWidth : undefined,
+        xaxis: {
+          ...PLOTLY_BASE.xaxis,
+          tickangle: -40,
+          automargin: true,
+          tickfont: { size: 10, color: '#475569' },
+          tickmode: 'array',
+          tickvals: names,
+          ticktext: formattedNames,
+        },
         yaxis: {
           title: useLogScale ? 'vCPUs / RAM — log scale' : 'vCPUs / RAM (GiB)',
           type: useLogScale ? 'log' : 'linear',
+          tickvals: useLogScale ? [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048] : undefined,
           gridcolor: '#e2e8f0', zeroline: false,
         },
         yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
         legend: { ...PLOTLY_BASE.legend, y: -0.32 },
-        margin: { t: 12, r: 55, b: 90, l: 58 }, hovermode: 'x unified',
-      }, { responsive: true, displayModeBar: false });
+        margin: { t: activeCats.length >= 2 ? 36 : 12, r: 55, b: 90, l: 58 }, hovermode: 'x unified',
+        annotations: activeCats.length >= 2 ? [{
+          xref: 'paper', yref: 'paper', x: 0, y: 1.08,
+          xanchor: 'left', yanchor: 'bottom', showarrow: false,
+          text: activeCats.length >= 4 ? 'Most powerful + cheapest per family. Select 1–3 families for more detail.' : 'Most powerful, best overall + cheapest per family. Select 1 family to see all instances.',
+          font: { size: 11, color: '#64748b' },
+          bgcolor: '#f8fafc',
+          bordercolor: '#e2e8f0',
+          borderwidth: 1,
+          borderpad: 4,
+        }] : [],
+      }, { responsive: !needsScroll, displayModeBar: false });
+
+      // Wire reset zoom button for line chart
+      const resetLine = el('resetZoomLine');
+      if (resetLine) {
+        resetLine.style.display = 'inline-flex';
+        resetLine.onclick = () => Plotly.relayout('chart', { 'xaxis.autorange': true, 'yaxis.autorange': true, 'yaxis2.autorange': true });
+      }
     }
 
     /* ── Radar chart ────────────────────────────────────────── */
@@ -2280,99 +2903,172 @@
     function renderRadar(rows) {
       const radarCard  = el('radarCard');
       const charts2    = radarCard?.closest('.charts-2');
-      const category   = el('category')?.value || 'All';
+      const MAX = 40;
 
-      // Hide radar for single-family views; show only when "All" is selected
-      const showRadar  = category === 'All';
-      if (radarCard)  radarCard.style.display  = showRadar ? '' : 'none';
-      if (charts2)    charts2.classList.toggle('radar-hidden', !showRadar);
-      if (!showRadar) return;
+      // Mirror the spec chart: use instance mode picks or family-pill filter
+      let picked = [];
 
-      /*
-       * Broad view (3+ categories): one polygon per category showing
-       * the AVERAGE rank-score across all instances in that category.
-       *
-       * Axes: Price Eff · CPU · Memory · Network
-       * GPU axis added only when GPU/Accelerated instances are present.
-       */
-      const activeCats  = [...new Set(rows.map(r => r.instance_category))];
-      const hasGPU      = activeCats.some(c => c === 'GPU' || c === 'Accelerated');
-      const broadView   = activeCats.length >= 3;
+      if (state.specMode === 'instance' && state.selectedInstances.length) {
+        // Instance mode: show exactly the selected instances
+        picked = state.selectedInstances
+          .map(type => rows.find(r => r.instance_type === type))
+          .filter(Boolean)
+          .map(r => ({ r, label: r.instance_category }));
+      } else {
+        // Family mode: same filter as spec line chart
+        const filtered = state.selectedFamilies.size
+          ? rows.filter(r => state.selectedFamilies.has(r.instance_category)) : [];
 
-      // Choose axes depending on whether we're looking at GPU instances
+        if (!filtered.length) {
+          if (radarCard) radarCard.style.display = 'none';
+          if (charts2)   charts2.style.display   = 'none';
+          return;
+        }
+
+        const activeCats = [...new Set(filtered.map(r => r.instance_category))];
+
+        if (activeCats.length >= 4) {
+          // 4+ families: most powerful + cheapest per family (2 reps, deduped)
+          activeCats.forEach(cat => {
+            const catRows = filtered.filter(r => r.instance_category === cat);
+            if (!catRows.length) return;
+            const mostPowerful = [...catRows].sort((a, b) => b.vcpus - a.vcpus)[0];
+            const cheapest = [...catRows].sort((a, b) => a.price_usd_hour - b.price_usd_hour)[0];
+            const seen = new Set();
+            [{ r: mostPowerful, label: 'Most powerful' }, { r: cheapest, label: 'Cheapest' }]
+              .forEach(({ r, label }) => {
+                if (seen.has(r.instance_type)) return;
+                seen.add(r.instance_type);
+                picked.push({ r, label });
+              });
+          });
+        } else if (activeCats.length >= 2) {
+          // 2–3 families: always 3 distinct picks per family
+          activeCats.forEach(cat => {
+            const catRows = filtered.filter(r => r.instance_category === cat);
+            if (!catRows.length) return;
+            const byVcpu  = [...catRows].sort((a, b) => b.vcpus - a.vcpus);
+            const byPrice = [...catRows].sort((a, b) => a.price_usd_hour - b.price_usd_hour);
+            const byScore = catRows;
+            const seen = new Set();
+            const addFirst = (sorted, label) => {
+              const r = sorted.find(x => !seen.has(x.instance_type));
+              if (!r) return;
+              seen.add(r.instance_type);
+              picked.push({ r, label });
+            };
+            const before = picked.length;
+            addFirst(byScore,  'Best overall');
+            addFirst(byVcpu,   'Most powerful');
+            addFirst(byPrice,  'Cheapest');
+            if (picked.length - before < 3) addFirst(byScore, 'Runner-up');
+          });
+        } else {
+          // 1 family: show 5 per page, sorted by composite score
+          const RADAR_PAGE_SIZE = 5;
+          const total = filtered.length;
+          const totalPages = Math.ceil(total / RADAR_PAGE_SIZE);
+          state.radarPage = Math.min(state.radarPage, totalPages - 1);
+          const pageRows = filtered.slice(state.radarPage * RADAR_PAGE_SIZE, (state.radarPage + 1) * RADAR_PAGE_SIZE);
+          picked = pageRows.map(r => ({ r, label: r.instance_type }));
+
+          // Render page controls
+          const pageEl = el('radarPageControls');
+          if (pageEl) {
+            pageEl.style.display = totalPages > 1 ? 'flex' : 'none';
+            pageEl.innerHTML = `
+              <button class="re-page-btn" onclick="radarGoPage(${state.radarPage - 1})" ${state.radarPage === 0 ? 'disabled' : ''}>‹ Prev</button>
+              <span class="re-page-info">Page ${state.radarPage + 1} of ${totalPages} <span style="color:#94a3b8">(${total} total)</span></span>
+              <button class="re-page-btn" onclick="radarGoPage(${state.radarPage + 1})" ${state.radarPage >= totalPages - 1 ? 'disabled' : ''}>Next ›</button>`;
+          }
+          // Guide note for single family
+          const noteEl = el('radarGuideNote');
+          if (noteEl) noteEl.innerHTML = `Showing ${pageRows.length} of ${total} instances. Use page controls to browse, or toggle any instance in the legend to hide it.`;
+        }
+      }
+
+      if (!picked.length) {
+        if (radarCard) radarCard.style.display = 'none';
+        if (charts2)   charts2.style.display   = 'none';
+        return;
+      }
+
+      // Apply hidden toggles
+      const visiblePicked = picked.filter(p => !state.radarHidden.has(p.r.instance_type));
+
+      const hasGPU = picked.some(p => p.r.instance_category === 'GPU' || p.r.instance_category === 'Accelerated');
       const axes = hasGPU
         ? ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU']
         : ['Price Eff.', 'CPU', 'Memory', 'Network'];
-      // Close the polygon by repeating the first axis
       const theta = [...axes, axes[0]];
-
       const scoreKeys = hasGPU
         ? ['scoreP', 'scoreC', 'scoreM', 'scoreN', 'scoreG']
         : ['scoreP', 'scoreC', 'scoreM', 'scoreN'];
 
-      const avg = (arr, key) => arr.reduce((s, r) => s + (r[key] || 0), 0) / arr.length;
+      const traceColors = getCategoryTraceColors(picked.map(p => p.r));
+      const traces = visiblePicked.map(p => {
+        const idx = picked.indexOf(p);
+        const r = p.r;
+        const color = traceColors[idx];
+        const vals = scoreKeys.map(k => +(r[k] || 0).toFixed(3));
+        vals.push(vals[0]);
+        const hoverLines = axes.map((ax, i) => ax + ': <b>' + vals[i].toFixed(2) + '</b>').join('<br>');
+        const isCheap = p.label === 'Cheapest';
+        return {
+          type: 'scatterpolar', r: vals, theta, fill: 'toself',
+          name: r.instance_type + ' · ' + p.label,
+          line: { color, width: isCheap ? 2 : 2.5, dash: isCheap ? 'dash' : 'solid' },
+          fillcolor: color + (isCheap ? '0a' : '18'),
+          marker: { size: isCheap ? 4 : 5, color, symbol: isCheap ? 'diamond' : 'circle' },
+          hovertemplate: '<b>' + r.instance_type + '</b><br><span style="color:#94a3b8">' + r.instance_category + ' · ' + p.label + '</span><br>' + hoverLines + '<br>$' + r.price_usd_hour.toFixed(4) + '/hr<extra></extra>',
+        };
+      });
 
-      let traces = [];
+      // Render custom legend in left panel
+      const legendSection = el('radarLegendSection');
+      const legendList = el('radarLegendList');
+      if (legendList && legendSection) {
+        legendSection.style.display = '';
+        legendList.innerHTML = picked.map((p, idx) => {
+          const color = traceColors[idx];
+          const hidden = state.radarHidden.has(p.r.instance_type);
+          return `<div class="re-legend-item ${hidden ? 're-legend-item-hidden' : ''}"
+                       onclick="radarToggleInstance('${p.r.instance_type}')" title="Click to show/hide">
+            <span class="re-legend-color" style="background:${color};opacity:${hidden ? 0.25 : 1}"></span>
+            <span class="re-legend-name">${p.r.instance_type}</span>
+            <span class="re-legend-tag">${p.label}</span>
+          </div>`;
+        }).join('');
+      }
 
-      if (broadView) {
-        // One filled polygon per active category, using category averages
-        FILTER_CATS.forEach(cat => {
-          const catRows = rows.filter(r => r.instance_category === cat);
-          if (!catRows.length) return;
-          const color = CAT_COLOR[cat] || '#4f46e5';
-          const r_vals = scoreKeys.map(k => +avg(catRows, k).toFixed(3));
-          // close the polygon
-          r_vals.push(r_vals[0]);
-
-          const hoverLines = axes.map((ax, i) => ax + ': <b>' + r_vals[i].toFixed(2) + '</b>').join('<br>');
-          traces.push({
-            type: 'scatterpolar',
-            r: r_vals,
-            theta,
-            fill: 'toself',
-            name: cat + ' avg',
-            line: { color, width: 2.5 },
-            fillcolor: color + '28',
-            hovertemplate: '<b>' + cat + '</b> (avg of ' + catRows.length + ')<br>' + hoverLines + '<extra></extra>',
-          });
-        });
-      } else {
-        // Focused: top-5 individual instances as separate polygons
-        const top5 = rows.slice(0, Math.min(5, rows.length));
-        traces = top5.map((r, i) => {
-          const color  = CAT_COLOR[r.instance_category] || '#6366f1';
-          const r_vals = scoreKeys.map(k => +(r[k] || 0).toFixed(3));
-          r_vals.push(r_vals[0]);
-          return {
-            type: 'scatterpolar',
-            r: r_vals,
-            theta,
-            fill: 'toself',
-            name: r.instance_type,
-            line: { color, width: 2 },
-            fillcolor: color + '28',
-            hovertemplate: '<b>' + r.instance_type + '</b><br>%{theta}: %{r:.2f}<extra></extra>',
-          };
-        });
+      // Hide guide note for multi-family
+      const noteEl = el('radarGuideNote');
+      if (noteEl && picked.length && picked[0].label !== picked[0].r.instance_type) {
+        noteEl.innerHTML = 'Click any instance in the legend to show or hide it on the chart.';
       }
 
       Plotly.react('chart3', traces, {
         ...PLOTLY_BASE,
         polar: {
           bgcolor: '#fafbff',
-          radialaxis: {
-            visible: true,
-            range: [0, 1],
-            gridcolor: '#e2e8f0',
-            tickfont: { size: 9 },
-            tickformat: '.1f',
-            dtick: 0.25,
-          },
+          radialaxis: { visible: true, range: [0, 1], gridcolor: '#e2e8f0', tickfont: { size: 9 }, tickformat: '.1f', dtick: 0.25 },
           angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: 11, color: '#475569' } },
         },
-        legend: { orientation: 'h', y: -0.22, x: 0, font: { size: 11 } },
-        margin: { t: 20, r: 20, b: 60, l: 20 },
+        showlegend: false,
+        margin: { t: 20, r: 20, b: 20, l: 20 },
       }, { responsive: true, displayModeBar: false });
+    }
+
+    function radarGoPage(page) {
+      state.radarPage = page;
+      state.radarHidden.clear();
+      renderRadar(state.scoredRows);
+    }
+
+    function radarToggleInstance(type) {
+      if (state.radarHidden.has(type)) state.radarHidden.delete(type);
+      else state.radarHidden.add(type);
+      renderRadar(state.scoredRows);
     }
 
     /* ── Bar chart ──────────────────────────────────────────── */
@@ -2411,19 +3107,19 @@
         y: top25.map(r => r.instance_type),
         type: 'bar',
         orientation: 'h',
-        text: top25.map((_, i) => `#${i + 1}`),
+        text: top25.map(r => `$${(+r.price_usd_hour).toFixed(3)}/hr`),
         textposition: 'outside',
-        textfont: { size: 10, color: '#94a3b8' },
+        textfont: { size: 10, color: '#64748b', family: 'ui-monospace,SFMono-Regular,Menlo,monospace' },
         cliponaxis: false,
         marker: { color: colors, opacity: 0.88, line: { width: 0 } },
         hovertemplate:
-          '<b>#%{customdata[0]}  %{y}</b><br>' +
+          '<b>%{y}</b><br>' +
           yTitle + ': <b>' + xHover + '</b><br>' +
-          'Category: %{customdata[1]}<br>' +
-          'vCPUs: %{customdata[2]} · RAM: %{customdata[3]} GiB<br>' +
-          'Price: $%{customdata[4]:.4f}/hr<extra></extra>',
-        customdata: top25.map((r, i) => [
-          i + 1, r.instance_category, r.vcpus, r.memory_gib, r.price_usd_hour,
+          'Category: %{customdata[0]}<br>' +
+          'vCPUs: %{customdata[1]} · RAM: %{customdata[2]} GiB<br>' +
+          'Price: <b>$%{customdata[3]:.4f}/hr</b><extra></extra>',
+        customdata: top25.map(r => [
+          r.instance_category, r.vcpus, r.memory_gib, r.price_usd_hour,
         ]),
       }], {
         ...PLOTLY_BASE,
@@ -2535,6 +3231,10 @@
       const grid = el('runnersGrid');
       if (!grid) return;
       const runners = rows.slice(1, 5);
+      if (!runners.length) {
+        grid.innerHTML = `<div class="runners-empty">No other close matches in this filter. Try broadening your category or adjusting weights.</div>`;
+        return;
+      }
       grid.innerHTML = runners.map((r, i) => {
         const catColor = CAT_COLOR[r.instance_category] || '#4f46e5';
         const catBg = CAT_BG[r.instance_category] || '#f9fafb';
@@ -2557,116 +3257,258 @@
     }
 
     /* ── Parallel Coordinates Chart ──────────────────────────── */
+    /* ── Parallel coordinates axis definitions ──────────────── */
+    const PC_AXES = {
+      price:   { label: 'Price ($/hr)', key: 'price_usd_hour', fmt: v => +v.toFixed(4) },
+      vcpus:   { label: 'vCPUs',        key: 'vcpus',          fmt: v => v },
+      memory:  { label: 'RAM (GiB)',    key: 'memory_gib',     fmt: v => v },
+      network: { label: 'Network',      key: 'network_score',  fmt: v => v },
+      gpu:     { label: 'GPUs',         key: 'gpu_count',      fmt: v => v },
+      score:   { label: 'Score',        key: 'composite',      fmt: v => +v.toFixed(4) },
+    };
+
+    function togglePcAxis(key) {
+      const s = state.pcActiveAxes;
+      if (s.has(key)) { if (s.size > 2) s.delete(key); } // keep at least 2 axes
+      else s.add(key);
+      renderParallelCoordinates(state.scoredRows);
+    }
+
+    function setPcColorMode(mode) {
+      state.pcColorMode = mode;
+      el('pcColorCat')?.classList.toggle('active', mode === 'category');
+      el('pcColorFam')?.classList.toggle('active', mode === 'family');
+      renderParallelCoordinates(state.scoredRows);
+    }
+
     function renderParallelCoordinates(rows) {
       if (!rows || rows.length < 2) return;
-      const top30 = rows.slice(0, Math.min(30, rows.length));
-      // Color-code by sub-family prefix (e.g. m7g, c6i, r7i) for better readability
-      const famKeys = [...new Set(top30.map(r => getFamily(r.instance_type)))].sort();
-      const palette = ['#6366f1', '#10b981', '#f97316', '#ec4899', '#0ea5e9', '#facc15', '#8b5cf6', '#14b8a6'];
-      const famColor = fam => palette[famKeys.indexOf(fam) % palette.length] || '#64748b';
-      const famIndex = Object.fromEntries(famKeys.map((k, i) => [k, i]));
-      // Build a discrete colorscale that maps integer indices -> colors
-      const colorscale = famKeys.length <= 1
-        ? [[0, famColor(famKeys[0] || '')], [1, famColor(famKeys[0] || '')]]
-        : famKeys.map((fam, i) => [i / (famKeys.length - 1), famColor(fam)]);
+      const top50 = rows.slice(0, Math.min(50, rows.length));
+
+      /* ── Axis pills ─────────────────────────────────────── */
+      const pillsEl = el('pcAxesPills');
+      if (pillsEl) {
+        pillsEl.innerHTML = Object.entries(PC_AXES).map(([key, ax]) => {
+          const active = state.pcActiveAxes.has(key);
+          return `<button class="pc-axis-pill${active ? ' active' : ''}"
+            onclick="togglePcAxis('${key}')"
+            title="${active ? 'Click to hide' : 'Click to show'}">${ax.label}</button>`;
+        }).join('');
+      }
+
+      /* ── Color scheme ───────────────────────────────────── */
+      const palette = ['#6366f1','#10b981','#f97316','#ec4899','#0ea5e9','#facc15','#8b5cf6','#14b8a6'];
+      let colorValues, colorscale;
+
+      if (state.pcColorMode === 'category') {
+        const catOrder = ['General','Storage','CPU','Memory','GPU'];
+        colorValues = top50.map(r => catOrder.indexOf(r.instance_category));
+        colorscale = catOrder.map((c, i) => [i / (catOrder.length - 1), CAT_COLOR[c] || '#64748b']);
+      } else {
+        const famKeys = [...new Set(top50.map(r => getFamily(r.instance_type)))].sort();
+        const famIndex = Object.fromEntries(famKeys.map((k, i) => [k, i]));
+        colorValues = top50.map(r => famIndex[getFamily(r.instance_type)] ?? 0);
+        colorscale = famKeys.length <= 1
+          ? [[0, palette[0]], [1, palette[0]]]
+          : famKeys.map((_, i) => [i / (famKeys.length - 1), palette[i % palette.length]]);
+      }
+
+      /* ── Build active dimensions ────────────────────────── */
+      const activeDims = [...state.pcActiveAxes]
+        .filter(k => PC_AXES[k])
+        .map(k => {
+          const ax = PC_AXES[k];
+          const vals = top50.map(r => ax.fmt(r[ax.key] ?? 0));
+          const mn = Math.min(...vals), mx2 = Math.max(...vals);
+          return {
+            label: ax.label,
+            values: vals,
+            range: k === 'score' ? [0, 1.02]
+                 : k === 'network' ? [0, 5.5]
+                 : [Math.max(0, mn - (mx2 - mn) * 0.05), mx2 * 1.08],
+            tickformat: k === 'price' ? '.3f' : k === 'score' ? '.2f' : undefined,
+            _key: k, // carry key for filter counting
+          };
+        });
+
       Plotly.react('chartParallel', [{
         type: 'parcoords',
         line: {
-          color: top30.map(r => famIndex[getFamily(r.instance_type)] ?? 0),
+          color: colorValues,
           colorscale,
           cmin: 0,
-          cmax: Math.max(0, famKeys.length - 1),
+          cmax: colorscale.length - 1,
           showscale: false,
+          opacity: 0.65,
         },
-        dimensions: [
-          {
-            label: 'Instance',
-            tickvals: top30.map((_, i) => i),
-            ticktext: top30.map(r => r.instance_type),
-            values: top30.map((_, i) => i),
-          },
-          {
-            label: 'Price ($/hr)',
-            values: top30.map(r => +r.price_usd_hour.toFixed(4)),
-            range: [0, Math.max(...top30.map(r => r.price_usd_hour)) * 1.1],
-          },
-          {
-            label: 'vCPUs',
-            values: top30.map(r => r.vcpus),
-            range: [0, Math.max(...top30.map(r => r.vcpus)) * 1.1],
-          },
-          {
-            label: 'Memory (GiB)',
-            values: top30.map(r => r.memory_gib),
-            range: [0, Math.max(...top30.map(r => r.memory_gib)) * 1.1],
-          },
-          {
-            label: 'Network',
-            values: top30.map(r => r.network_score),
-            range: [0, 5.5],
-          },
-          {
-            label: 'Score',
-            values: top30.map(r => +r.composite.toFixed(4)),
-            range: [0, 1.05],
-          },
-        ],
+        dimensions: activeDims,
+        labelfont: { size: 12.5, color: '#1e293b', family: 'inherit' },
+        tickfont:  { size: 10.5, color: '#64748b' },
+        rangefont: { size: 10, color: '#6366f1' },
       }], {
         ...PLOTLY_BASE,
-        margin: { t: 40, r: 50, b: 30, l: 85 },
+        margin: { t: 44, r: 50, b: 24, l: 60 },
       }, {
         responsive: true,
         displayModeBar: true,
-        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines'],
+        modeBarButtonsToRemove: ['lasso2d','select2d','toggleSpikelines'],
         displaylogo: false,
       });
 
-      // Build grouped legend — one chip per instance family, with count badge
-      const familyGroups = {};
-      top30.forEach(r => {
-        const fam = getFamily(r.instance_type);
-        const c = famColor(fam);
-        if (!familyGroups[fam]) familyGroups[fam] = { color: c, instances: [] };
-        familyGroups[fam].instances.push(r.instance_type);
-      });
-
-      const legendHtml = Object.entries(familyGroups).map(([fam, { color, instances }]) => {
-        const bg = color + '18';
-        const tipText = instances.join(', ');
-        return `<div class="parcoords-legend-chip" style="--chip-c:${color};--chip-bg:${bg}" title="${tipText}">
-          <span class="parcoords-legend-dot" style="background:${color}"></span>
-          <span class="parcoords-legend-fam">${fam}</span>
-          <span class="parcoords-legend-cnt">${instances.length}</span>
-        </div>`;
-      }).join('');
-
-      const legendEl = el('parcoordsLegend');
-      if (legendEl) legendEl.innerHTML = legendHtml;
-
-      // Wire reset button — re-renders chart clearing all brush constraints
-      const resetBtn = el('resetParcoords');
-      if (resetBtn) {
-        resetBtn.onclick = () => renderParallelCoordinates(rows);
+      // Dismiss drag hint on first interaction with the chart
+      const pcHint = el('pcDragHint');
+      if (pcHint && !pcHint.dataset.dismissed) {
+        const dismiss = () => { pcHint.classList.add('pc-drag-hint-gone'); pcHint.dataset.dismissed = '1'; };
+        el('chartParallel')?.addEventListener('mousedown', dismiss, { once: true });
+        el('chartParallel')?.addEventListener('touchstart', dismiss, { once: true });
       }
 
-      // ── Hover tooltip ──────────────────────────────────────
+      /* ── Summary stats row ───────────────────────────────── */
+      const statsEl = el('pcSummaryStats');
+      if (statsEl) {
+        const fmt = (v, k) => k === 'price' ? '$' + v.toFixed(3) : k === 'score' ? (v * 100).toFixed(1) + '%' : Math.round(v);
+        const stats = [...state.pcActiveAxes].filter(k => PC_AXES[k]).map(k => {
+          const ax = PC_AXES[k];
+          const vals = top50.map(r => ax.fmt(r[ax.key] ?? 0));
+          const mn = Math.min(...vals), mx = Math.max(...vals);
+          const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+          return `<div class="pc-stat-cell">
+            <div class="pc-stat-label">${ax.label}</div>
+            <div class="pc-stat-vals">
+              <span class="pc-stat-lo" title="Min">${fmt(mn, k)}</span>
+              <span class="pc-stat-arrow">→</span>
+              <span class="pc-stat-hi" title="Max">${fmt(mx, k)}</span>
+              <span class="pc-stat-avg" title="Average">avg ${fmt(avg, k)}</span>
+            </div>
+          </div>`;
+        });
+        statsEl.innerHTML = stats.join('');
+      }
+
+      /* ── Legend ─────────────────────────────────────────── */
+      const legendEl = el('parcoordsLegend');
+      if (legendEl) {
+        if (state.pcColorMode === 'category') {
+          const cats = [...new Set(top50.map(r => r.instance_category))];
+          legendEl.innerHTML = cats.map(cat => {
+            const color = CAT_COLOR[cat] || '#64748b';
+            const n = top50.filter(r => r.instance_category === cat).length;
+            return `<div class="parcoords-legend-chip" style="--chip-c:${color};--chip-bg:${color}18">
+              <span class="parcoords-legend-dot" style="background:${color}"></span>
+              <span class="parcoords-legend-fam">${cat}</span>
+              <span class="parcoords-legend-cnt">${n}</span>
+            </div>`;
+          }).join('');
+        } else {
+          const famKeys = [...new Set(top50.map(r => getFamily(r.instance_type)))].sort();
+          legendEl.innerHTML = famKeys.map((fam, i) => {
+            const color = palette[i % palette.length];
+            const n = top50.filter(r => getFamily(r.instance_type) === fam).length;
+            return `<div class="parcoords-legend-chip" style="--chip-c:${color};--chip-bg:${color}18">
+              <span class="parcoords-legend-dot" style="background:${color}"></span>
+              <span class="parcoords-legend-fam">${fam}</span>
+              <span class="parcoords-legend-cnt">${n}</span>
+            </div>`;
+          }).join('');
+        }
+      }
+
+      /* ── Filter status + result list ────────────────────── */
+      function getVisibleRows() {
+        const gd = document.getElementById('chartParallel');
+        const dims = gd?._fullData?.[0]?.dimensions || [];
+        return top50.filter((r, ri) => dims.every(dim => {
+          if (!dim.constraintrange) return true;
+          const cr = dim.constraintrange;
+          const ranges = Array.isArray(cr[0]) ? cr : [cr];
+          const axDef = Object.values(PC_AXES).find(a => a.label === dim.label);
+          const val = axDef ? axDef.fmt(r[axDef.key] ?? 0) : ri;
+          return ranges.some(([lo, hi]) => val >= lo && val <= hi);
+        }));
+      }
+
+      function updateFilterUI() {
+        const visible = getVisibleRows();
+        const isFiltered = visible.length < top50.length;
+        const statusEl = el('pcFilterStatus');
+        const listEl = el('pcFilteredList');
+
+        if (statusEl) {
+          if (isFiltered) {
+            const pct = Math.round(visible.length / top50.length * 100);
+            statusEl.innerHTML = `🔍 <strong style="color:#4f46e5">${visible.length}</strong> of ${top50.length} instances match (${pct}%) — <button class="pc-clear-inline" onclick="renderParallelCoordinates(state.scoredRows)">clear all filters</button>`;
+          } else {
+            statusEl.innerHTML = `Showing top <strong>${top50.length}</strong> instances · <em>drag on any vertical axis to start filtering</em>`;
+          }
+        }
+
+        if (listEl) {
+          if (!isFiltered || !visible.length) {
+            listEl.innerHTML = '';
+            listEl.style.display = 'none';
+          } else {
+            listEl.style.display = 'flex';
+            // Sort filtered results by score desc, highlight best
+            const sorted = [...visible].sort((a, b) => b.composite - a.composite);
+            listEl.innerHTML = sorted.map((r, i) => {
+              const col = CAT_COLOR[r.instance_category] || '#6b7280';
+              const best = i === 0 && sorted.length > 1;
+              return `<div class="pc-result-chip${best ? ' pc-result-best' : ''}" style="border-color:${col}${best ? '60' : '35'};color:${col};background:${col}${best ? '14' : '0e'}">
+                ${best ? '<span class="pc-result-badge">Best</span>' : ''}
+                <span class="pc-result-price" style="background:${col};color:#fff">$${(+r.price_usd_hour).toFixed(3)}/hr</span>
+                <span class="pc-result-type">${r.instance_type}</span>
+                <span class="pc-result-meta">${r.vcpus}vCPU · ${r.memory_gib}GiB</span>
+              </div>`;
+            }).join('');
+          }
+        }
+
+        // Update summary stats for filtered subset
+        const sEl = el('pcSummaryStats');
+        if (sEl && isFiltered && visible.length) {
+          const fmt2 = (v, k) => k === 'price' ? '$' + v.toFixed(3) : k === 'score' ? (v * 100).toFixed(1) + '%' : Math.round(v);
+          sEl.innerHTML = [...state.pcActiveAxes].filter(k => PC_AXES[k]).map(k => {
+            const ax = PC_AXES[k];
+            const vals = visible.map(r => ax.fmt(r[ax.key] ?? 0));
+            const mn = Math.min(...vals), mx = Math.max(...vals);
+            const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+            return `<div class="pc-stat-cell">
+              <div class="pc-stat-label">${ax.label} <span style="font-weight:500;color:#6366f1">(filtered)</span></div>
+              <div class="pc-stat-vals">
+                <span class="pc-stat-lo">${fmt2(mn, k)}</span>
+                <span class="pc-stat-arrow">→</span>
+                <span class="pc-stat-hi">${fmt2(mx, k)}</span>
+                <span class="pc-stat-avg">avg ${fmt2(avg, k)}</span>
+              </div>
+            </div>`;
+          }).join('');
+        }
+      }
+
+      updateFilterUI();
+
       const chartDiv = document.getElementById('chartParallel');
+      chartDiv.on('plotly_restyle', updateFilterUI);
+
+      /* ── Reset button ───────────────────────────────────── */
+      const resetBtn = el('resetParcoords');
+      if (resetBtn) resetBtn.onclick = () => renderParallelCoordinates(rows);
+
+      /* ── Hover tooltip ──────────────────────────────────── */
       const tip = el('parcoordsTooltip');
 
       chartDiv.on('plotly_hover', function(data) {
-        if (!tip || !data.points || !data.points.length) return;
+        if (!tip || !data.points?.length) return;
         const pt = data.points[0];
-        // Plotly parcoords uses pointNumber or pointIndex
-        const idx = pt.pointNumber ?? pt.pointIndex ?? pt.pointNumber;
-        if (idx == null || !top30[idx]) return;
+        const idx = pt.pointNumber ?? pt.pointIndex;
+        if (idx == null || !top50[idx]) return;
+        const r = top50[idx];
 
-        const r = top30[idx];
-        const fam = getFamily(r.instance_type);
-        const lineC = famColor(fam);
+        const lineC = state.pcColorMode === 'category'
+          ? (CAT_COLOR[r.instance_category] || '#4f46e5')
+          : palette[([...new Set(top50.map(x => getFamily(x.instance_type)))].sort().indexOf(getFamily(r.instance_type))) % palette.length];
         const catC = CAT_COLOR[r.instance_category] || '#4f46e5';
         const scoreBar = Math.round(r.composite * 100);
-        const rank = rows.findIndex(x => x.instance_type === r.instance_type) + 1;
-
         tip.innerHTML = `
           <div class="pct-header">
             <span class="pct-name" style="color:${lineC}">${r.instance_type}</span>
@@ -2675,7 +3517,7 @@
           <div class="pct-body">
             <div class="pct-row"><span>Price</span><strong>$${(+r.price_usd_hour).toFixed(4)}/hr</strong></div>
             <div class="pct-row"><span>vCPUs</span><strong>${r.vcpus}</strong></div>
-            <div class="pct-row"><span>Memory</span><strong>${r.memory_gib} GiB</strong></div>
+            <div class="pct-row"><span>RAM</span><strong>${r.memory_gib} GiB</strong></div>
             ${r.gpu_count ? `<div class="pct-row"><span>GPUs</span><strong>${r.gpu_count}</strong></div>` : ''}
             <div class="pct-row"><span>Network</span><strong>${r.network_score} / 5</strong></div>
             <div class="pct-score-row">
@@ -2684,23 +3526,19 @@
               <strong>${(r.composite * 100).toFixed(1)}%</strong>
             </div>
           </div>
-          ${rank > 0 ? `<div class="pct-rank-badge">Rank <span class="pct-rank-num">#${rank}</span> of ${rows.length} candidates</div>` : ''}
-        `;
+          <div class="pct-price-badge">$${(+r.price_usd_hour).toFixed(3)}<span>/hr</span></div>`;
 
-        // Position tooltip near cursor, keeping it within chart bounds
         const chartRect = chartDiv.getBoundingClientRect();
         const mx = (data.event.clientX || 0) - chartRect.left;
         const my = (data.event.clientY || 0) - chartRect.top;
         tip.classList.add('pct-visible');
-        const tipW = 220;
-        const left = (mx + 14 + tipW > chartRect.width) ? mx - tipW - 10 : mx + 14;
+        const tipW = 230;
+        const left = mx + 14 + tipW > chartRect.width ? mx - tipW - 10 : mx + 14;
         tip.style.left = Math.max(4, left) + 'px';
-        tip.style.top = Math.max(4, my - 30) + 'px';
+        tip.style.top = Math.max(4, my - 40) + 'px';
       });
 
-      chartDiv.on('plotly_unhover', function() {
-        if (tip) tip.classList.remove('pct-visible');
-      });
+      chartDiv.on('plotly_unhover', () => tip?.classList.remove('pct-visible'));
     }
 
     /* ── Value Map scatter chart ────────────────────────────── */
@@ -3020,18 +3858,31 @@
     const ARCH_CAT_MAP = {
       All:     null,                          // null = show all
       CPU:     ['Compute'],
-      GPU:     ['GPU', 'HPC', 'Accelerated'],
+      GPU:     ['GPU', 'HPC', 'Accelerated', 'Media', 'FPGA'],
       Memory:  ['Memory'],
       Storage: ['Storage'],
-      General: ['General'],
+      General: ['General', 'Mac'],
     };
 
-    function renderArchTable(query, categoryFilter) {
-      const q           = (query || '').toLowerCase().trim();
-      const filterKey   = categoryFilter || 'All';
-      const allowedCats = ARCH_CAT_MAP[filterKey] ?? null;
+    function renderArchTable(query, selectedCats) {
+      const q  = (query || '').toLowerCase().trim();
+      // selectedCats may be a Set, array, or single string — normalise to Set
+      const sc = selectedCats instanceof Set ? selectedCats
+               : Array.isArray(selectedCats)  ? new Set(selectedCats)
+               : (selectedCats && selectedCats !== 'All') ? new Set([selectedCats])
+               : new Set();
 
-      // 1. Start from all families, then narrow by selected category
+      // Build the union of allowed arch-cats across every selected category
+      let allowedCats = null; // null = show all
+      if (sc.size > 0) {
+        allowedCats = [];
+        for (const key of sc) {
+          const mapped = ARCH_CAT_MAP[key];
+          if (mapped) allowedCats.push(...mapped);
+        }
+      }
+
+      // 1. Start from all families, then narrow by selected categories
       let families = Object.keys(ARCH_MAP);
       if (allowedCats) families = families.filter(f => allowedCats.includes(ARCH_MAP[f].cat));
 
@@ -3048,9 +3899,10 @@
       // 3. Update the active-filter badge next to the search input
       const tag = el('archFilterTag');
       if (tag) {
-        if (filterKey !== 'All') {
-          const info = FAMILY_INFO[filterKey];
-          tag.textContent = (info?.icon || '') + ' ' + (info?.name || filterKey);
+        if (sc.size > 0) {
+          const labels = [...sc].map(k => (FAMILY_INFO[k]?.icon || '') + ' ' + (FAMILY_INFO[k]?.name || k)).join(', ');
+          const info   = sc.size === 1 ? FAMILY_INFO[[...sc][0]] : null;
+          tag.textContent      = labels;
           tag.style.display    = 'inline-flex';
           tag.style.background = info?.bg    || '#eef2ff';
           tag.style.color      = info?.color || '#4f46e5';
@@ -3193,8 +4045,9 @@
       renderFamilyCards(regionRows);
       renderFamilyAggChart(regionRows);
 
-      /* Fully filtered rows for scoring */
-      let rows = regionRows.filter(r => category === 'All' || r.instance_category === category);
+      /* Fully filtered rows for scoring — supports multi-select from family cards */
+      const sc = state.selectedCategories;
+      let rows = regionRows.filter(r => sc.size === 0 || sc.has(r.instance_category));
 
       if (!rows.length) {
         el('recCard').classList.add('error-state');
@@ -3269,12 +4122,11 @@
       renderFamilyFilter(rows);
       renderRadar(rows);
       renderLineChart(rows);
-      /* If radar is hidden the spec chart container just changed width;
-         force Plotly to pick up the new size after the CSS reflow. */
-      const chartEl = document.getElementById('chart');
-      if (chartEl && chartEl.closest('.charts-2')?.classList.contains('radar-hidden')) {
-        requestAnimationFrame(() => Plotly.Plots.resize(chartEl));
-      }
+      /* Force Plotly resize after any layout reflow */
+      requestAnimationFrame(() => {
+        const chartEl = document.getElementById('chart');
+        if (chartEl) Plotly.Plots.resize(chartEl);
+      });
       renderParallelCoordinates(rows);
       renderBar(rows, metric);
       renderScatterChart(rows);
@@ -3288,7 +4140,7 @@
       renderCalculator(calcRow);
       renderTable(rows, el('tableSearch').value);
       // Arch table re-filters whenever the main category changes
-      renderArchTable(el('archSearch')?.value, category);
+      renderArchTable(el('archSearch')?.value, state.selectedCategories);
       saveHash();
     }
 
@@ -3328,7 +4180,7 @@
           .filter(g => geoGroups[g])
           .map(g => `<optgroup label="${g}">${geoGroups[g].map(r => {
             const m = REGION_META[r];
-            return `<option value="${r}">${r}${m ? ' — ' + m.label : ''}</option>`;
+            return `<option value="${r}">${m ? `${m.label} (${r})` : r}</option>`;
           }).join('')
             }</optgroup>`)
           .join('');
@@ -3374,7 +4226,7 @@
         el('tableSearch').addEventListener('input', () =>
           renderTable(state.scoredRows, el('tableSearch').value));
         el('archSearch').addEventListener('input', e =>
-          renderArchTable(e.target.value, el('category').value));
+          renderArchTable(e.target.value, state.selectedCategories));
 
         /* Keyboard shortcuts */
         document.addEventListener('keydown', e => {
@@ -3390,7 +4242,7 @@
         });
 
         render();
-        renderArchTable(el('archSearch')?.value, el('category').value);
+        renderArchTable(el('archSearch')?.value, state.selectedCategories);
 
         el('loader').style.display = 'none';
         const app = el('app');
@@ -3412,10 +4264,10 @@
           'step-agg',
           'step-drill',
           'step-rec',
+          'step-arch',
           'step-viz',
           'step-browse',
           'step-calc',
-          'step-arch',
           'step-region',
           'step-methodology',
           'step-bibliography',
@@ -3448,112 +4300,68 @@
   <!-- ── Site Footer ── -->
   <footer class="site-footer">
     <div class="footer-glow"></div>
+    <div class="footer-glow footer-glow-left"></div>
     <div class="footer-inner">
 
-      <div class="footer-grid footer-grid-3col">
-
-        <!-- Brand -->
-        <div>
-          <div class="footer-brand">EC2 <em>Advisor</em></div>
-          <p class="footer-tagline">
-            An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for
-            your workload — scored by price efficiency, compute, memory, network, and GPU using
-            rank-based multi-criteria analysis.
-          </p>
-          <div class="footer-badge">
-            <span class="footer-badge-dot"></span>
-            Using Live AWS Pricing Data
+      <div class="footer-shell">
+        <div class="footer-main">
+          <div class="footer-brand-block">
+            <div class="footer-brand">EC2 Instance <em>Advisor</em></div>
+            <p class="footer-tagline">
+              Find the right EC2 instance fast. Compare price, CPU, memory, network, and GPU in one place.
+            </p>
           </div>
-          <div class="footer-tech-stack">
-            <span class="footer-tech">Vanilla JS</span>
-            <span class="footer-tech">Plotly.js</span>
-            <span class="footer-tech">AWS Pricing API</span>
-            <span class="footer-tech">Static · No backend</span>
-          </div>
-        </div>
 
-        <!-- Open Source -->
-        <div>
-          <div class="footer-section-title">Open Source</div>
-          <ul class="footer-links">
-            <li><a href="https://github.com/varad-more/ec2-instance-advisor" target="_blank" rel="noopener">
-                <span class="fl-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                </span> GitHub Repository
-              </a></li>
-            <li><a href="https://github.com/varad-more" target="_blank" rel="noopener">
-                <span class="fl-icon">👤</span> Varad More
-              </a></li>
-          </ul>
-        </div>
-
-        <!-- Keyboard Shortcuts -->
-        <div>
-          <div class="footer-section-title">Keyboard Shortcuts</div>
-          <div class="footer-kbds">
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">B</span>
-              <span class="footer-kbd-desc">Balanced preset</span>
+          <div class="footer-links" aria-label="Footer links">
+            <div class="footer-col">
+              <div class="footer-col-title">Project</div>
+              <a class="footer-link footer-link-strong" href="https://github.com/varad-more/ec2-instance-advisor" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub Repo
+              </a>
+              <a class="footer-link" href="https://github.com/varad-more/ec2-instance-advisor/issues" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Report a Bug
+              </a>
+              <a class="footer-link" href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                AWS EC2 Pricing
+              </a>
             </div>
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">C</span>
-              <span class="footer-kbd-desc">Cost-first preset</span>
-            </div>
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">P</span>
-              <span class="footer-kbd-desc">Performance preset</span>
-            </div>
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">M</span>
-              <span class="footer-kbd-desc">ML / GPU preset</span>
-            </div>
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">← →</span>
-              <span class="footer-kbd-desc">Cycle AWS regions</span>
-            </div>
-            <div class="footer-kbd-row">
-              <span class="footer-kbd-key">/</span>
-              <span class="footer-kbd-desc">Focus search</span>
+            <div class="footer-col">
+              <div class="footer-col-title">Author</div>
+              <a class="footer-link" href="https://github.com/varad-more" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Varad More
+              </a>
+              <a class="footer-link" href="https://varadmore.me" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z"/><path d="M9.5 12.2l1.8 1.8 3.6-3.8"/></svg>
+                Portfolio
+              </a>
             </div>
           </div>
         </div>
+      </div>
 
-      </div><!-- /footer-grid -->
-
-      <hr class="footer-divider">
-
-      <div class="footer-bottom"
-        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <a href="https://github.com/varad-more" target="_blank" rel="noopener"
-            style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
-            <img src="https://github.com/varad-more.png?size=80" alt="Varad More"
-              style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(129,140,248,.3);">
-            <div>
-              <div style="font-size: 13px; font-weight: 800; color: #f8fafc; letter-spacing: -.02em;">Varad More</div>
-              <div style="font-size: 11px; color: #94a3b8; font-weight: 600;">Creator &amp; Developer</div>
-            </div>
-          </a>
-          <span style="width: 1px; height: 24px; background: rgba(255,255,255,.1);"></span>
+      <div class="footer-bottom-bar">
+        <div class="footer-bottom-left">
           <span class="footer-copy">
-            Data sourced from the AWS public pricing API. Pricing snapshot may be outdated — always verify on
-            <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener"
-              style="color:#c4b5fd;text-decoration:none;">aws.amazon.com/ec2/pricing</a>.
+            Data from the AWS public pricing API. Verify current prices on
+            <a href="https://aws.amazon.com/ec2/pricing/" target="_blank" rel="noopener">aws.amazon.com</a>.
+          </span>
+          <span class="footer-disclaimer">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Not affiliated with Amazon Web Services.
           </span>
         </div>
-        <span class="footer-disclaimer">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          Not affiliated with, endorsed by, or an official channel of Amazon Web Services (AWS). Independent personal
-          project for educational &amp; portfolio purposes only.
-        </span>
+        <a class="footer-back-to-top" href="#app">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Back to top
+        </a>
       </div>
 
     </div><!-- /footer-inner -->
