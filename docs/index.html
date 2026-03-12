@@ -2115,7 +2115,11 @@
         obj.network_score = +obj.network_score; obj.gpu_count = +obj.gpu_count;
         obj.price_usd_hour = +obj.price_usd_hour;
         return obj;
-      });
+      }).filter(obj =>
+        !isNaN(obj.vcpus) && !isNaN(obj.memory_gib) &&
+        !isNaN(obj.network_score) && !isNaN(obj.price_usd_hour) &&
+        obj.instance_type && obj.price_usd_hour > 0
+      );
     }
     /**
      * Min-max normalise an array to [0, 1].
@@ -2574,7 +2578,8 @@
       if (!matches.length) { sugBox.style.display = 'none'; return; }
       sugBox.innerHTML = matches.map(r => {
         const col = CAT_COLOR[r.instance_category] || '#6b7280';
-        return `<div class="ip-sug-item" onmousedown="addInstanceToCompare('${r.instance_type}')">
+        const safeType = r.instance_type.replace(/"/g, '&quot;');
+        return `<div class="ip-sug-item" data-type="${safeType}">
           <span class="ip-sug-type" style="color:${col}">${r.instance_type}</span>
           <span class="ip-sug-meta">${r.instance_category} · ${r.vcpus} vCPU · ${r.memory_gib} GiB · $${(+r.price_usd_hour).toFixed(4)}/hr</span>
         </div>`;
@@ -4311,6 +4316,15 @@
         el('archSearch').addEventListener('input', debounce(() =>
           renderArchTable(el('archSearch').value, state.selectedCategories)));
 
+        /* Delegated listener for instance picker suggestions */
+        const sugBox = el('ipSuggestions');
+        if (sugBox) {
+          sugBox.addEventListener('mousedown', e => {
+            const item = e.target.closest('[data-type]');
+            if (item) { e.preventDefault(); addInstanceToCompare(item.dataset.type); }
+          });
+        }
+
         /* Keyboard shortcuts */
         document.addEventListener('keydown', e => {
           const tag = e.target.tagName;
@@ -4374,8 +4388,10 @@
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(() => {
             ['chart', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6', 'chartParallel', 'cmpChart'].forEach(id => {
-              const d = document.getElementById(id);
-              if (d && d.data) Plotly.Plots.resize(d);
+              try {
+                const d = document.getElementById(id);
+                if (d && d.data) Plotly.Plots.resize(d);
+              } catch (_) { /* ignore resize errors for hidden/unmounted charts */ }
             });
           }, 150);
         }, { passive: true });
