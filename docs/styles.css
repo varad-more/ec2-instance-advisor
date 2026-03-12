@@ -891,48 +891,84 @@
     /* ── Radar card: header + split body ─────────────────── */
     #radarCard .chart-hd {
       border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, #fafbff 0%, #eef2ff 100%);
     }
 
     .radar-split {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      min-height: 420px;
+      display: flex;
+      flex-direction: row;
+      min-height: 350px;
     }
 
     @media (max-width: 760px) {
       .radar-split {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        height: auto;
+      }
+      .radar-explainer {
+        width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .radar-legend-panel {
+        width: 100%;
+        max-height: 200px;
+        border-left: none;
+        border-top: 1px solid var(--line);
       }
       .radar-chart-wrap {
-        border-top: 1px solid var(--line);
+        border-top: none;
+        height: 300px;
+        padding: 0;
       }
     }
 
     .radar-explainer {
-      padding: 22px 24px;
+      width: 220px;
+      flex-shrink: 0;
+      padding: 16px;
       border-right: 1px solid var(--line);
-      background: #fafbff;
+      background: linear-gradient(180deg, #fafbff 0%, #f1f5f9 100%);
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      overflow: auto;
+      gap: 12px;
+    }
+
+    .radar-legend-panel {
+      width: 230px;
+      flex-shrink: 0;
+      padding: 16px;
+      border-left: 1px solid var(--line);
+      background: linear-gradient(180deg, #fafbff 0%, #f1f5f9 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .radar-chart-wrap {
+      flex: 1;
       display: flex;
-      align-items: stretch;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: #fafbff;
+      min-height: 350px;
     }
 
     .radar-chart-wrap .chart-body {
-      flex: 1;
-      padding: 8px 4px;
+      width: 100%;
+      height: 100%;
+      max-width: 480px;
+      max-height: 480px;
+      aspect-ratio: 1 / 1;
     }
 
     /* Explainer content */
     .re-section {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .re-heading {
@@ -944,9 +980,9 @@
     }
 
     .re-text {
-      font-size: 13px;
+      font-size: 12px;
       color: #475569;
-      line-height: 1.7;
+      line-height: 1.5;
       margin: 0;
     }
 
@@ -954,14 +990,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: 12px;
       color: #334155;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     .re-legend-swatch {
       flex-shrink: 0;
-      width: 32px;
+      width: 24px;
       height: 4px;
       border-radius: 2px;
     }
@@ -972,29 +1008,34 @@
 
     .re-dashed {
       background: repeating-linear-gradient(
-        90deg, #4f46e5 0px, #4f46e5 5px, transparent 5px, transparent 9px
+        90deg, #4f46e5 0px, #4f46e5 4px, transparent 4px, transparent 8px
       );
     }
 
     .re-axes {
       display: flex;
-      flex-direction: column;
-      gap: 7px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
     }
 
-    .re-axis-row {
-      display: flex;
+    .re-axis-badge {
+      display: inline-flex;
       align-items: center;
-      gap: 9px;
-      font-size: 12.5px;
-      color: #475569;
-      line-height: 1.4;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #334155;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 3px 8px;
+      border-radius: 99px;
     }
 
     .re-axis-dot {
       flex-shrink: 0;
-      width: 9px;
-      height: 9px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
     }
 
@@ -1008,6 +1049,10 @@
       line-height: 1.6;
     }
 
+    .re-tip:empty {
+      display: none;
+    }
+    
     /* ── Radar custom legend ─────────────────────────────────── */
     .re-legend-list {
       display: flex;
@@ -1042,9 +1087,11 @@
     }
 
     .re-legend-color {
-      width: 10px;
+      width: 14px;
       height: 10px;
-      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       transition: opacity .15s;
     }
@@ -3148,19 +3195,21 @@
 
       /* Chart bodies - shorter on mobile */
       #chart5 {
-        height: 220px !important;
+        height: 240px !important;
       }
 
       #chart {
-        height: 220px !important;
+        height: 260px !important;
       }
 
       #chart2 {
-        height: 220px !important;
+        height: 300px !important;
       }
 
       #chart3 {
-        height: 240px !important;
+        height: 100% !important;
+        min-height: 280px;
+        max-width: 100%;
       }
 
       #chart4 {
@@ -3168,7 +3217,21 @@
       }
 
       #chart6 {
-        height: 240px !important;
+        height: 260px !important;
+      }
+
+      #chartParallel {
+        height: 350px !important;
+      }
+
+      .radar-chart-wrap {
+        min-height: 300px;
+        padding: 8px;
+      }
+
+      .radar-chart-wrap .chart-body {
+        aspect-ratio: auto;
+        max-width: 100%;
       }
 
       /* Family highlights - 2 cols */
@@ -3254,11 +3317,21 @@
       }
 
       #chart5 {
-        height: 250px !important;
+        height: 260px !important;
       }
 
       #chart3 {
-        height: 270px !important;
+        height: 100% !important;
+        min-height: 320px;
+      }
+
+      .radar-chart-wrap {
+        min-height: 320px;
+      }
+
+      .radar-chart-wrap .chart-body {
+        aspect-ratio: auto;
+        max-width: 100%;
       }
 
       .footer-grid {
@@ -5365,6 +5438,19 @@
       background: #94a3b8;
       background-clip: content-box;
       border: 2px solid transparent;
+    }
+
+    /* ── Tabular numbers — prevent layout shift during animated counters ── */
+    .kpi-val,
+    .hero-stat-val,
+    .rec-stat-val,
+    .score-ring-num,
+    .score-num,
+    .runner-spec-val,
+    #tableCount,
+    #weightTotal,
+    td {
+      font-variant-numeric: tabular-nums;
     }
 
     /* ── Focus rings ────────────────────────────────────────── */

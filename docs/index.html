@@ -47,6 +47,14 @@
 
 <body>
 
+  <noscript>
+    <div style="position:fixed;inset:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,sans-serif;color:#e2e8f0;text-align:center;padding:24px">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <strong style="font-size:20px;font-weight:800;letter-spacing:-.02em">JavaScript required</strong>
+      <p style="font-size:14px;color:#94a3b8;max-width:340px;line-height:1.7">EC2 Instance Advisor requires JavaScript to load and score instance data. Please enable JS in your browser settings.</p>
+    </div>
+  </noscript>
+
   <div id="toastShelf"></div>
 
   <!-- Loader -->
@@ -521,31 +529,32 @@
               <!-- Left: explanatory panel -->
               <div class="radar-explainer">
                 <div class="re-section">
-                  <div class="re-heading">How to read</div>
-                  <p class="re-text">Each polygon is one instance. A <b>larger area</b> means stronger overall capability. Overlapping polygons show where instances compete closely.</p>
-                </div>
-                <div class="re-section">
-                  <div class="re-heading">Axes</div>
+                  <div class="re-heading">How to read & Axes</div>
+                  <p class="re-text">Larger shapes mean stronger overall capability. Overlaps show specific trade-offs.</p>
+                  <p class="re-text" id="radarDynamicContext" style="color:var(--muted); font-size:11.5px; line-height:1.5;">When comparing families, we plot the <b>Cheapest</b> and <b>Most Powerful</b> instance per family to show the spectrum of capability.</p>
                   <div class="re-axes">
-                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#0ea5e9"></span><b>Price Eff.</b> — value per dollar</div>
-                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#8b5cf6"></span><b>CPU</b> — normalised vCPU count</div>
-                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#ec4899"></span><b>Memory</b> — normalised RAM</div>
-                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#10b981"></span><b>Network</b> — relative throughput</div>
-                    <div class="re-axis-row"><span class="re-axis-dot" style="background:#f59e0b"></span><b>GPU</b> — shown for GPU families</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#0ea5e9"></span>Price Eff.</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#8b5cf6"></span>CPU</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#ec4899"></span>Memory</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#10b981"></span>Network</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#f59e0b"></span>GPU</div>
                   </div>
                 </div>
+              </div>
+              <!-- Middle: the chart -->
+              <div class="radar-chart-wrap">
+                <div class="chart-body" id="chart3"></div>
+              </div>
+              <!-- Right: Legend -->
+              <div class="radar-legend-panel">
                 <!-- Dynamic legend with toggles — populated by renderRadar() -->
                 <div id="radarLegendSection" style="display:none">
-                  <div class="re-heading" style="margin-top:12px">Instances</div>
+                  <div class="re-heading">Instances</div>
+                  <div id="radarGuideNote" style="font-size:11px;color:var(--muted);margin:4px 0 8px 0;line-height:1.4;"></div>
                   <div id="radarLegendList" class="re-legend-list"></div>
                 </div>
                 <!-- Page controls for single-family — populated by renderRadar() -->
                 <div id="radarPageControls" class="re-page-controls" style="display:none"></div>
-                <div id="radarGuideNote" class="re-tip" style="margin-top:10px"></div>
-              </div>
-              <!-- Right: the chart -->
-              <div class="radar-chart-wrap">
-                <div class="chart-body" id="chart3" style="min-height:420px;height:100%"></div>
               </div>
             </div>
           </div>
@@ -2484,8 +2493,10 @@
         xaxis: { gridcolor: '#e2e8f0' },
         yaxis: { title: 'vCPUs / RAM (GiB)', gridcolor: '#e2e8f0', zeroline: false },
         yaxis2: { title: 'Avg Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false, tickprefix: '$', tickformat: '.4f', automargin: true },
-        legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
-        margin: { t: 16, r: 80, b: 70, l: 55 }, hovermode: 'x unified',
+        legend: { orientation: 'h', y: -0.28, x: 0, font: { size: window.innerWidth <= 600 ? 9 : 11 } },
+        margin: window.innerWidth <= 600
+          ? { t: 12, r: 55, b: 60, l: 40 }
+          : { t: 16, r: 80, b: 70, l: 55 }, hovermode: 'x unified',
       }, { responsive: true, displayModeBar: false });
 
     }
@@ -2701,8 +2712,10 @@
           gridcolor: '#e2e8f0', zeroline: false,
         },
         yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
-        legend: { ...PLOTLY_BASE.legend, y: -0.32 },
-        margin: { t: 20, r: 72, b: 90, l: 58 },
+        legend: { ...PLOTLY_BASE.legend, y: -0.32, font: { size: window.innerWidth <= 600 ? 9 : 11 } },
+        margin: window.innerWidth <= 600
+          ? { t: 14, r: 50, b: 70, l: 42 }
+          : { t: 20, r: 72, b: 90, l: 58 },
         hovermode: 'x unified',
       }, { responsive: true, displayModeBar: false });
 
@@ -2869,8 +2882,10 @@
           gridcolor: '#e2e8f0', zeroline: false,
         },
         yaxis2: { title: 'Cost ($/hr)', overlaying: 'y', side: 'right', zeroline: false, showgrid: false },
-        legend: { ...PLOTLY_BASE.legend, y: -0.32 },
-        margin: { t: activeCats.length >= 2 ? 36 : 12, r: 55, b: 90, l: 58 }, hovermode: 'x unified',
+        legend: { ...PLOTLY_BASE.legend, y: -0.32, font: { size: window.innerWidth <= 600 ? 9 : 11 } },
+        margin: window.innerWidth <= 600
+          ? { t: activeCats.length >= 2 ? 30 : 8, r: 40, b: 70, l: 42 }
+          : { t: activeCats.length >= 2 ? 36 : 12, r: 55, b: 90, l: 58 }, hovermode: 'x unified',
         annotations: activeCats.length >= 2 ? [{
           xref: 'paper', yref: 'paper', x: 0, y: 1.08,
           xanchor: 'left', yanchor: 'bottom', showarrow: false,
@@ -2901,6 +2916,7 @@
     function renderRadar(rows) {
       const radarCard  = el('radarCard');
       const charts2    = radarCard?.closest('.charts-2');
+      const radarContextEl = el('radarDynamicContext');
       const MAX = 40;
 
       // Mirror the spec chart: use instance mode picks or family-pill filter
@@ -2912,6 +2928,7 @@
           .map(type => rows.find(r => r.instance_type === type))
           .filter(Boolean)
           .map(r => ({ r, label: r.instance_category }));
+        if (radarContextEl) radarContextEl.innerHTML = `Showing <b>selected instances</b> manually.`;
       } else {
         // Family mode: same filter as spec line chart
         const filtered = state.selectedFamilies.size
@@ -2940,6 +2957,7 @@
                 picked.push({ r, label });
               });
           });
+          if (radarContextEl) radarContextEl.innerHTML = `Showing <b>most powerful</b> + <b>cheapest</b> instance per family.`;
         } else if (activeCats.length >= 2) {
           // 2–3 families: always 3 distinct picks per family
           activeCats.forEach(cat => {
@@ -2961,6 +2979,7 @@
             addFirst(byPrice,  'Cheapest');
             if (picked.length - before < 3) addFirst(byScore, 'Runner-up');
           });
+          if (radarContextEl) radarContextEl.innerHTML = `Showing <b>most powerful</b>, <b>best overall</b> + <b>cheapest</b> instance per family.`;
         } else {
           // 1 family: show 5 per page, sorted by composite score
           const RADAR_PAGE_SIZE = 5;
@@ -2969,6 +2988,8 @@
           state.radarPage = Math.min(state.radarPage, totalPages - 1);
           const pageRows = filtered.slice(state.radarPage * RADAR_PAGE_SIZE, (state.radarPage + 1) * RADAR_PAGE_SIZE);
           picked = pageRows.map(r => ({ r, label: r.instance_type }));
+
+          if (radarContextEl) radarContextEl.innerHTML = `Showing up to <b>5 candidate</b> instances per page.`;
 
           // Render page controls
           const pageEl = el('radarPageControls');
@@ -2981,7 +3002,7 @@
           }
           // Guide note for single family
           const noteEl = el('radarGuideNote');
-          if (noteEl) noteEl.innerHTML = `Showing ${pageRows.length} of ${total} instances. Use page controls to browse, or toggle any instance in the legend to hide it.`;
+          if (noteEl) noteEl.innerHTML = `Showing ${pageRows.length} of ${total} instances. Toggle to show/hide.`;
         }
       }
 
@@ -3004,20 +3025,58 @@
         : ['scoreP', 'scoreC', 'scoreM', 'scoreN'];
 
       const traceColors = getCategoryTraceColors(picked.map(p => p.r));
+      const isMultiFamilyCompare = state.specMode === 'family' && new Set(picked.map(p => p.r.instance_category)).size >= 2;
+
       const traces = visiblePicked.map(p => {
         const idx = picked.indexOf(p);
         const r = p.r;
-        const color = traceColors[idx];
+        
+        let color = traceColors[idx];
+        let dash = 'solid', fillOpacity = '18', size = 5, symbol = 'circle', width = 2.5;
+
+        // If multi-family comparison, use the same base color for the family and differentiate by line style
+        if (isMultiFamilyCompare) {
+          color = CAT_COLOR[r.instance_category] || '#6b7280';
+          if (p.label === 'Cheapest') {
+            dash = 'dash';
+            fillOpacity = '0a';
+            size = 4;
+            symbol = 'diamond';
+            width = 2;
+          } else if (p.label === 'Best overall') {
+            dash = 'dot';
+            fillOpacity = '0f';
+            width = 2;
+          } else if (p.label === 'Most powerful') {
+            dash = 'solid';
+            fillOpacity = '1a';
+            width = 2.5;
+          } else {
+            dash = 'dashdot';
+            fillOpacity = '05';
+            width = 1.5;
+          }
+        } else {
+          // Fallback line styles for single family or instance mode
+          if (p.label === 'Cheapest') {
+            dash = 'dash';
+            fillOpacity = '0a';
+            size = 4;
+            symbol = 'diamond';
+            width = 2;
+          }
+        }
+
         const vals = scoreKeys.map(k => +(r[k] || 0).toFixed(3));
         vals.push(vals[0]);
         const hoverLines = axes.map((ax, i) => ax + ': <b>' + vals[i].toFixed(2) + '</b>').join('<br>');
-        const isCheap = p.label === 'Cheapest';
+        
         return {
           type: 'scatterpolar', r: vals, theta, fill: 'toself',
           name: r.instance_type + ' · ' + p.label,
-          line: { color, width: isCheap ? 2 : 2.5, dash: isCheap ? 'dash' : 'solid' },
-          fillcolor: color + (isCheap ? '0a' : '18'),
-          marker: { size: isCheap ? 4 : 5, color, symbol: isCheap ? 'diamond' : 'circle' },
+          line: { color, width, dash },
+          fillcolor: color + fillOpacity,
+          marker: { size, color, symbol },
           hovertemplate: '<b>' + r.instance_type + '</b><br><span style="color:#94a3b8">' + r.instance_category + ' · ' + p.label + '</span><br>' + hoverLines + '<br>$' + r.price_usd_hour.toFixed(4) + '/hr<extra></extra>',
         };
       });
@@ -3028,32 +3087,58 @@
       if (legendList && legendSection) {
         legendSection.style.display = '';
         legendList.innerHTML = picked.map((p, idx) => {
-          const color = traceColors[idx];
+          let color = traceColors[idx];
+          let dash = 'solid';
+          if (isMultiFamilyCompare) {
+            color = CAT_COLOR[p.r.instance_category] || '#6b7280';
+            if (p.label === 'Cheapest') dash = 'dashed';
+            else if (p.label === 'Best overall') dash = 'dotted';
+            else if (p.label === 'Most powerful') dash = 'solid';
+            else dash = 'dashdot';
+          } else {
+            if (p.label === 'Cheapest') dash = 'dashed';
+          }
+          
           const hidden = state.radarHidden.has(p.r.instance_type);
+          
+          // Render a small line style for the legend color swatch
+          let swatchStyle = '';
+          if (dash === 'solid') swatchStyle = `border-bottom: 2.5px solid ${color};`;
+          else if (dash === 'dashed') swatchStyle = `border-bottom: 2px dashed ${color};`;
+          else if (dash === 'dotted') swatchStyle = `border-bottom: 2px dotted ${color};`;
+          else swatchStyle = `border-bottom: 1.5px dashed ${color};`; // fallback for dashdot
+            
           return `<div class="re-legend-item ${hidden ? 're-legend-item-hidden' : ''}"
                        onclick="radarToggleInstance('${p.r.instance_type}')" title="Click to show/hide">
-            <span class="re-legend-color" style="background:${color};opacity:${hidden ? 0.25 : 1}"></span>
+            <span class="re-legend-color" style="opacity:${hidden ? 0.25 : 1}">
+               <div style="width:14px; height:0; ${swatchStyle}"></div>
+            </span>
             <span class="re-legend-name">${p.r.instance_type}</span>
             <span class="re-legend-tag">${p.label}</span>
           </div>`;
         }).join('');
       }
 
-      // Hide guide note for multi-family
+      // Set guide note
       const noteEl = el('radarGuideNote');
       if (noteEl && picked.length && picked[0].label !== picked[0].r.instance_type) {
-        noteEl.innerHTML = 'Click any instance in the legend to show or hide it on the chart.';
+        noteEl.innerHTML = 'Click any instance to toggle visibility.';
+      } else if (noteEl) {
+        noteEl.innerHTML = '';
       }
 
+      const isMobile = window.innerWidth <= 760;
       Plotly.react('chart3', traces, {
         ...PLOTLY_BASE,
         polar: {
-          bgcolor: '#fafbff',
-          radialaxis: { visible: true, range: [0, 1], gridcolor: '#e2e8f0', tickfont: { size: 9 }, tickformat: '.1f', dtick: 0.25 },
-          angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: 11, color: '#475569' } },
+          bgcolor: 'rgba(0,0,0,0)',
+          radialaxis: { visible: true, range: [0, 1], gridcolor: '#e2e8f0', tickfont: { size: isMobile ? 8 : 9, color: '#94a3b8' }, tickformat: '.1f', dtick: 0.25 },
+          angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: isMobile ? 10 : 11, color: '#1e293b', weight: 600 }, rotation: 90 },
         },
         showlegend: false,
-        margin: { t: 20, r: 20, b: 20, l: 20 },
+        margin: { t: 40, r: 70, b: 40, l: 60 },
+        autosize: true,
+        paper_bgcolor: 'rgba(0,0,0,0)',
       }, { responsive: true, displayModeBar: false });
     }
 
@@ -3107,7 +3192,7 @@
         orientation: 'h',
         text: top25.map(r => `$${(+r.price_usd_hour).toFixed(3)}/hr`),
         textposition: 'outside',
-        textfont: { size: 10, color: '#64748b', family: 'ui-monospace,SFMono-Regular,Menlo,monospace' },
+        textfont: { size: window.innerWidth <= 600 ? 8 : 10, color: '#64748b', family: 'ui-monospace,SFMono-Regular,Menlo,monospace' },
         cliponaxis: false,
         marker: { color: colors, opacity: 0.88, line: { width: 0 } },
         hovertemplate:
@@ -3125,10 +3210,10 @@
         yaxis: {
           autorange: 'reversed',
           automargin: true,
-          tickfont: { family: 'ui-monospace,SFMono-Regular,Menlo,monospace', size: 11, color: '#334155' },
+          tickfont: { family: 'ui-monospace,SFMono-Regular,Menlo,monospace', size: window.innerWidth <= 600 ? 9 : 11, color: '#334155' },
           gridcolor: '#f1f5f9',
         },
-        margin: { t: 10, r: 55, b: 50, l: 20 },
+        margin: window.innerWidth <= 600 ? { t: 8, r: 40, b: 40, l: 10 } : { t: 10, r: 55, b: 50, l: 20 },
         bargap: 0.35,
       }, {
         responsive: true,
@@ -3340,12 +3425,14 @@
           opacity: 0.65,
         },
         dimensions: activeDims,
-        labelfont: { size: 12.5, color: '#1e293b', family: 'inherit' },
-        tickfont:  { size: 10.5, color: '#64748b' },
-        rangefont: { size: 10, color: '#6366f1' },
+        labelfont: { size: window.innerWidth <= 600 ? 10.5 : 12.5, color: '#1e293b', family: 'inherit' },
+        tickfont:  { size: window.innerWidth <= 600 ? 9 : 10.5, color: '#64748b' },
+        rangefont: { size: window.innerWidth <= 600 ? 8.5 : 10, color: '#6366f1' },
       }], {
         ...PLOTLY_BASE,
-        margin: { t: 44, r: 50, b: 24, l: 60 },
+        margin: window.innerWidth <= 600
+          ? { t: 36, r: 20, b: 20, l: 30 }
+          : { t: 44, r: 50, b: 24, l: 60 },
       }, {
         responsive: true,
         displayModeBar: true,
@@ -3640,10 +3727,10 @@
       });
       Plotly.react('chart6', traces, {
         ...PLOTLY_BASE,
-        xaxis: { title: 'Price ($/hr)', gridcolor: '#e2e8f0', zeroline: false, tickformat: '$.3f' },
-        yaxis: { title: 'Composite Score', gridcolor: '#e2e8f0', zeroline: false, range: [-0.05, 1.1] },
-        legend: { orientation: 'h', y: -0.28, x: 0, font: { size: 11 } },
-        margin: { t: 36, r: 20, b: 70, l: 60 }, hovermode: 'closest',
+        xaxis: { title: 'Price ($/hr)', gridcolor: '#e2e8f0', zeroline: false, tickformat: '$.3f', titlefont: { size: window.innerWidth <= 600 ? 10 : 12 } },
+        yaxis: { title: 'Composite Score', gridcolor: '#e2e8f0', zeroline: false, range: [-0.05, 1.1], titlefont: { size: window.innerWidth <= 600 ? 10 : 12 } },
+        legend: { orientation: 'h', y: -0.28, x: 0, font: { size: window.innerWidth <= 600 ? 9 : 11 } },
+        margin: window.innerWidth <= 600 ? { t: 24, r: 12, b: 60, l: 45 } : { t: 36, r: 20, b: 70, l: 60 }, hovermode: 'closest',
         shapes: [{
           type: 'rect', xref: 'paper', yref: 'paper',
           x0: 0, y0: 0.55, x1: 0.35, y1: 1,
@@ -4279,6 +4366,18 @@
         /* ── Back to top button ── */
         window.addEventListener('scroll', () => {
           el('backToTop')?.classList.toggle('btt-visible', window.scrollY > 500);
+        }, { passive: true });
+
+        /* ── Resize all Plotly charts on window resize ── */
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            ['chart', 'chart2', 'chart3', 'chart4', 'chart5', 'chart6', 'chartParallel', 'cmpChart'].forEach(id => {
+              const d = document.getElementById(id);
+              if (d && d.data) Plotly.Plots.resize(d);
+            });
+          }, 150);
         }, { passive: true });
 
       } catch (e) {
