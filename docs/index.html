@@ -19,10 +19,14 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://varad-more.github.io/ec2-instance-advisor/" />
+  <meta property="og:site_name" content="EC2 Instance Advisor" />
   <meta property="og:title" content="EC2 Instance Advisor | Find the right instance for your workload" />
   <meta property="og:description"
     content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
   <meta property="og:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="EC2 Instance Advisor Preview" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
@@ -31,10 +35,34 @@
   <meta property="twitter:description"
     content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
   <meta property="twitter:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+  <meta property="twitter:image:alt" content="EC2 Instance Advisor Preview" />
 
   <!-- Icons -->
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="https://varad-more.github.io/ec2-instance-advisor/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" href="https://varad-more.github.io/ec2-instance-advisor/apple-touch-icon.png" />
+
+  <!-- JSON-LD SEO Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "EC2 Instance Advisor",
+      "url": "https://varad-more.github.io/ec2-instance-advisor/",
+      "description": "An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload based on CPU, GPU, memory, and storage needs.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "author": {
+        "@type": "Person",
+        "name": "Varad More"
+      },
+      "image": "https://varad-more.github.io/ec2-instance-advisor/ogcard.png",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
 
   <!-- Inter font for premium typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,6 +85,28 @@
 
   <div id="toastShelf"></div>
 
+  <!-- Mobile → desktop hint banner -->
+  <div id="desktopHintBanner" class="dhb" hidden>
+    <span class="dhb-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+    </span>
+    <div class="dhb-copy">
+      <span class="dhb-title">Works best on desktop</span>
+      <span class="dhb-sub">Switch to desktop for full charts, comparisons &amp; a richer experience.</span>
+    </div>
+    <button class="dhb-close" onclick="dismissDesktopHint()" aria-label="Dismiss hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
   <!-- Loader -->
   <div id="loader">
     <div class="spinner"></div>
@@ -69,18 +119,30 @@
 
     <!-- ── Sticky Nav ── -->
     <nav class="site-nav">
-      <button id="mobileNavToggle" class="mobile-nav-toggle hide-md" aria-label="Toggle navigation">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button
+        id="mobileNavToggle"
+        class="mobile-nav-toggle hide-md"
+        type="button"
+        aria-label="Open navigation menu"
+        aria-controls="navSteps"
+        aria-expanded="false">
+        <svg class="icon-hamburger" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="7" x2="21" y2="7"></line>
           <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="17" x2="21" y2="17"></line>
+        </svg>
+        <svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
       <div class="nav-brand">
         <div class="nav-brand-logo" aria-hidden="true">☁️</div>
         <span class="text">EC2 <em>Advisor</em></span>
       </div>
-            <div class="nav-steps" id="navSteps">
+      <span class="nav-brand-sep" aria-hidden="true"></span>
+      <div class="nav-steps" id="navSteps">
+        <span class="nav-phase-label">Learn</span>
         <!-- LEARN phase -->
         <button class="nav-step-btn" data-step="step-workload-map" onclick="scrollToStep('step-workload-map')"
           title="Workload Quick Reference">
@@ -111,6 +173,7 @@
             </svg></span><span class="step-lbl">Compare</span>
         </button>
         <span class="nav-divider"></span>
+        <span class="nav-phase-label">Decide</span>
         <!-- DECIDE phase -->
         <button class="nav-step-btn" data-step="step-drill" onclick="scrollToStep('step-drill')"
           title="Spec Comparison">
@@ -144,6 +207,7 @@
             </svg></span><span class="step-lbl">Arch</span>
         </button>
         <span class="nav-divider"></span>
+        <span class="nav-phase-label">Analyze</span>
         <!-- ANALYZE phase -->
         <button class="nav-step-btn" data-step="step-viz" onclick="scrollToStep('step-viz')"
           title="Visual Analysis">
@@ -183,6 +247,7 @@
             </svg></span><span class="step-lbl">Cost</span>
         </button>
         <span class="nav-divider"></span>
+        <span class="nav-phase-label">Reference</span>
         <!-- REFERENCE phase -->
         <button class="nav-step-btn" data-step="step-region" onclick="scrollToStep('step-region')"
           title="Region & Pricing">
@@ -236,18 +301,8 @@
           <select id="region" aria-label="Select AWS region"></select>
         </div>
         <span class="nav-chip warn hide-sm">Not official AWS</span>
-        <button class="nav-btn" onclick="shareURL()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-          </svg>
-          Share
-        </button>
       </div>
+      <div id="mobileNavBackdrop" class="mobile-nav-backdrop" aria-hidden="true"></div>
     </nav>
 
     <!-- ── Hero ── -->
@@ -315,7 +370,7 @@
             <ul class="help-list">
               <li><strong>Snapshot-based</strong>: prices come from a stored CSV, not live AWS billing.</li>
               <li><strong>Shortlisting tool</strong>: the goal is to narrow options; benchmark before production.</li>
-              <li><strong>Shareable</strong>: use the <strong>Share</strong> button in the navbar to send a link with your current settings.</li>
+              <li><strong>Shareable</strong>: use the <strong>Share this view</strong> button in the footer to send a link with your current settings.</li>
             </ul>
           </div>
         </div>
@@ -755,11 +810,41 @@
                 <div class="wb-seg" id="wb-gpu" style="background:#8b5cf6"></div>
               </div>
               <div class="wbar-legend">
-                <span style="color:#3b82f6">● Price</span>
-                <span style="color:#60a5fa">● CPU</span>
-                <span style="color:#10b981">● Memory</span>
-                <span style="color:#34d399">● Network</span>
-                <span style="color:#8b5cf6">● GPU</span>
+                <span class="wbar-chip">
+                  <span class="wbar-key">
+                    <span class="wbar-dot" style="background:#3b82f6"></span>
+                    <span>Price</span>
+                  </span>
+                  <span class="wbar-val" id="wl-price">25%</span>
+                </span>
+                <span class="wbar-chip">
+                  <span class="wbar-key">
+                    <span class="wbar-dot" style="background:#60a5fa"></span>
+                    <span>CPU</span>
+                  </span>
+                  <span class="wbar-val" id="wl-cpu">25%</span>
+                </span>
+                <span class="wbar-chip">
+                  <span class="wbar-key">
+                    <span class="wbar-dot" style="background:#10b981"></span>
+                    <span>Memory</span>
+                  </span>
+                  <span class="wbar-val" id="wl-mem">25%</span>
+                </span>
+                <span class="wbar-chip">
+                  <span class="wbar-key">
+                    <span class="wbar-dot" style="background:#34d399"></span>
+                    <span>Network</span>
+                  </span>
+                  <span class="wbar-val" id="wl-net">10%</span>
+                </span>
+                <span class="wbar-chip">
+                  <span class="wbar-key">
+                    <span class="wbar-dot" style="background:#8b5cf6"></span>
+                    <span>GPU</span>
+                  </span>
+                  <span class="wbar-val" id="wl-gpu">10%</span>
+                </span>
               </div>
             </div>
           </div>
@@ -904,9 +989,10 @@
               <span class="isab arm">ARM64</span>
             </div>
           </div>
-          <div class="table-wrap" style="max-height:520px">
+          <div class="table-wrap">
             <table id="archTable"></table>
           </div>
+          <div id="archLoadMoreWrap"></div>
           <div id="archCount" class="arch-count-bar"></div>
         </div>
       </section>
@@ -1557,7 +1643,8 @@
       radarHidden:        new Set(), // instance types toggled off in radar legend
       pcActiveAxes: new Set(['price', 'vcpus', 'memory', 'network', 'score']),
       pcColorMode:  'category',      // 'category' | 'family'
-      tableLimit:         30,        // current "load more" page limit
+      tableLimit:         30,        // current "load more" page limit for candidates table
+      archLimit:          30,        // current "load more" page limit for arch reference table
       calcInstanceType:   null,      // instance_type currently used for TCO calculator
     };
 
@@ -1679,6 +1766,21 @@
     }
     // Initialize segment click handlers
     document.addEventListener('DOMContentLoaded', () => {
+      const mobileNavToggle = document.getElementById('mobileNavToggle');
+      const navSteps = document.getElementById('navSteps');
+      const isMobileNavReady =
+        mobileNavToggle instanceof HTMLButtonElement && navSteps instanceof HTMLElement;
+      const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+      const setMobileNavOpen = (isOpen) => {
+        if (!isMobileNavReady) return;
+        navSteps.classList.toggle('mobile-open', isOpen);
+        mobileNavToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        mobileNavToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        if (mobileNavBackdrop) mobileNavBackdrop.classList.toggle('active', isOpen);
+      };
+
+      setMobileNavOpen(false);
+
       document.body.addEventListener('change', (e) => {
         const t = e.target;
         if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
@@ -1687,14 +1789,29 @@
       }, true);
       // generic UX analytics hooks
       document.body.addEventListener('click', (e) => {
+        if (!(e.target instanceof Element)) return;
         const toggle = e.target.closest('#mobileNavToggle');
         if (toggle) {
-          const navSteps = document.getElementById('navSteps');
-          navSteps.classList.toggle('mobile-open');
-        } else if (e.target.closest('.nav-step-btn')) {
-          document.getElementById('navSteps').classList.remove('mobile-open');
+          if (!isMobileNavReady) return;
+          setMobileNavOpen(!navSteps.classList.contains('mobile-open'));
+          return;
+        }
+        if (e.target.closest('.nav-step-btn')) {
+          setMobileNavOpen(false);
+          return;
+        }
+        if (isMobileNavReady && navSteps.classList.contains('mobile-open') && !e.target.closest('.nav-steps')) {
+          setMobileNavOpen(false);
         }
       }, true);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setMobileNavOpen(false);
+      });
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) setMobileNavOpen(false);
+      });
       
       document.body.addEventListener('click', (e) => {
         const t = e.target;
@@ -2001,6 +2118,29 @@
       setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
     }
 
+    /** On phones/tablets, show a one-time banner hint to switch to desktop. */
+    function maybeToastDesktopHint() {
+      if (window.innerWidth > 900) return;
+      const key = 'ec2AdvisorDesktopHintSeen';
+      try {
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, '1');
+      } catch (_) { /* show anyway if sessionStorage unavailable */ }
+      setTimeout(() => {
+        const banner = el('desktopHintBanner');
+        if (!banner) return;
+        banner.hidden = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('dhb-visible')));
+      }, 800);
+    }
+
+    function dismissDesktopHint() {
+      const banner = el('desktopHintBanner');
+      if (!banner) return;
+      banner.classList.remove('dhb-visible');
+      setTimeout(() => { banner.hidden = true; }, 300);
+    }
+
     /* ── 9. Scroll & nav helpers ────────────────────────────── */
 
     /** Smooth-scroll to a section by id. */
@@ -2032,6 +2172,11 @@
     function tableLoadMore() {
       state.tableLimit += 30;
       renderTable(state.scoredRows, el('tableSearch').value);
+    }
+
+    function archLoadMore() {
+      state.archLimit += 30;
+      renderArchTable(el('archSearch')?.value, state.selectedCategories);
     }
 
     /* ── 10. URL hash persistence ───────────────────────────── */
@@ -2201,6 +2346,7 @@
     /* ── Weight bar ─────────────────────────────────────────── */
     const WB_LABEL = { price: 'Price', cpu: 'CPU', mem: 'Memory', net: 'Network', gpu: 'GPU' };
     function renderWeightBar(w, sum) {
+      const isCompact = window.innerWidth <= 640;
       Object.entries(w).forEach(([k, val]) => {
         const seg = el(`wb-${k}`);
         if (!seg) return;
@@ -2208,8 +2354,15 @@
         seg.style.width = pct + '%';
         const label = WB_LABEL[k] || k;
         seg.title = `${label}: ${pct.toFixed(0)}%`;
+        seg.setAttribute('aria-label', `${label}: ${pct.toFixed(0)}%`);
         // Show label text inside segment when wide enough
-        seg.textContent = pct >= 12 ? `${label} ${pct.toFixed(0)}%` : pct >= 7 ? `${pct.toFixed(0)}%` : '';
+        seg.textContent = isCompact
+          ? ''
+          : pct >= 18 ? `${label} ${pct.toFixed(0)}%`
+          : pct >= 10 ? `${pct.toFixed(0)}%`
+          : '';
+        const legendVal = el(`wl-${k}`);
+        if (legendVal) legendVal.textContent = `${pct.toFixed(0)}%`;
       });
       el('weightTotal').textContent = sum > 0 ? '100%' : '0% ⚠️';
     }
@@ -3132,7 +3285,10 @@
         noteEl.innerHTML = '';
       }
 
-      const isMobile = window.innerWidth <= 760;
+      const isMobile = window.innerWidth <= 900;
+      const radarMargins = isMobile
+        ? { t: 24, r: 28, b: 18, l: 28 }
+        : { t: 40, r: 70, b: 40, l: 60 };
       Plotly.react('chart3', traces, {
         ...PLOTLY_BASE,
         polar: {
@@ -3141,7 +3297,7 @@
           angularaxis: { gridcolor: '#e2e8f0', tickfont: { size: isMobile ? 10 : 11, color: '#1e293b', weight: 600 }, rotation: 90 },
         },
         showlegend: false,
-        margin: { t: 40, r: 70, b: 40, l: 60 },
+        margin: radarMargins,
         autosize: true,
         paper_bgcolor: 'rgba(0,0,0,0)',
       }, { responsive: true, displayModeBar: false });
@@ -4000,25 +4156,22 @@
         }
       }
 
-      // 4. Update the count footer
-      const countBar = el('archCount');
-      if (countBar) {
-        countBar.textContent = families.length
-          ? families.length + ' famil' + (families.length === 1 ? 'y' : 'ies') + ' shown'
-          : '';
-      }
-
       const tbl = el('archTable');
+      const lmw = el('archLoadMoreWrap');
+      const countBar = el('archCount');
+
       if (!tbl) return;
 
       if (!families.length) {
         tbl.innerHTML = '<tbody><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">' +
           (q ? 'No families match "' + q + '"' : 'No families in this category') +
           '</td></tr></tbody>';
+        if (lmw) lmw.innerHTML = '';
+        if (countBar) countBar.textContent = '';
         return;
       }
 
-      // 5. Sort: canonical category order, then alphabetically by family prefix
+      // 4. Sort: canonical category order, then alphabetically by family prefix
       const CAT_ORDER = ['General', 'Compute', 'Memory', 'Storage', 'GPU', 'HPC', 'Accelerated'];
       families.sort((a, b) => {
         const ci = CAT_ORDER.indexOf(ARCH_MAP[a].cat);
@@ -4026,15 +4179,27 @@
         return ci !== cj ? ci - cj : a.localeCompare(b);
       });
 
-      // 6. Badge renderers
+      // 5. Paginate
+      const lim    = state.archLimit || 30;
+      const shown  = families.slice(0, lim);
+      const total  = families.length;
+
+      // 6. Update count footer
+      if (countBar) {
+        countBar.textContent = q || sc.size > 0
+          ? `Showing ${shown.length} of ${total} famil${total === 1 ? 'y' : 'ies'} matched`
+          : `Showing ${shown.length} of ${total} famil${total === 1 ? 'y' : 'ies'}`;
+      }
+
+      // 7. Badge renderers
       const vBadge = v => '<span class="avb ' + ({ Intel: 'intel', AMD: 'amd', AWS: 'aws' }[v] || '') + '">' + v + '</span>';
       const iBadge = i => '<span class="isab ' + (i === 'ARM64' ? 'arm' : 'x86') + '">' + i + '</span>';
       const aBadge = a => a !== '—' ? '<span class="accel-badge">' + a + '</span>' : '<span class="arch-dash">—</span>';
 
-      // 7. Build table rows, inserting a category separator row when category changes
+      // 8. Build table rows for the current page, inserting category separators
       let bodyRows = '';
       let lastCat  = '';
-      for (const fam of families) {
+      for (const fam of shown) {
         const d = ARCH_MAP[fam];
         if (d.cat !== lastCat) {
           lastCat = d.cat;
@@ -4056,6 +4221,16 @@
         '<th>Family</th><th>Category</th><th>CPU Vendor</th><th>Processor</th>' +
         '<th>ISA</th><th>Hypervisor</th><th>Accelerator</th><th>Year</th>' +
         '</tr></thead><tbody>' + bodyRows + '</tbody>';
+
+      // 9. Load-more button
+      if (lmw) {
+        if (total > shown.length) {
+          const rem = Math.min(total - shown.length, 30);
+          lmw.innerHTML = `<button class="load-more-btn" onclick="archLoadMore()">Show ${rem} more (${total - shown.length} remaining) ↓</button>`;
+        } else {
+          lmw.innerHTML = '';
+        }
+      }
     }
 
     /* ── Table ──────────────────────────────────────────────── */
@@ -4228,6 +4403,7 @@
       renderCalculator(calcRow);
       renderTable(rows, el('tableSearch').value);
       // Arch table re-filters whenever the main category changes
+      state.archLimit = 30;
       renderArchTable(el('archSearch')?.value, state.selectedCategories);
       saveHash();
     }
@@ -4313,8 +4489,10 @@
         });
         el('tableSearch').addEventListener('input', debounce(() =>
           renderTable(state.scoredRows, el('tableSearch').value)));
-        el('archSearch').addEventListener('input', debounce(() =>
-          renderArchTable(el('archSearch').value, state.selectedCategories)));
+        el('archSearch').addEventListener('input', debounce(() => {
+          state.archLimit = 30;
+          renderArchTable(el('archSearch').value, state.selectedCategories);
+        }));
 
         /* Delegated listener for instance picker suggestions */
         const sugBox = el('ipSuggestions');
@@ -4345,6 +4523,7 @@
         const app = el('app');
         app.style.transition = 'opacity .5s ease';
         app.style.opacity = '1';
+        maybeToastDesktopHint();
 
         /* Animate hero stats after app fades in */
         setTimeout(() => {
@@ -4469,10 +4648,23 @@
             Not affiliated with Amazon Web Services.
           </span>
         </div>
-        <a class="footer-back-to-top" href="#app">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-          Back to top
-        </a>
+        <div class="footer-bottom-right">
+          <button class="footer-share-btn" onclick="shareURL()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Share this view
+          </button>
+          <a class="footer-back-to-top" href="#app">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            Back to top
+          </a>
+        </div>
       </div>
 
     </div><!-- /footer-inner -->
