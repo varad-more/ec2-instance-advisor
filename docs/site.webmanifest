@@ -1,6 +1,12 @@
 {
   "name": "EC2 Instance Advisor",
   "short_name": "EC2 Advisor",
+  "description": "Find the optimal Amazon EC2 instance for your workload — compare price, CPU, memory, GPU, and network across 500+ instance types.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "favicon-16x16.png",
@@ -20,10 +26,8 @@
     {
       "src": "android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#4f46e5",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

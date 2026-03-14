@@ -160,7 +160,7 @@ In repo Settings → Pages:
 - **Source**: Deploy from a branch
 - **Branch**: `main`, folder: `/docs`
 
-The app will be live at `https://<username>.github.io/ec2-instance-advisor/`.
+The app will be live at `https://<username>.github.io/ec2-instance-advisor/` (or your custom domain, e.g. [varadmore.me/ec2-instance-advisor](https://varadmore.me/ec2-instance-advisor/)).
 
 ### Any static host
 

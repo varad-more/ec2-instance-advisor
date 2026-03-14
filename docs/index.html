@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EC2 Instance Advisor | Find the right instance for your workload</title>
+  <title>EC2 Instance Advisor | Find the Best AWS EC2 Instance</title>
 
   <!-- Primary Meta Tags -->
-  <meta name="title" content="EC2 Instance Advisor | Find the right instance for your workload" />
+  <meta name="title" content="EC2 Instance Advisor | Find the Best AWS EC2 Instance" />
   <meta name="description"
-    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload based on CPU, GPU, memory, and storage needs." />
+    content="Find the optimal AWS EC2 instance. Compare 500+ types by price, CPU, memory, GPU, and network — weighted by your priorities. Free, no login." />
   <meta name="keywords"
-    content="AWS, EC2, Amazon Web Services, cloud computing, EC2 instance types, cloud architecture, EC2 advisor, find EC2 instance" />
+    content="AWS EC2 instance types, EC2 instance comparison, EC2 instance selector, Amazon EC2 pricing, best EC2 instance, EC2 instance advisor, EC2 instance finder, AWS cloud computing, EC2 vCPUs, EC2 GPU instances, compare EC2 instances, AWS instance pricing calculator, EC2 cost optimization" />
   <meta name="robots" content="index, follow" />
   <meta name="author" content="Varad More" />
   <meta name="theme-color" content="#4f46e5" />
@@ -21,43 +21,58 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://varad-more.github.io/ec2-instance-advisor/" />
   <meta property="og:site_name" content="EC2 Instance Advisor" />
-  <meta property="og:title" content="EC2 Instance Advisor | Find the right instance for your workload" />
+  <meta property="og:title" content="EC2 Instance Advisor | Find the Best AWS EC2 Instance" />
   <meta property="og:description"
-    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
+    content="Instantly compare 500+ EC2 instance types by price, CPU, memory, GPU, and network — weighted by your priorities. Free, no login required." />
   <meta property="og:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+  <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="EC2 Instance Advisor Preview" />
+  <meta property="og:image:alt" content="EC2 Instance Advisor — interactive instance comparison tool" />
+  <meta property="og:image:secure_url" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+  <meta property="og:locale" content="en_US" />
 
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://varad-more.github.io/ec2-instance-advisor/" />
-  <meta property="twitter:title" content="EC2 Instance Advisor | Find the right instance for your workload" />
-  <meta property="twitter:description"
-    content="An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload." />
-  <meta property="twitter:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
-  <meta property="twitter:image:alt" content="EC2 Instance Advisor Preview" />
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@varadmore" />
+  <meta name="twitter:title" content="EC2 Instance Advisor | Find the Best AWS EC2 Instance" />
+  <meta name="twitter:description"
+    content="Instantly compare 500+ EC2 instance types by price, CPU, memory, GPU, and network — weighted by your priorities." />
+  <meta name="twitter:image" content="https://varad-more.github.io/ec2-instance-advisor/ogcard.png" />
+  <meta name="twitter:image:alt" content="EC2 Instance Advisor — interactive instance comparison tool" />
 
-  <!-- Icons -->
-  <link rel="icon" type="image/svg+xml" href="https://varad-more.github.io/ec2-instance-advisor/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="https://varad-more.github.io/ec2-instance-advisor/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="https://varad-more.github.io/ec2-instance-advisor/favicon-16x16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="https://varad-more.github.io/ec2-instance-advisor/apple-touch-icon.png" />
-  <link rel="manifest" href="https://varad-more.github.io/ec2-instance-advisor/site.webmanifest" />
+  <!-- Icons — relative paths so they work locally and on any host -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
 
-  <!-- JSON-LD SEO Structured Data -->
+  <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "EC2 Instance Advisor",
       "url": "https://varad-more.github.io/ec2-instance-advisor/",
-      "description": "An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload based on CPU, GPU, memory, and storage needs.",
+      "inLanguage": "en",
+      "description": "An interactive tool to discover, compare, and select the optimal Amazon EC2 instance for your cloud workload based on price, CPU, GPU, memory, and network needs.",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Works in Chrome, Firefox, Safari, Edge.",
+      "featureList": [
+        "Compare 500+ EC2 instance types",
+        "Filter by region, category, and workload",
+        "Weighted scoring by price, CPU, memory, GPU, and network",
+        "Radar chart and parallel coordinates visualization",
+        "Side-by-side instance comparison",
+        "Shareable URL with saved settings"
+      ],
       "author": {
         "@type": "Person",
-        "name": "Varad More"
+        "name": "Varad More",
+        "url": "https://varad-more.github.io"
       },
       "image": "https://varad-more.github.io/ec2-instance-advisor/ogcard.png",
       "offers": {
@@ -68,19 +83,21 @@
     }
   </script>
 
-  <!-- Inter font for premium typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
+  <!-- Plotly charting library -->
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" id="mainCSS" href="styles.css" />
+  <script>document.getElementById('mainCSS').href='styles.css?v='+Date.now();</script>
 </head>
 
 <body>
 
   <noscript>
-    <div style="position:fixed;inset:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,sans-serif;color:#e2e8f0;text-align:center;padding:24px">
+    <div style="position:fixed;inset:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#e2e8f0;text-align:center;padding:24px">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <strong style="font-size:20px;font-weight:800;letter-spacing:-.02em">JavaScript required</strong>
       <p style="font-size:14px;color:#94a3b8;max-width:340px;line-height:1.7">EC2 Instance Advisor requires JavaScript to load and score instance data. Please enable JS in your browser settings.</p>
@@ -400,7 +417,7 @@
         <div class="step-hdr">
           <div class="step-num">01</div>
           <div>
-            <div class="step-title">Workload → Family Quick Reference</div>
+            <h2 class="step-title">Workload → Family Quick Reference</h2>
             <div class="step-desc">
               Not sure where to start? Match your primary bottleneck to a recommended instance family,
               then continue to explore families and set your priorities.
@@ -456,7 +473,7 @@
         <div class="step-hdr">
           <div class="step-num">02</div>
           <div>
-            <div class="step-title">Understand Instance Families</div>
+            <h2 class="step-title">Understand Instance Families</h2>
             <div class="step-desc">
               EC2 instances are grouped into families, each optimized for a specific hardware profile.
               Click a card to filter the entire analysis to that family, or keep <strong>All</strong> to compare across
@@ -486,7 +503,7 @@
         <div class="step-hdr">
           <div class="step-num">03</div>
           <div>
-            <div class="step-title">Family-Level Comparison</div>
+            <h2 class="step-title">Family-Level Comparison</h2>
             <div class="step-desc">
               A high-level view to sanity-check the recommendation. The bars show typical vCPU count and RAM while the line
               shows average hourly cost. Use this to understand the broad tradeoffs between families.
@@ -528,7 +545,7 @@
         <div class="step-hdr">
           <div class="step-num">04</div>
           <div>
-            <div class="step-title">Compare Specs &amp; Tradeoffs</div>
+            <h2 class="step-title">Compare Specs &amp; Tradeoffs</h2>
             <div class="step-desc">
               Use these charts to understand instance behavior before changing ranking logic.
               Start with family-level comparison, then switch to instance mode for direct spec tradeoffs.
@@ -592,10 +609,10 @@
                   <p class="re-text">Larger shapes mean stronger overall capability. Overlaps show specific trade-offs.</p>
                   <p class="re-text" id="radarDynamicContext" style="color:var(--muted); font-size:11.5px; line-height:1.5;">When comparing families, we plot the <b>Cheapest</b> and <b>Most Powerful</b> instance per family to show the spectrum of capability.</p>
                   <div class="re-axes">
-                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#0ea5e9"></span>Price Eff.</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#0ea5e9"></span>Price ($/hr)</div>
                     <div class="re-axis-badge"><span class="re-axis-dot" style="background:#8b5cf6"></span>CPU</div>
-                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#ec4899"></span>Memory</div>
-                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#10b981"></span>Network</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#ec4899"></span>RAM</div>
+                    <div class="re-axis-badge"><span class="re-axis-dot" style="background:#10b981"></span>Net</div>
                     <div class="re-axis-badge"><span class="re-axis-dot" style="background:#f59e0b"></span>GPU</div>
                   </div>
                 </div>
@@ -637,10 +654,10 @@
         <div class="step-hdr">
           <div class="step-num">05</div>
           <div>
-            <div class="step-title">Your Best Match</div>
+            <h2 class="step-title">Your Top Picks</h2>
             <div class="step-desc">
-              This is the decision step: apply presets, tune weights, and see how your top recommendation changes in real time.
-              The score ring shows the current composite rank (0–1). Use runners-up and compare mode before finalizing.
+              This is the decision step: apply presets, tune weights, and see how your top picks change in real time.
+              Click any pick to compare specs in detail. Use the full table below to explore all candidates.
             </div>
           </div>
         </div>
@@ -666,10 +683,10 @@
               <div class="controls-presets-wrap">
                 <span class="controls-mini-lbl">Presets</span>
                 <div class="controls-presets" role="group" aria-label="Ranking presets">
-                  <button class="preset-btn" id="pr-balanced" onclick="setPreset('balanced')">⚖️ Balanced</button>
-                  <button class="preset-btn" id="pr-cost" onclick="setPreset('cost')">💰 Cost First</button>
-                  <button class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
-                  <button class="preset-btn" id="pr-ml" onclick="setPreset('ml')">🤖 ML / AI</button>
+                  <button type="button" class="preset-btn" id="pr-balanced" onclick="setPreset('balanced')">⚖️ Balanced</button>
+                  <button type="button" class="preset-btn" id="pr-cost" onclick="setPreset('cost')">💰 Cost First</button>
+                  <button type="button" class="preset-btn" id="pr-performance" onclick="setPreset('performance')">🚀 Performance</button>
+                  <button type="button" class="preset-btn" id="pr-ml" onclick="setPreset('ml')">🤖 ML / AI</button>
                 </div>
               </div>
             </div>
@@ -677,10 +694,10 @@
           <div class="controls-body">
             <div class="help-callout" style="margin-bottom:14px">
               <div class="help-callout-title">What do these weights do?</div>
-              <div class="help-callout-text">
-                The advisor scores every candidate across Price, CPU, Memory, Network, and GPU, then blends them using
-                your weight levels. Think of it as: <strong>“rank what I care about most”</strong>.
-                If you increase <strong>Price</strong>, cheaper instances climb. If you increase <strong>GPU</strong>, GPU instances climb.
+              <div class=”help-callout-text”>
+                Spec axes rank by <strong>raw capability</strong>: more vCPUs, more RAM = higher score.
+                Price is a separate axis that controls cost sensitivity.
+                Increase <strong>CPU</strong> to shift toward instances with more vCPUs; increase <strong>Price</strong> to favor cheaper options.
               </div>
               <ul class="help-list">
                 <li><strong>Make one change at a time</strong>: adjust 1–2 criteria, then review why the top match changed.</li>
@@ -698,16 +715,16 @@
                 <div class="prio-card-body">
                   <div class="prio-card-hd">
                     <div class="prio-card-name">Price Efficiency</div>
-                    <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">Med</span>
+                    <span class="sl-val" id="wPriceVal" style="background:#eff6ff;color:#1d4ed8">High</span>
                   </div>
                   <div class="prio-card-desc">Favor instances with the lowest hourly cost</div>
-                  <input id="wPrice" type="hidden" value="25" />
+                  <input id="wPrice" type="hidden" value="50" />
                   <div class="seg-bar" data-for="wPrice">
-                    <button class="seg" data-val="0">Off</button>
-                    <button class="seg" data-val="10">Low</button>
-                    <button class="seg seg-active" data-val="25">Med</button>
-                    <button class="seg" data-val="50">High</button>
-                    <button class="seg" data-val="100">Max</button>
+                    <button type="button" class="seg" data-val="0">Off</button>
+                    <button type="button" class="seg" data-val="10">Low</button>
+                    <button type="button" class="seg" data-val="25">Med</button>
+                    <button type="button" class="seg seg-active" data-val="50">High</button>
+                    <button type="button" class="seg" data-val="100">Max</button>
                   </div>
                 </div>
               </div>
@@ -722,14 +739,14 @@
                     <div class="prio-card-name">Compute (vCPUs)</div>
                     <span class="sl-val" id="wCpuVal" style="background:#eff6ff;color:#2563eb">Med</span>
                   </div>
-                  <div class="prio-card-desc">Prioritize raw CPU power and core count</div>
+                  <div class="prio-card-desc">Favor instances with more vCPUs and better CPU efficiency</div>
                   <input id="wCpu" type="hidden" value="25" />
                   <div class="seg-bar" data-for="wCpu">
-                    <button class="seg" data-val="0">Off</button>
-                    <button class="seg" data-val="10">Low</button>
-                    <button class="seg seg-active" data-val="25">Med</button>
-                    <button class="seg" data-val="50">High</button>
-                    <button class="seg" data-val="100">Max</button>
+                    <button type="button" class="seg" data-val="0">Off</button>
+                    <button type="button" class="seg" data-val="10">Low</button>
+                    <button type="button" class="seg seg-active" data-val="25">Med</button>
+                    <button type="button" class="seg" data-val="50">High</button>
+                    <button type="button" class="seg" data-val="100">Max</button>
                   </div>
                 </div>
               </div>
@@ -744,14 +761,14 @@
                     <div class="prio-card-name">Memory (RAM)</div>
                     <span class="sl-val" id="wMemVal" style="background:#ecfdf5;color:#059669">Med</span>
                   </div>
-                  <div class="prio-card-desc">Weight for available RAM capacity (GiB)</div>
+                  <div class="prio-card-desc">Favor instances with more RAM and better memory efficiency</div>
                   <input id="wMem" type="hidden" value="25" />
                   <div class="seg-bar" data-for="wMem">
-                    <button class="seg" data-val="0">Off</button>
-                    <button class="seg" data-val="10">Low</button>
-                    <button class="seg seg-active" data-val="25">Med</button>
-                    <button class="seg" data-val="50">High</button>
-                    <button class="seg" data-val="100">Max</button>
+                    <button type="button" class="seg" data-val="0">Off</button>
+                    <button type="button" class="seg" data-val="10">Low</button>
+                    <button type="button" class="seg seg-active" data-val="25">Med</button>
+                    <button type="button" class="seg" data-val="50">High</button>
+                    <button type="button" class="seg" data-val="100">Max</button>
                   </div>
                 </div>
               </div>
@@ -766,14 +783,14 @@
                     <div class="prio-card-name">Network Bandwidth</div>
                     <span class="sl-val" id="wNetVal" style="background:#f0fdf4;color:#16a34a">Low</span>
                   </div>
-                  <div class="prio-card-desc">Importance of network throughput (Gbps)</div>
+                  <div class="prio-card-desc">Favor instances with higher bandwidth and better network efficiency</div>
                   <input id="wNet" type="hidden" value="10" />
                   <div class="seg-bar" data-for="wNet">
-                    <button class="seg" data-val="0">Off</button>
-                    <button class="seg seg-active" data-val="10">Low</button>
-                    <button class="seg" data-val="25">Med</button>
-                    <button class="seg" data-val="50">High</button>
-                    <button class="seg" data-val="100">Max</button>
+                    <button type="button" class="seg" data-val="0">Off</button>
+                    <button type="button" class="seg seg-active" data-val="10">Low</button>
+                    <button type="button" class="seg" data-val="25">Med</button>
+                    <button type="button" class="seg" data-val="50">High</button>
+                    <button type="button" class="seg" data-val="100">Max</button>
                   </div>
                 </div>
               </div>
@@ -786,16 +803,16 @@
                 <div class="prio-card-body">
                   <div class="prio-card-hd">
                     <div class="prio-card-name">GPU Accelerators</div>
-                    <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">Low</span>
+                    <span class="sl-val" id="wGpuVal" style="background:#f5f3ff;color:#7c3aed">Off</span>
                   </div>
-                  <div class="prio-card-desc">ML, AI, deep learning, and graphics rendering workloads</div>
-                  <input id="wGpu" type="hidden" value="10" />
+                  <div class="prio-card-desc">Favor instances with more GPU power and better GPU efficiency</div>
+                  <input id="wGpu" type="hidden" value="0" />
                   <div class="seg-bar" data-for="wGpu">
-                    <button class="seg" data-val="0">Off</button>
-                    <button class="seg seg-active" data-val="10">Low</button>
-                    <button class="seg" data-val="25">Med</button>
-                    <button class="seg" data-val="50">High</button>
-                    <button class="seg" data-val="100">Max</button>
+                    <button type="button" class="seg seg-active" data-val="0">Off</button>
+                    <button type="button" class="seg" data-val="10">Low</button>
+                    <button type="button" class="seg" data-val="25">Med</button>
+                    <button type="button" class="seg" data-val="50">High</button>
+                    <button type="button" class="seg" data-val="100">Max</button>
                   </div>
                 </div>
               </div>
@@ -878,38 +895,19 @@
           </div>
         </div>
 
-        <!-- Rec hero -->
+        <!-- Top Picks -->
         <div id="recCard" class="rec-hero">
           <div id="recAccentBar" class="rec-hero-accent" style="background:var(--accent)"></div>
-          <div class="rec-hero-inner">
-            <div class="rec-hero-left">
-              <div class="rec-eyebrow">
-                <span>Based on your current weights &amp; filters</span>
-                <button class="copy-rec-btn" onclick="copyRecommendation()" title="Copy recommendation">📋 Copy</button>
-              </div>
-              <div id="recName" class="rec-name">—</div>
-              <div id="recTags" class="rec-tags"></div>
-              <div id="recStats" class="rec-stats"></div>
-              <div id="recWhy" class="rec-why"></div>
+          <div style="padding:16px 22px 4px">
+            <div class="rec-eyebrow">
+              <span>Based on your current weights &amp; filters</span>
+              <button class="copy-rec-btn" onclick="copyRecommendation()" title="Copy recommendation">📋 Copy</button>
             </div>
-            <div class="rec-hero-right">
-              <div class="score-ring-wrap">
-                <svg width="96" height="96" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="38" fill="none" stroke="#e2e8f0" stroke-width="8" />
-                  <circle id="recScoreArc" cx="48" cy="48" r="38" fill="none" stroke="var(--accent)" stroke-width="8"
-                    stroke-dasharray="0 238.76" stroke-linecap="round" transform="rotate(-90 48 48)"
-                    style="transition:stroke-dasharray .6s cubic-bezier(.4,0,.2,1),stroke .35s" />
-                </svg>
-                <div class="score-ring-val">
-                  <span id="recScoreNum" class="score-ring-num">—</span>
-                  <span class="score-ring-sub">Score</span>
-                </div>
-              </div>
-              <div class="score-ring-hint">0 → 1 · higher is better</div>
-              <div id="recRankTxt" class="rec-rank-txt"></div>
-              <div id="recCatLabel" class="rec-cat-label"></div>
-            </div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);margin:4px 0 2px">Top Picks for You</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Probable options ranked by your priorities — pick the one that fits your workload best.</div>
           </div>
+          <div class="top-picks-grid" id="topPicksGrid"></div>
+          <div class="tp-legend" id="topPicksLegend"></div>
         </div>
 
         <!-- Instance compare panel -->
@@ -917,7 +915,7 @@
           <div class="cmp-hd">
             <div>
               <div class="cmp-title" id="cmpTitle">Instance Detail View</div>
-              <div class="cmp-sub" id="cmpSub">vs. top recommendation</div>
+              <div class="cmp-sub" id="cmpSub">vs. top pick</div>
             </div>
             <button class="cmp-close" onclick="closeCompare()" title="Close">✕</button>
           </div>
@@ -927,39 +925,16 @@
           </div>
         </div>
 
-        <!-- Score Breakdown: Stacked Bar Chart -->
-        <div class="score-breakdown-card">
-          <div class="score-breakdown-hd">
-            <div>
-              <div class="chart-title">Score Breakdown: Why This Instance?</div>
-              <div class="chart-sub">Stacked bar shows each criterion's contribution to the total weighted score. Wider
-                segments indicate higher influence from your priority settings.</div>
-            </div>
-          </div>
-          <div class="score-breakdown-body" id="scoreBreakdownBody"></div>
-          <div class="sb-legend" id="scoreBreakdownLegend"></div>
-        </div>
-
         <!-- NLG Explainability Panel -->
         <div class="nlg-panel">
           <div class="nlg-hdr">
             <div class="nlg-icon">💡</div>
-            <div class="nlg-title">Why This Recommendation?</div>
+            <div class="nlg-title">Why These Picks?</div>
           </div>
           <div class="nlg-text" id="nlgText">
-            Adjust the weight sliders above to see a personalized explanation of why a specific instance was
+            Adjust the weight sliders above to see a personalized explanation of why these instances were
             recommended.
           </div>
-        </div>
-
-        <!-- Top 5 Runners-Up -->
-        <div style="margin-top:20px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-            <div style="font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em">Top 4 Runners-Up</div>
-            <div style="font-size:11px;color:var(--muted);font-weight:600">Next best candidates ranked by your weighted
-              criteria</div>
-          </div>
-          <div class="runners-grid" id="runnersGrid"></div>
         </div>
 
       </section>
@@ -971,7 +946,7 @@
         <div class="step-hdr">
           <div class="step-num">06</div>
           <div>
-            <div class="step-title">Hardware Architecture Reference</div>
+            <h2 class="step-title">Hardware Architecture Reference</h2>
             <div class="step-desc">
               CPU vendor, microarchitecture, ISA, hypervisor, and accelerator for each instance family.
               <strong>Use this earlier to validate platform fit before finalizing your top match.</strong>
@@ -1017,7 +992,7 @@
         <div class="step-hdr">
           <div class="step-num">07</div>
           <div>
-            <div class="step-title">Visual Analysis</div>
+            <h2 class="step-title">Visual Analysis</h2>
             <div class="step-desc">
               Interactive charts for multi-dimensional exploration. Drag axis ranges to filter,
               compare metrics, and spot the best-value instances visually.
@@ -1136,7 +1111,7 @@
         <div class="step-hdr">
           <div class="step-num">08</div>
           <div>
-            <div class="step-title">Browse All Candidates</div>
+            <h2 class="step-title">Browse All Candidates</h2>
             <div class="step-desc">
               The full ranked list for your current filters. Search by instance name or category.
               <strong>Click any row</strong> to open a head-to-head spec and score comparison against the #1 pick.
@@ -1173,7 +1148,7 @@
         <div class="step-hdr">
           <div class="step-num">09</div>
           <div>
-            <div class="step-title">Monthly TCO Estimator</div>
+            <h2 class="step-title">Monthly TCO Estimator</h2>
             <div class="step-desc">
               Compare billing models side-by-side. Factor in EBS storage type, data egress, and fleet
               size to get a realistic monthly TCO. Compute prices use the selected region snapshot;
@@ -1351,9 +1326,9 @@
         <div class="step-hdr">
           <div class="step-num">10</div>
           <div>
-            <div class="step-title">Regional Price Comparison</div>
+            <h2 class="step-title">Regional Price Comparison</h2>
             <div class="step-desc">
-              Compare how your top recommendation’s on-demand price varies across AWS regions.
+              Compare how your top pick’s on-demand price varies across AWS regions.
               Use the <strong>region selector in the navbar</strong> above to switch regions — all scores update instantly.
             </div>
           </div>
@@ -1374,7 +1349,7 @@
         <div class="step-hdr">
           <div class="step-num">11</div>
           <div>
-            <div class="step-title">Scoring Methodology</div>
+            <h2 class="step-title">Scoring Methodology</h2>
             <div class="step-desc">
               How our engine ranks instances. The EC2 Instance Advisor uses Multi-Criteria Decision Analysis (MCDA)
               — an established operations-research framework — to produce consistent, explainable rankings.
@@ -1382,14 +1357,50 @@
           </div>
         </div>
 
+        <!-- ── Scoring Pipeline ── -->
+        <ol class="scoring-pipeline" aria-label="Scoring pipeline overview">
+          <li class="pipeline-step ps-filter">
+            <div class="pipeline-step-num" aria-hidden="true">1</div>
+            <div class="pipeline-step-label">Filter</div>
+            <div class="pipeline-step-detail">Region, category &amp; workload filters narrow the candidate set</div>
+          </li>
+          <li class="pipeline-arrow" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </li>
+          <li class="pipeline-step ps-normalize">
+            <div class="pipeline-step-num" aria-hidden="true">2</div>
+            <div class="pipeline-step-label">Normalize</div>
+            <div class="pipeline-step-detail">Fractional rank maps each metric to [0, 1]</div>
+          </li>
+          <li class="pipeline-arrow" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </li>
+          <li class="pipeline-step ps-blend">
+            <div class="pipeline-step-num" aria-hidden="true">3</div>
+            <div class="pipeline-step-label">Blend</div>
+            <div class="pipeline-step-detail">Raw capability &amp; value efficiency are mixed per axis</div>
+          </li>
+          <li class="pipeline-arrow" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </li>
+          <li class="pipeline-step ps-score">
+            <div class="pipeline-step-num" aria-hidden="true">4</div>
+            <div class="pipeline-step-label">Score &amp; Rank</div>
+            <div class="pipeline-step-detail">Weighted sum &rarr; composite score &rarr; final ranking</div>
+          </li>
+        </ol>
+
         <div class="methodology-grid">
           <!-- Weighted Scoring Model -->
           <div class="method-card mc-scoring">
-            <div class="method-icon">🎯</div>
-            <div class="method-name">Weighted Scoring Model (WSM)</div>
+            <div class="method-card-head">
+              <div class="method-icon" aria-hidden="true">🎯</div>
+              <h3 class="method-name">Weighted Scoring Model (WSM)</h3>
+            </div>
             <div class="method-text">
-              Each EC2 instance is scored across five criteria: price efficiency, vCPUs, memory, network, and GPU count.
-              Your weight levels define how much each criterion contributes to the final composite score.
+              Each instance is scored on <strong>five axes</strong> — price, CPU, memory, network, and GPU —
+              then blended into a single composite score. Your slider levels control how much each axis
+              contributes, so the ranking adapts to your workload priorities.
             </div>
             <div class="method-formula" aria-label="Weighted scoring formulas">
               <div class="method-formula-group">
@@ -1407,64 +1418,144 @@
                 <div class="formula-expr formula-expr-compact">
                   w<sub>i</sub> = slider_value<sub>i</sub> / &Sigma;(slider_values)
                 </div>
+                <div class="method-formula-note">Sliders at 0 are excluded; remaining weights always sum to 1.0</div>
               </div>
             </div>
           </div>
 
           <!-- Normalization -->
           <div class="method-card mc-normalize">
-            <div class="method-icon">📊</div>
-            <div class="method-name">Rank Normalization (robust)</div>
+            <div class="method-card-head">
+              <div class="method-icon" aria-hidden="true">📊</div>
+              <h3 class="method-name">Rank Normalization</h3>
+            </div>
             <div class="method-text">
-              Raw metrics have wildly different scales (e.g., $/hr vs GiB RAM). To avoid outliers dominating the range,
-              each metric is normalized to [0, 1] by <strong>fractional rank</strong> within the current candidate set.
-              Higher hardware specs rank higher; lower price efficiency ranks higher (inverse).
+              Each metric is normalized to [0,&thinsp;1] by <strong>fractional rank</strong> within the
+              current candidate set. Unlike min-max normalization, this distributes scores uniformly
+              regardless of outliers.
             </div>
             <div class="method-formula" aria-label="Rank normalization formulas">
               <div class="method-formula-meta">
                 <span class="formula-chip"><var>n</var> = candidate count</span>
-                <span class="formula-chip">rank(value) &isin; [0, n &minus; 1]</span>
+                <span class="formula-chip">rank &isin; [0, n &minus; 1]</span>
               </div>
               <div class="method-formula-group">
-                <div class="method-formula-kicker">Direct (higher is better)</div>
+                <div class="method-formula-kicker">Higher is better</div>
                 <div class="formula-expr formula-expr-compact">
                   score = rank(value) / (n &minus; 1)
                 </div>
               </div>
               <div class="method-formula-group">
-                <div class="method-formula-kicker">Inverse (lower is better)</div>
+                <div class="method-formula-kicker">Lower is better (price)</div>
                 <div class="formula-expr formula-expr-compact">
                   score = 1 &minus; rank(value) / (n &minus; 1)
                 </div>
               </div>
-              <div class="method-formula-note">Ties use the average of their rank positions.</div>
+              <div class="method-formula-note">Ties share the average of their rank positions.</div>
             </div>
           </div>
 
-          <!-- User Weights -->
+          <!-- Efficiency-Blended Scoring -->
           <div class="method-card mc-weights">
-            <div class="method-icon">⚖️</div>
-            <div class="method-name">Price Efficiency (not raw price)</div>
+            <div class="method-card-head">
+              <div class="method-icon" aria-hidden="true">💡</div>
+              <h3 class="method-name">Efficiency-Blended Scoring</h3>
+            </div>
             <div class="method-text">
-              The “price” criterion is computed as <strong>cost per compute unit</strong>, not raw $/hr.
-              This prevents tiny cheap instances from always winning on price, and better matches real planning tradeoffs.
-              Your weights are still normalized to sum to 1.0; only relative importance matters.
+              Each spec axis blends <strong>raw capability</strong> with <strong>value efficiency</strong> (spec-per-dollar).
+              Your Price weight controls the blend: high price priority favors cost-efficient instances,
+              low price priority favors raw power. This creates natural within-family progression
+              (e.g. t4g: small &rarr; medium &rarr; large) and smooth cross-family transitions.
             </div>
-            <div class="method-formula" aria-label="Price efficiency formulas">
+            <div class="method-formula" aria-label="Efficiency-blended scoring formulas">
               <div class="method-formula-group">
-                <div class="method-formula-kicker">Compute units</div>
+                <div class="method-formula-kicker">Price axis (independent)</div>
                 <div class="formula-expr formula-expr-compact">
-                  compute_units = vCPUs + (0.25 &times; RAM_GiB) + (4 &times; GPU_count)
+                  scoreP = inverse rank(price_usd_hour)
                 </div>
+                <div class="method-formula-note">Lower $/hr &rarr; higher score</div>
               </div>
               <div class="method-formula-group">
-                <div class="method-formula-kicker">Price efficiency</div>
+                <div class="method-formula-kicker">Spec axes (blended)</div>
                 <div class="formula-expr formula-expr-compact">
-                  price_efficiency = price_usd_hour / max(compute_units, 0.01)
+                  raw = rank(spec)<br>
+                  value = rank(spec / price)<br>
+                  score = priceW &times; value + (1&minus;priceW) &times; raw
+                </div>
+                <div class="method-formula-note">Price weight controls capability vs. efficiency blend</div>
+              </div>
+              <div class="method-formula-group method-formula-gpu-group">
+                <div class="method-formula-kicker">GPU axis (tier-weighted)</div>
+                <div class="formula-expr formula-expr-compact">
+                  scoreG = blend(rank(gpu&times;tier), rank(gpu&times;tier/price))
+                </div>
+                <div class="gpu-tier-grid">
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">1</span>K80 · M60</span>
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">2</span>T4 · V520</span>
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">3</span>A10G · L4 · V100</span>
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">4</span>A100 · L40S · Inf2</span>
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">5</span>H100 · Trn2</span>
+                  <span class="gpu-tier-item"><span class="gpu-tier-num">6</span>H200</span>
                 </div>
               </div>
-              <div class="method-formula-note">Lower values are better, so this metric is inverse-rank normalized into scoreP.</div>
             </div>
+          </div>
+        </div>
+
+        <!-- ── Why Rank Normalization? ── -->
+        <div class="method-callout method-callout-why">
+          <div class="method-callout-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="method-callout-body">
+            <h3 class="method-callout-title">Why rank normalization instead of min-max?</h3>
+            <div class="method-callout-text">
+              Min-max normalization collapses when outliers dominate. If one $32/hr GPU instance sets the price ceiling,
+              every sub-$1 instance gets a price score of ~1.0 and they become indistinguishable. Rank normalization
+              distributes scores uniformly — each instance gets a distinct, meaningful position regardless of how extreme
+              the raw values are.
+            </div>
+            <div class="norm-comparison" role="group" aria-label="Comparison of Min-Max vs Rank-Based normalization">
+              <div class="norm-compare-col norm-bad" role="figure" aria-label="Min-Max normalization: scores clustered between 0.92 and 0.97, cannot differentiate instances">
+                <div class="norm-compare-label">Min-Max</div>
+                <div class="norm-compare-bar-group">
+                  <div class="norm-compare-row"><span class="norm-inst">t3.micro</span><div class="norm-bar-track"><div class="norm-bar" style="width:97%"></div></div><span class="norm-val">0.97</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">t3.small</span><div class="norm-bar-track"><div class="norm-bar" style="width:97%"></div></div><span class="norm-val">0.97</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">m5.large</span><div class="norm-bar-track"><div class="norm-bar" style="width:95%"></div></div><span class="norm-val">0.95</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">c5.xlarge</span><div class="norm-bar-track"><div class="norm-bar" style="width:92%"></div></div><span class="norm-val">0.92</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">p3.16xl</span><div class="norm-bar-track"><div class="norm-bar" style="width:0%"></div></div><span class="norm-val">0.00</span></div>
+                </div>
+                <div class="norm-verdict">Scores clustered — can't differentiate</div>
+              </div>
+              <div class="norm-compare-col norm-good" role="figure" aria-label="Rank-Based normalization: scores evenly distributed from 0.00 to 1.00, clear differentiation">
+                <div class="norm-compare-label">Rank-Based</div>
+                <div class="norm-compare-bar-group">
+                  <div class="norm-compare-row"><span class="norm-inst">t3.micro</span><div class="norm-bar-track"><div class="norm-bar" style="width:100%"></div></div><span class="norm-val">1.00</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">t3.small</span><div class="norm-bar-track"><div class="norm-bar" style="width:75%"></div></div><span class="norm-val">0.75</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">m5.large</span><div class="norm-bar-track"><div class="norm-bar" style="width:50%"></div></div><span class="norm-val">0.50</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">c5.xlarge</span><div class="norm-bar-track"><div class="norm-bar" style="width:25%"></div></div><span class="norm-val">0.25</span></div>
+                  <div class="norm-compare-row"><span class="norm-inst">p3.16xl</span><div class="norm-bar-track"><div class="norm-bar" style="width:0%"></div></div><span class="norm-val">0.00</span></div>
+                </div>
+                <div class="norm-verdict">Evenly distributed — clear ranking</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Limitations ── -->
+        <div class="method-callout method-callout-limits">
+          <div class="method-callout-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="method-callout-body">
+            <h3 class="method-callout-title">Limitations to keep in mind</h3>
+            <ul class="method-limits-list">
+              <li>Prices are a <strong>point-in-time snapshot</strong> — they drift from live AWS pricing over time</li>
+              <li>Only <strong>Linux on-demand, shared tenancy</strong> SKUs are scored</li>
+              <li>Network is a coarse ordinal score (1&ndash;5), not actual throughput measurements</li>
+              <li>EBS/egress costs in the TCO calculator use <strong>us-east-1 reference rates</strong> — actual rates vary by region</li>
+              <li>This is a <strong>shortlisting tool</strong> — always benchmark your actual workload before committing</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -1476,7 +1567,7 @@
         <div class="step-hdr">
           <div class="step-num">12</div>
           <div>
-            <div class="step-title">References</div>
+            <h2 class="step-title">References</h2>
             <div class="step-desc">
               Official AWS sources for instance specs, pricing constants, hardware architecture, and scoring
               methodology.
@@ -1600,14 +1691,13 @@
           </a>
 
         </div>
-    </div>
-    </section>
+      </section>
 
   </div><!-- /.funnel-wrap -->
 
-  <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-
   </div><!-- /#app -->
+
+  <button id="backToTop" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
   <script>
     /* ═══════════════════════════════════════════════════════════
@@ -1650,6 +1740,7 @@
       tableLimit:         30,        // current "load more" page limit for candidates table
       archLimit:          30,        // current "load more" page limit for arch reference table
       calcInstanceType:   null,      // instance_type currently used for TCO calculator
+      _filterKey:         '',        // tracks region+category to detect filter vs weight-only changes
     };
 
     /** Slider IDs for the priority weights. */
@@ -1659,6 +1750,7 @@
 
     /** Convenience alias for getElementById. */
     const el = id => document.getElementById(id);
+    const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
     /* ── Analytics (GA4 style, optional) ───────────────────── */
     const ANALYTICS = {
@@ -1744,10 +1836,35 @@
 
     /** Preset weight profiles for the priority sliders. */
     const PRESETS = {
-      balanced:    { wPrice: 25, wCpu: 25, wMem: 25, wNet: 10, wGpu: 10 },
-      cost:        { wPrice: 100, wCpu: 10, wMem: 10, wNet: 0,  wGpu: 0  },
-      performance: { wPrice: 10, wCpu: 50, wMem: 25, wNet: 10, wGpu: 10 },
-      ml:          { wPrice: 10, wCpu: 25, wMem: 25, wNet: 10, wGpu: 50 },
+      // Price-biased balance — mid-range instances by default; increase a spec to shift larger.
+      balanced:    { wPrice: 50, wCpu: 25, wMem: 25, wNet: 10, wGpu: 0  },
+      // Cheapest instance wins — ignore everything else.
+      cost:        { wPrice: 100, wCpu: 0,  wMem: 0,  wNet: 0,  wGpu: 0  },
+      // Maximise raw compute (vCPUs + RAM) for batch jobs, APIs, encoding workloads.
+      performance: { wPrice: 10,  wCpu: 50, wMem: 25, wNet: 10, wGpu: 0  },
+      // GPU-first: tier-weighted GPU score + memory + fast networking for distributed training/inference.
+      ml:          { wPrice: 10,  wCpu: 10,  wMem: 25, wNet: 25, wGpu: 100 },
+    };
+
+    /**
+     * GPU quality tier per instance family.
+     * Derived from relative FP16 TFLOPS of the accelerator.
+     * Used as a multiplier: gpu_score = gpu_count × tier.
+     * Non-GPU instances have gpu_count=0, so they score 0 regardless.
+     *   1 = legacy (K80, M60)
+     *   2 = mid-gen (T4, T4G, Radeon V520)
+     *   3 = modern (A10G, L4, V100, Inferentia1)
+     *   4 = high-end (A100, L40S, Inferentia2, Trainium1)
+     *   5 = cutting-edge (H100, Trainium2)
+     *   6 = latest (H200)
+     */
+    const GPU_TIER = {
+      p2: 1, g3: 1,
+      g4ad: 2, g4dn: 2, g5g: 2,
+      g5: 3, g6: 3, gr6: 3, p3: 3, p3dn: 3, inf1: 3,
+      g6e: 4, p4d: 4, p4de: 4, inf2: 4, trn1: 4,
+      trn2: 5, p5: 5,
+      p5e: 6, p5en: 6,
     };
 
     /* ── 3. Segment-bar widget ──────────────────────────────── */
@@ -1837,6 +1954,9 @@
             if (valEl) {
               valEl.textContent = SEG_LABELS[val] || val;
             }
+            // Deactivate preset buttons when user manually changes weights
+            ['balanced', 'cost', 'performance', 'ml'].forEach(k =>
+              el(`pr-${k}`)?.classList.remove('active'));
             render();
           });
         });
@@ -2165,7 +2285,7 @@
         });
       }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
       document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.chart-card, .kpi, .score-breakdown-card, .nlg-panel, .runner-card, .method-card, .bib-card, .rec-hero, .controls-card').forEach(card => {
+        document.querySelectorAll('.chart-card, .kpi, .nlg-panel, .method-card, .bib-card, .rec-hero, .controls-card').forEach(card => {
           card.classList.add('scroll-reveal');
           observer.observe(card);
         });
@@ -2207,11 +2327,13 @@
 
     /* ── Copy recommendation ────────────────────────────────── */
     function copyRecommendation() {
-      const name = el('recName').textContent;
-      const tags = el('recTags')?.textContent?.trim() || '';
-      if (!name || name === '—') { toast('No recommendation yet'); return; }
-      navigator.clipboard.writeText(`${name} — ${tags}`)
-        .then(() => toast('📋 Recommendation copied!'))
+      const picks = (state.scoredRows || []).slice(0, 5);
+      if (!picks.length) { toast('No recommendations yet'); return; }
+      const text = picks.map((r, i) =>
+        `#${i + 1} ${r.instance_type} — ${r.instance_category} | $${r.price_usd_hour.toFixed(4)}/hr | ${r.vcpus} vCPUs | ${r.memory_gib} GiB RAM | Score: ${(r.composite * 100).toFixed(1)}%`
+      ).join('\n');
+      navigator.clipboard.writeText(text)
+        .then(() => toast('Top picks copied!'))
         .catch(() => toast('Could not access clipboard'));
     }
 
@@ -2394,52 +2516,69 @@
     }
 
     /* ── Rec card ───────────────────────────────────────────── */
-    function renderRecCard(best, rows) {
+    function renderTopPicks(rows, w, sum) {
       el('recCard').classList.remove('error-state');
-      const catColor = CAT_COLOR[best.instance_category] || '#4f46e5';
-      const catBg = CAT_BG[best.instance_category] || '#f9fafb';
-      el('recAccentBar').style.background = catColor;
-      const arc = el('recScoreArc');
-      if (arc) {
-        arc.style.stroke = catColor;
-        arc.setAttribute('stroke-dasharray', `${(best.composite * 238.76).toFixed(2)} 238.76`);
+      const picks = rows.slice(0, 5);
+      const topColor = CAT_COLOR[picks[0].instance_category] || '#4f46e5';
+      el('recAccentBar').style.background = topColor;
+      const grid = el('topPicksGrid');
+      if (!grid) return;
+      grid.innerHTML = picks.map((r, i) => {
+        const catColor = CAT_COLOR[r.instance_category] || '#4f46e5';
+        const catBg = CAT_BG[r.instance_category] || '#f9fafb';
+        const isTop = i === 0;
+        // Stacked score breakdown
+        const contributions = {
+          price: (w.price / sum) * r.scoreP,
+          cpu: (w.cpu / sum) * r.scoreC,
+          mem: (w.mem / sum) * r.scoreM,
+          net: (w.net / sum) * r.scoreN,
+          gpu: (w.gpu / sum) * r.scoreG,
+        };
+        const segments = Object.entries(contributions).map(([key, val]) => {
+          const pct = (val * 100).toFixed(1);
+          return `<div class="tp-seg" style="width:${pct}%;background:${SB_COLORS[key]}" title="${SB_LABELS[key]}: ${pct}%"></div>`;
+        }).join('');
+        return `
+        <div class="top-pick-card${isTop ? ' top-pick-best' : ''}" onclick="renderInstanceCompare(state.scoredRows[${i}])" style="border-color:${isTop ? catColor + '60' : 'var(--line)'}">
+          ${isTop ? `<div class="top-pick-badge" style="background:${catColor}">Best Match</div>` : ''}
+          <div class="top-pick-rank" style="color:${catColor}">#${i + 1}</div>
+          <div class="top-pick-name">${r.instance_type}</div>
+          <div class="top-pick-cat" style="background:${catBg};color:${catColor};border-color:${catColor}40">${r.instance_category}</div>
+          <div class="top-pick-specs">
+            <div class="top-pick-spec"><span class="top-pick-spec-val">$${r.price_usd_hour.toFixed(4)}</span><span class="top-pick-spec-lbl">$/hr</span></div>
+            <div class="top-pick-spec"><span class="top-pick-spec-val">${r.vcpus}</span><span class="top-pick-spec-lbl">vCPUs</span></div>
+            <div class="top-pick-spec"><span class="top-pick-spec-val">${r.memory_gib}</span><span class="top-pick-spec-lbl">GiB RAM</span></div>
+            ${r.gpu_count > 0 ? `<div class="top-pick-spec"><span class="top-pick-spec-val">${r.gpu_count}</span><span class="top-pick-spec-lbl">GPUs</span></div>` : ''}
+            <div class="top-pick-spec"><span class="top-pick-spec-val">${r.network_score}/5</span><span class="top-pick-spec-lbl">Network</span></div>
+          </div>
+          <div class="top-pick-score-row">
+            <div class="tp-bar-wrap">${segments}</div>
+            <div class="top-pick-score-val">${(r.composite * 100).toFixed(1)}%</div>
+          </div>
+        </div>`;
+      }).join('');
+      // Shared legend below the grid
+      const legendEl = el('topPicksLegend');
+      if (legendEl) {
+        legendEl.innerHTML = Object.entries(SB_COLORS).map(([key, color]) =>
+          `<span class="tp-legend-item"><span class="tp-legend-dot" style="background:${color}"></span>${SB_LABELS[key]}</span>`
+        ).join('');
       }
-      el('recName').textContent = best.instance_type;
-      el('recTags').innerHTML =
-        `<span class="rtag" style="background:${catBg};color:${catColor};border-color:${catColor}40">${best.instance_category}</span>` +
-        `<span class="rtag">${best.region}</span>`;
-      el('recStats').innerHTML = [
-        { val: `$${best.price_usd_hour.toFixed(4)}`, lbl: 'Per Hour' },
-        { val: best.vcpus, lbl: 'vCPUs' },
-        { val: `${best.memory_gib} GiB`, lbl: 'RAM' },
-        { val: best.gpu_count > 0 ? best.gpu_count : '—', lbl: 'GPUs' },
-        { val: `${best.network_score}/5`, lbl: 'Network' },
-      ].map(s => `<div class="rec-stat"><div class="rec-stat-val">${s.val}</div><div class="rec-stat-lbl">${s.lbl}</div></div>`).join('');
-      animateNum('recScoreNum', best.composite, v => v.toFixed(3), 600);
-      el('recRankTxt').innerHTML = `<strong>#1</strong> of ${rows.length} candidates`;
-      el('recCatLabel').innerHTML =
-        `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${catColor};margin-right:4px"></span>` +
-        `<span style="color:${catColor}">${best.instance_category}</span>`;
-      el('recCatLabel').style.cssText = `background:${catBg};border-color:${catColor}30;color:${catColor}`;
-      const cheapest = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
-      const strongest = rows.reduce((a, b) => (a.perf || 0) > (b.perf || 0) ? a : b);
-      const pd = ((best.price_usd_hour - cheapest.price_usd_hour) / Math.max(cheapest.price_usd_hour, 1e-4)) * 100;
-      const pg = ((strongest.perf - best.perf) / Math.max(strongest.perf, 1)) * 100;
-      el('recWhy').innerHTML =
-        `${TYPE_EXPLAIN[best.instance_category] || ''} ` +
-        `Cost is ${pd <= 1 ? `<b style=\"color:var(--success)\">near-cheapest</b>` : (pd > 1000 ? `<b>${(pd / 100).toFixed(1)}x</b> above cheapest` : `<b>${pd.toFixed(1)}%</b> above cheapest`)} in filter. ` +
-        `Performance within <b>${Math.max(0, pg).toFixed(1)}%</b> of the top performer. ` +
-        `<span style="color:var(--accent);cursor:pointer" onclick="el('step-browse').scrollIntoView({behavior:'smooth'})">Browse all candidates ↓</span>`;
     }
+
+    /* ── Typography (match styles.css --font-sans / --font-mono) ── */
+    const FONT_SANS = 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    const FONT_MONO = 'ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, monospace';
 
     /* ── Plotly base ────────────────────────────────────────── */
     const PLOTLY_BASE = {
       paper_bgcolor: 'transparent', plot_bgcolor: '#fafbff',
-      font: { family: 'Inter,sans-serif', size: 11, color: '#64748b' },
+      font: { family: FONT_SANS, size: 11, color: '#64748b' },
       hoverlabel: {
         bgcolor: '#0f172a',
         bordercolor: 'rgba(148,163,184,.35)',
-        font: { family: 'Inter,sans-serif', size: 12, color: '#e2e8f0' },
+        font: { family: FONT_SANS, size: 12, color: '#e2e8f0' },
         namelength: 28,
       },
       xaxis: {
@@ -2850,7 +2989,7 @@
           customdata: cd,
           text: prices.map(p => '$' + (+p).toFixed(3)),
           textposition: 'top right',
-          textfont: { size: 10, color: '#ef4444', family: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
+          textfont: { size: 10, color: '#ef4444', family: FONT_MONO },
           line: { color: '#ef4444', width: 2.5, shape: 'spline', dash: 'dot' },
           marker: { color: '#ef4444', size: 7, line: { color: '#fff', width: 1.5 } },
           yaxis: 'y2',
@@ -3179,8 +3318,8 @@
 
       const hasGPU = picked.some(p => p.r.instance_category === 'GPU' || p.r.instance_category === 'Accelerated');
       const axes = hasGPU
-        ? ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU']
-        : ['Price Eff.', 'CPU', 'Memory', 'Network'];
+        ? ['Price', 'CPU', 'RAM', 'Net', 'GPU']
+        : ['Price', 'CPU', 'RAM', 'Net'];
       const theta = [...axes, axes[0]];
       const scoreKeys = hasGPU
         ? ['scoreP', 'scoreC', 'scoreM', 'scoreN', 'scoreG']
@@ -3357,7 +3496,7 @@
         orientation: 'h',
         text: top25.map(r => `$${(+r.price_usd_hour).toFixed(3)}/hr`),
         textposition: 'outside',
-        textfont: { size: window.innerWidth <= 600 ? 8 : 10, color: '#64748b', family: 'ui-monospace,SFMono-Regular,Menlo,monospace' },
+        textfont: { size: window.innerWidth <= 600 ? 8 : 10, color: '#64748b', family: FONT_MONO },
         cliponaxis: false,
         marker: { color: colors, opacity: 0.88, line: { width: 0 } },
         hovertemplate:
@@ -3375,7 +3514,7 @@
         yaxis: {
           autorange: 'reversed',
           automargin: true,
-          tickfont: { family: 'ui-monospace,SFMono-Regular,Menlo,monospace', size: window.innerWidth <= 600 ? 9 : 11, color: '#334155' },
+          tickfont: { family: FONT_MONO, size: window.innerWidth <= 600 ? 9 : 11, color: '#334155' },
           gridcolor: '#f1f5f9',
         },
         margin: window.innerWidth <= 600 ? { t: 8, r: 40, b: 40, l: 10 } : { t: 10, r: 55, b: 50, l: 20 },
@@ -3395,115 +3534,49 @@
       }
     }
 
-    /* ── Stacked Bar Chart (Score Breakdown) ─────────────────── */
+    /* ── Score breakdown colors & labels (used by Top Picks) ── */
     const SB_COLORS = { price: '#3b82f6', cpu: '#60a5fa', mem: '#10b981', net: '#34d399', gpu: '#8b5cf6' };
-    const SB_LABELS = { price: 'Price Efficiency', cpu: 'Compute (vCPUs)', mem: 'Memory (RAM)', net: 'Network', gpu: 'GPU' };
-    function renderScoreBreakdown(rows, w, sum) {
-      const body = el('scoreBreakdownBody');
-      const legend = el('scoreBreakdownLegend');
-      if (!body || !legend) return;
-      const top5 = rows.slice(0, 5);
-      body.innerHTML = top5.map((r, idx) => {
-        const contributions = {
-          price: (w.price / sum) * r.scoreP,
-          cpu: (w.cpu / sum) * r.scoreC,
-          mem: (w.mem / sum) * r.scoreM,
-          net: (w.net / sum) * r.scoreN,
-          gpu: (w.gpu / sum) * r.scoreG,
-        };
-        const total = Object.values(contributions).reduce((a, b) => a + b, 0);
-        const maxScore = 1;
-        const segments = Object.entries(contributions).map(([key, val]) => {
-          const pct = (val / maxScore * 100).toFixed(1);
-          const label = pct > 8 ? `${(+pct).toFixed(0)}%` : '';
-          return `<div class="sb-segment" style="width:${pct}%;background:${SB_COLORS[key]}" title="${SB_LABELS[key]}: ${(val * 100).toFixed(1)}%">${label}</div>`;
-        }).join('');
-        return `
-          <div class="sb-row">
-            <div class="sb-label">${idx === 0 ? '★ ' : ''}${r.instance_type}</div>
-            <div class="sb-bar-wrap">${segments}</div>
-            <div class="sb-total">${(total * 100).toFixed(1)}%</div>
-          </div>`;
-      }).join('');
-      legend.innerHTML = Object.entries(SB_COLORS).map(([key, color]) =>
-        `<div class="sb-legend-item"><div class="sb-legend-dot" style="background:${color}"></div>${SB_LABELS[key]}</div>`
-      ).join('');
-    }
+    const SB_LABELS = { price: 'Price ($/hr)', cpu: 'CPU', mem: 'Memory', net: 'Network', gpu: 'GPU' };
 
     /* ── NLG Explainability ──────────────────────────────────── */
-    function renderNLG(best, rows, w, sum) {
+    function renderNLG(best, rows, w, sum, allOff = false) {
       const nlg = el('nlgText');
       if (!nlg) return;
+
+      const picks = rows.slice(0, 5);
+      const pickNames = picks.map(r => `<strong>${r.instance_type}</strong>`).join(', ');
+
+      if (allOff) {
+        nlg.innerHTML = `Your top picks are ${pickNames} under a balanced evaluation (all priority weights are Off).
+          <em style="color:var(--muted)">Set at least one weight above Off to customize the ranking.</em>`;
+        return;
+      }
+
       const weights = [
-        { key: 'price', label: 'cost efficiency', val: w.price },
-        { key: 'cpu', label: 'compute capacity (vCPUs)', val: w.cpu },
-        { key: 'mem', label: 'memory (RAM)', val: w.mem },
+        { key: 'price', label: 'lowest hourly cost', val: w.price },
+        { key: 'cpu', label: 'CPU capability', val: w.cpu },
+        { key: 'mem', label: 'memory capacity', val: w.mem },
         { key: 'net', label: 'network throughput', val: w.net },
-        { key: 'gpu', label: 'GPU acceleration', val: w.gpu },
+        { key: 'gpu', label: 'GPU power', val: w.gpu },
       ].sort((a, b) => b.val - a.val);
       const top1 = weights[0];
       const top2 = weights[1];
       const pctTop1 = ((top1.val / sum) * 100).toFixed(0);
       const pctTop2 = ((top2.val / sum) * 100).toFixed(0);
-      const cheapest = rows.reduce((a, b) => a.price_usd_hour < b.price_usd_hour ? a : b);
-      const priceDiff = ((best.price_usd_hour - cheapest.price_usd_hour) / Math.max(cheapest.price_usd_hour, 1e-4) * 100).toFixed(1);
-      let priceContext = '';
-      if (+priceDiff <= 1) {
-        priceContext = 'It is among the most affordable options in your current filter.';
-      } else if (+priceDiff <= 30) {
-        priceContext = `Its price is only ${priceDiff}% above the cheapest option, offering strong value for the performance gained.`;
-      } else {
-        priceContext = `While ${priceDiff}% above the cheapest option, its superior specs justify the premium at your current priority weights.`;
-      }
-      const scoreDisplay = (best.composite * 100).toFixed(1);
+      const showTop2 = +pctTop2 >= 15 && top2.val < top1.val;
       nlg.innerHTML = `
-        This <strong> ${best.instance_type}</strong> instance was selected because you
+        Your top picks are ${pickNames} because you
         ${+pctTop1 >= 50 ? 'heavily' : 'primarily'} prioritized
-          <strong> ${top1.label}</strong> (${pctTop1}% weight)
-        ${+pctTop2 >= 15
-          ? `while also valuing <strong>${top2.label}</strong> (${pctTop2}% weight)`
+          <strong>${top1.label}</strong> (${pctTop1}% weight)${showTop2
+          ? ` while also valuing <strong>${top2.label}</strong> (${pctTop2}% weight)`
           : ''
         }.
-        It achieved a composite score of <strong> ${scoreDisplay}%</strong>
-        across ${rows.length} candidates in the ${best.region} region.
-          ${priceContext}
-        ${best.instance_category !== 'General'
-          ? `As a <strong>${best.instance_category}</strong> family instance, it is architecturally optimized for ${TYPE_EXPLAIN[best.instance_category]?.toLowerCase() || 'specialized workloads'}`
-          : ''
-        }
+        These were the best matches across ${rows.length} candidates in the ${best.region} region.
+        Click any pick to compare specs in detail.
       `;
     }
 
     /* ── Top 5 Runners-Up ──────────────────────────────────── */
-    function renderRunnersUp(rows) {
-      const grid = el('runnersGrid');
-      if (!grid) return;
-      const runners = rows.slice(1, 5);
-      if (!runners.length) {
-        grid.innerHTML = `<div class="runners-empty">No other close matches in this filter. Try broadening your category or adjusting weights.</div>`;
-        return;
-      }
-      grid.innerHTML = runners.map((r, i) => {
-        const catColor = CAT_COLOR[r.instance_category] || '#4f46e5';
-        const catBg = CAT_BG[r.instance_category] || '#f9fafb';
-        return `
-        <div class="runner-card" onclick="renderInstanceCompare(state.scoredRows[${i + 1}])">
-            <div class="runner-rank">#${i + 2}</div>
-            <div class="runner-name">${r.instance_type}</div>
-            <div class="runner-cat" style="background:${catBg};color:${catColor};border:1px solid ${catColor}30">${r.instance_category}</div>
-            <div class="runner-specs">
-              <div><div class="runner-spec-lbl">Price/hr</div><div class="runner-spec-val">$${r.price_usd_hour.toFixed(4)}</div></div>
-              <div><div class="runner-spec-lbl">vCPUs</div><div class="runner-spec-val">${r.vcpus}</div></div>
-              <div><div class="runner-spec-lbl">Memory</div><div class="runner-spec-val">${r.memory_gib} GiB</div></div>
-              <div><div class="runner-spec-lbl">Score</div><div class="runner-spec-val">${(r.composite * 100).toFixed(1)}%</div></div>
-            </div>
-            <div class="runner-score-bar">
-              <div class="runner-score-fill" style="width:${(r.composite * 100).toFixed(1)}%;background:${catColor}"></div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
     /* ── Parallel Coordinates Chart ──────────────────────────── */
     /* ── Parallel coordinates axis definitions ──────────────── */
     const PC_AXES = {
@@ -3991,7 +4064,7 @@
         { lbl: 'Network', val: `${row.network_score} /5`, sub: `vs ${best.network_score}/5` },
         { lbl: 'Score', val: (row.composite * 100).toFixed(1) + '%', sub: `vs ${(best.composite * 100).toFixed(1)}% ` },
       ].map(s => `<div class="cmp-spec-item"><div class="cmp-spec-lbl">${s.lbl}</div><div class="cmp-spec-val">${s.val}</div><div class="cmp-spec-sub">${s.sub}</div></div>`).join('');
-      const dims = ['Price Eff.', 'CPU', 'Memory', 'Network', 'GPU'];
+      const dims = ['Price', 'CPU', 'RAM', 'Net', 'GPU'];
       const catC = CAT_COLOR[row.instance_category] || '#4f46e5';
       const topC = CAT_COLOR[best.instance_category] || '#4f46e5';
       Plotly.react('cmpChart', [
@@ -4168,7 +4241,7 @@
 
       if (!families.length) {
         tbl.innerHTML = '<tbody><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">' +
-          (q ? 'No families match "' + q + '"' : 'No families in this category') +
+          (q ? 'No families match &quot;' + escHtml(q) + '&quot;' : 'No families in this category') +
           '</td></tr></tbody>';
         if (lmw) lmw.innerHTML = '';
         if (countBar) countBar.textContent = '';
@@ -4251,7 +4324,7 @@
         : `Showing ${shown.length} of ${rows.length} `;
       const lmw = el('tableLoadMoreWrap');
       if (!shown.length) {
-        el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match "${query}"</td></tr></tbody>`;
+        el('table').innerHTML = `<tbody><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">No instances match &quot;${escHtml(query)}&quot;</td></tr></tbody>`;
         if (lmw) lmw.innerHTML = '';
         return;
       }
@@ -4297,14 +4370,13 @@
      */
     function render() {
       SLIDERS.forEach(s => {
+        const val = +el(s).value;
         const v = el(s + 'Val');
-        if (v) {
-          const val = +el(s).value;
-          v.textContent = SEG_LABELS[val] || val;
-        }
+        if (v) v.textContent = SEG_LABELS[val] || val;
+        const bar = document.querySelector(`.seg-bar[data-for="${s}"]`);
+        if (bar) bar.querySelectorAll('.seg').forEach(b => b.classList.toggle('seg-active', +b.dataset.val === val));
       });
       const region = el('region').value;
-      const category = el('category').value;
       const metric = el('metric').value;
 
       /* Region-only rows for family cards and agg chart */
@@ -4318,72 +4390,110 @@
 
       if (!rows.length) {
         el('recCard').classList.add('error-state');
-        el('recName').textContent = 'No instances match your filters.';
-        ['recTags', 'recStats', 'recWhy', 'recRankTxt', 'recCatLabel'].forEach(id => { if (el(id)) el(id).innerHTML = ''; });
-        if (el('recScoreNum')) el('recScoreNum').textContent = '—';
+        const grid = el('topPicksGrid');
+        if (grid) grid.innerHTML = '<div style="padding:20px 22px;color:var(--muted);font-size:13px">No instances match your filters. Try broadening your category or region.</div>';
         el('table').innerHTML = ''; el('tableCount').textContent = '';
         closeCompare(); return;
       }
       el('recCard').classList.remove('error-state');
 
       const w = { price: +el('wPrice').value, cpu: +el('wCpu').value, mem: +el('wMem').value, net: +el('wNet').value, gpu: +el('wGpu').value };
-      const sum = Object.values(w).reduce((a, b) => a + b, 0) || 1;
-      renderWeightBar(w, sum);
+      const rawSum = Object.values(w).reduce((a, b) => a + b, 0);
+      const sum = rawSum || 1;
+      // When every slider is Off, fall back to balanced weights so the result is meaningful not arbitrary
+      const sw = rawSum > 0 ? w : { price: 50, cpu: 25, mem: 25, net: 10, gpu: 0 };
+      const sSum = rawSum > 0 ? sum : 110;
+      renderWeightBar(w, rawSum);
 
       /*
-       * Composite scoring — rank-based normalization (rankNorm):
-       *   · All five dimensions mapped to [0, 1] by fractional rank within the
-       *     current candidate set.  This is more robust than min-max: a single
-       *     $32/hr GPU instance no longer collapses every non-GPU price score to ~1.
+       * Composite scoring — efficiency-blended rank normalization:
        *
-       *   · Price Efficiency (scoreP): ranks instances by $/compute-unit rather
-       *     than raw price.  compute_units = vCPUs + RAM*0.25 + GPUs*4
-       *     → a large, cheap instance beats a tiny cheap one on this axis.
+       *   Each spec axis has TWO rank scores:
+       *     · raw_rank   = rankNorm(spec)           — raw capability
+       *     · value_rank = rankNorm(spec / price)    — efficiency (spec per dollar)
        *
-       *   · CPU (scoreC), Memory (scoreM), Network (scoreN), GPU (scoreG):
-       *     ranked by the raw spec value — higher is better.
+       *   The final spec score BLENDS them using the price weight as the ratio:
+       *     · spec_score = priceBlend × value_rank + (1 − priceBlend) × raw_rank
        *
-       *   · composite = weighted sum of the five rank scores, using the priority
-       *     sliders as weights.
+       *   When the user prioritizes price → value scores dominate → cheap
+       *   efficient instances (t-family) rank high.
+       *   When the user de-prioritizes price → raw scores dominate → powerful
+       *   instances (m/c/r-family) rise to the top.
+       *   The transition is smooth: t3.small → t3.medium → t3.large → m-family.
        *
-       *   · perf = objective performance score (fixed weights, user-independent)
-       *     used only for "Best Performer" KPI — does not drive the ranking.
+       *   · scoreP: inverse rankNorm(price) — pure price axis.
+       *   · composite = price_w × scoreP + Σ(spec_w × blended_spec_score).
        */
-      const pricePerUnit = rows.map(r =>
-        r.price_usd_hour / Math.max(r.vcpus + r.memory_gib * 0.25 + r.gpu_count * 4, 0.01));
-      const p = rankNorm(pricePerUnit, true);   // higher rank = better $/compute-unit
-      const c = rankNorm(rows.map(r => r.vcpus));
-      const m = rankNorm(rows.map(r => r.memory_gib));
-      const n = rankNorm(rows.map(r => r.network_score));
-      const g = rankNorm(rows.map(r => r.gpu_count));
+      const gpuSpec = r => {
+        const t = GPU_TIER[r.instance_type.split('.')[0]] || (r.gpu_count > 0 ? 1 : 0);
+        return r.gpu_count * t;
+      };
 
-      rows = rows.map((r, i) => ({
-        ...r,
-        perf: c[i] * .35 + m[i] * .30 + n[i] * .20 + g[i] * .15,
-        composite: (w.price / sum) * p[i] + (w.cpu / sum) * c[i] + (w.mem / sum) * m[i] + (w.net / sum) * n[i] + (w.gpu / sum) * g[i],
-        scoreP: p[i], scoreC: c[i], scoreM: m[i], scoreN: n[i], scoreG: g[i],
-      })).sort((a, b) => b.composite - a.composite);
+      // Price axis: inverse rank on raw $/hr
+      const p = rankNorm(rows.map(r => r.price_usd_hour), true);
+
+      // Raw spec ranks (capability)
+      const cRaw = rankNorm(rows.map(r => r.vcpus));
+      const mRaw = rankNorm(rows.map(r => r.memory_gib));
+      const nRaw = rankNorm(rows.map(r => r.network_score));
+      const gRaw = rankNorm(rows.map(gpuSpec));
+
+      // Value ranks (efficiency = spec / price)
+      const cVal = rankNorm(rows.map(r => r.vcpus / r.price_usd_hour));
+      const mVal = rankNorm(rows.map(r => r.memory_gib / r.price_usd_hour));
+      const nVal = rankNorm(rows.map(r => r.network_score / r.price_usd_hour));
+      const gVal = rankNorm(rows.map(r => gpuSpec(r) / r.price_usd_hour));
+
+      // Blend ratio: price weight as fraction of total
+      const priceBlend = sw.price / sSum;
+
+      rows = rows.map((r, i) => {
+        // Blend raw capability with value efficiency per axis
+        const sc = priceBlend * cVal[i] + (1 - priceBlend) * cRaw[i];
+        const sm = priceBlend * mVal[i] + (1 - priceBlend) * mRaw[i];
+        const sn = priceBlend * nVal[i] + (1 - priceBlend) * nRaw[i];
+        const sg = priceBlend * gVal[i] + (1 - priceBlend) * gRaw[i];
+
+        const composite = (sw.price / sSum) * p[i] + (sw.cpu / sSum) * sc + (sw.mem / sSum) * sm + (sw.net / sSum) * sn + (sw.gpu / sSum) * sg;
+        const perf = cRaw[i] * .35 + mRaw[i] * .30 + nRaw[i] * .20 + gRaw[i] * .15;
+
+        return { ...r, perf, composite, scoreP: p[i], scoreC: sc, scoreM: sm, scoreN: sn, scoreG: sg };
+      }).sort((a, b) => {
+        const d = b.composite - a.composite;
+        return Math.abs(d) > 1e-9 ? d : b.scoreP - a.scoreP;
+      });
 
       rows.forEach((r, i) => { r._idx = i; }); // O(1) lookup in renderTable
       state.scoredRows = rows;
-      state.tableLimit = 30;   // reset to first page on filter change
+      // Only reset table pagination when the actual filter changes (region / category), not on weight-only changes
+      const newFilterKey = `${region}|${[...sc].sort().join(',')}`;
+      if (state._filterKey !== newFilterKey) {
+        state._filterKey = newFilterKey;
+        state.tableLimit = 30;
+      }
       const best = rows[0];
 
       // Score ALL region rows (all categories) for the Family Highlights card
-      const fhPpu = regionRows.map(r => r.price_usd_hour / Math.max(r.vcpus + r.memory_gib * 0.25 + r.gpu_count * 4, 0.01));
-      const fhP = rankNorm(fhPpu, true), fhC = rankNorm(regionRows.map(r => r.vcpus));
-      const fhM = rankNorm(regionRows.map(r => r.memory_gib)), fhN = rankNorm(regionRows.map(r => r.network_score));
-      const fhG = rankNorm(regionRows.map(r => r.gpu_count));
-      const fhScored = regionRows.map((r, i) => ({
-        ...r,
-        composite: (w.price / sum) * fhP[i] + (w.cpu / sum) * fhC[i] + (w.mem / sum) * fhM[i] + (w.net / sum) * fhN[i] + (w.gpu / sum) * fhG[i],
-      }));
+      const fhP = rankNorm(regionRows.map(r => r.price_usd_hour), true);
+      const fhCR = rankNorm(regionRows.map(r => r.vcpus));
+      const fhMR = rankNorm(regionRows.map(r => r.memory_gib));
+      const fhNR = rankNorm(regionRows.map(r => r.network_score));
+      const fhGR = rankNorm(regionRows.map(gpuSpec));
+      const fhCV = rankNorm(regionRows.map(r => r.vcpus / r.price_usd_hour));
+      const fhMV = rankNorm(regionRows.map(r => r.memory_gib / r.price_usd_hour));
+      const fhNV = rankNorm(regionRows.map(r => r.network_score / r.price_usd_hour));
+      const fhGV = rankNorm(regionRows.map(r => gpuSpec(r) / r.price_usd_hour));
+      const fhScored = regionRows.map((r, i) => {
+        const c = priceBlend * fhCV[i] + (1 - priceBlend) * fhCR[i];
+        const m = priceBlend * fhMV[i] + (1 - priceBlend) * fhMR[i];
+        const n = priceBlend * fhNV[i] + (1 - priceBlend) * fhNR[i];
+        const g = priceBlend * fhGV[i] + (1 - priceBlend) * fhGR[i];
+        return { ...r, composite: (sw.price / sSum) * fhP[i] + (sw.cpu / sSum) * c + (sw.mem / sSum) * m + (sw.net / sSum) * n + (sw.gpu / sSum) * g };
+      });
       renderFamilyHighlights(fhScored, FILTER_CATS);
 
-      renderRecCard(best, rows);
-      renderScoreBreakdown(rows, w, sum);
-      renderNLG(best, rows, w, sum);
-      renderRunnersUp(rows);
+      renderTopPicks(rows, sw, sSum);
+      renderNLG(best, rows, sw, sSum, rawSum === 0);
       renderKPIs(rows);
       syncFamilyFilter(rows);
       renderFamilyFilter(rows);
@@ -4467,11 +4577,23 @@
         });
 
         loadHash();
+        // Sync selectedCategories from hash-loaded category value so URL sharing works
+        const hashCat = el('category').value;
+        if (hashCat && hashCat !== 'All') state.selectedCategories.add(hashCat);
         syncRegionPager();
 
         /* Event listeners */
         ['region', 'category', 'metric', ...SLIDERS].forEach(id => {
-          el(id).addEventListener('input', () => { if (id === 'region') syncRegionPager(); render(); });
+          el(id).addEventListener('input', () => {
+            if (id === 'region') syncRegionPager();
+            if (id === 'category') {
+              // Keep selectedCategories in sync with the dropdown so filtering always responds
+              const val = el('category').value;
+              state.selectedCategories.clear();
+              if (val && val !== 'All') state.selectedCategories.add(val);
+            }
+            render();
+          });
         });
         /* Arrow keys still cycle regions (← →) */
         ['calcHours', 'calcCount', 'calcStorageGb', 'calcEgress'].forEach(id =>
@@ -4580,11 +4702,11 @@
         }, { passive: true });
 
       } catch (e) {
-        el('loader').innerHTML =
-          `<div style="text-align:center;padding:24px;color:#f87171">
-         <b style="font-size:18px">Failed to load dataset</b><br>
-         <span style="font-size:13px;color:#64748b;margin-top:8px;display:block">${e.message}</span>
-       </div>`;
+        const errWrap = document.createElement('div');
+        errWrap.style.cssText = 'text-align:center;padding:24px;color:#f87171';
+        errWrap.innerHTML = '<b style="font-size:18px">Failed to load dataset</b><br><span style="font-size:13px;color:#64748b;margin-top:8px;display:block"></span>';
+        errWrap.querySelector('span').textContent = e.message;
+        el('loader').replaceChildren(errWrap);
       }
     }
 
@@ -4673,8 +4795,6 @@
 
     </div><!-- /footer-inner -->
   </footer>
-
-  </div><!-- /app -->
 
 
 </body>
