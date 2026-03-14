@@ -4269,7 +4269,7 @@
     /* ── Scoring Pipeline ─────────────────────────────────── */
     .scoring-pipeline {
       display: flex;
-      align-items: flex-start;
+      align-items: stretch;
       justify-content: center;
       margin-bottom: 24px;
       padding: 24px 16px;
@@ -4338,20 +4338,50 @@
 
     @media (max-width: 700px) {
       .scoring-pipeline {
-        flex-direction: column;
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        justify-items: center;
+        align-items: stretch;
+        gap: 0;
+        padding: 16px 12px;
       }
 
       .pipeline-step {
         min-width: auto;
-        max-width: 280px;
+        max-width: none;
         width: 100%;
       }
 
+      /* Row 1: Filter -> arrow -> Normalize */
+      .ps-filter    { grid-column: 1; grid-row: 1; }
+      .ps-normalize { grid-column: 3; grid-row: 1; }
+
+      /* Row 2: Blend -> arrow -> Score & Rank */
+      .ps-blend { grid-column: 1; grid-row: 3; }
+      .ps-score { grid-column: 3; grid-row: 3; }
+
       .pipeline-arrow {
-        transform: rotate(90deg);
         margin-top: 0;
-        padding: 8px 0;
+        align-self: center;
+      }
+
+      /* 1st arrow: between Filter and Normalize (row 1) */
+      .scoring-pipeline li:nth-child(2) {
+        grid-column: 2; grid-row: 1;
+      }
+
+      /* 2nd arrow: connecting row 1 to row 2 (points down) */
+      .scoring-pipeline li:nth-child(4) {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        transform: rotate(90deg);
+        padding: 6px 0;
+        justify-self: center;
+      }
+
+      /* 3rd arrow: between Blend and Score (row 2) */
+      .scoring-pipeline li:nth-child(6) {
+        grid-column: 2; grid-row: 3;
       }
     }
 
