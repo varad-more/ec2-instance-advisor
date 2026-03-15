@@ -26,7 +26,7 @@
 
 <p align="center">
   <a href="https://varadmore.me/ec2-instance-advisor/">
-    <img src="docs/ogcard.png" alt="EC2 Instance Advisor screenshot" width="720" />
+    <img src="docs/preview.gif" alt="EC2 Instance Advisor demo" width="720" />
   </a>
 </p>
 
