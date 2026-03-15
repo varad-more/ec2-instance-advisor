@@ -3041,10 +3041,24 @@
 
       const scrollOuter = document.querySelector('.chart-scroll-outer');
       if (!filtered.length) {
-        setSpecChartContext('');
+        setSpecChartContext('Select one or more families above to compare instance specs.');
         const resetLine = el('resetZoomLine');
         if (resetLine) resetLine.style.display = 'none';
-        if (scrollOuter) scrollOuter.style.display = 'none';
+        if (scrollOuter) scrollOuter.style.display = '';
+        const chartDiv = el('chart');
+        if (chartDiv) chartDiv.style.width = '';
+        Plotly.react('chart', [], {
+          ...PLOTLY_BASE,
+          height: 300,
+          xaxis: { visible: false },
+          yaxis: { visible: false },
+          annotations: [{
+            xref: 'paper', yref: 'paper', x: 0.5, y: 0.5,
+            xanchor: 'center', yanchor: 'middle', showarrow: false,
+            text: 'Select a family to compare specs',
+            font: { size: 15, color: '#94a3b8' },
+          }],
+        }, { responsive: true, displayModeBar: false });
         return;
       }
       if (scrollOuter) scrollOuter.style.display = '';
@@ -3123,6 +3137,14 @@
         setSpecChartContext(`Showing all ${top.length} instances · ${catChips} · sorted by composite score`);
       }
 
+      // Sort all arrays by vCPUs ascending for linear progression on the chart
+      const sortOrder = vcpus.map((v, i) => i).sort((a, b) => vcpus[a] - vcpus[b]);
+      names   = sortOrder.map(i => names[i]);
+      vcpus   = sortOrder.map(i => vcpus[i]);
+      memory  = sortOrder.map(i => memory[i]);
+      prices  = sortOrder.map(i => prices[i]);
+      meta    = sortOrder.map(i => meta[i]);
+
       const cd = meta.map(m => [m.cat || '—', m.kind || '—']);
       const allSpecY = [...vcpus, ...memory].filter(v => v > 0);
       const specYMax = Math.max(...allSpecY), specYMin = Math.min(...allSpecY);
@@ -3135,10 +3157,10 @@
       });
 
       // Scroll sizing: expand chart width for focused view when instances overflow
-      const PX_PER_TICK = 64;
+      const MIN_PX_PER_TICK = 64;
       const containerW = scrollOuter ? scrollOuter.clientWidth : 900;
-      const needsScroll = activeCats.length === 1 && names.length > Math.floor(containerW / PX_PER_TICK);
-      const chartWidth = needsScroll ? Math.max(containerW, names.length * PX_PER_TICK) : containerW;
+      const needsScroll = activeCats.length === 1 && names.length > Math.floor(containerW / MIN_PX_PER_TICK);
+      const chartWidth = needsScroll ? Math.max(containerW, names.length * MIN_PX_PER_TICK) : containerW;
       const chartDiv = el('chart');
       if (chartDiv) chartDiv.style.width = '';
 
@@ -3146,21 +3168,21 @@
         {
           name: 'vCPUs', type: 'scatter', mode: 'lines+markers', x: names, y: vcpus,
           customdata: cd,
-          line: { color: '#0ea5e9', width: 2.5, shape: 'spline' },
+          line: { color: '#0ea5e9', width: 2.5, shape: 'linear' },
           marker: { color: '#0ea5e9', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>vCPUs: <b>%{y}</b><extra></extra>',
         },
         {
           name: 'RAM (GiB)', type: 'scatter', mode: 'lines+markers', x: names, y: memory,
           customdata: cd,
-          line: { color: '#ec4899', width: 2.5, shape: 'spline' },
+          line: { color: '#ec4899', width: 2.5, shape: 'linear' },
           marker: { color: '#ec4899', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>RAM: <b>%{y} GiB</b><extra></extra>',
         },
         {
           name: 'Cost ($/hr)', type: 'scatter', mode: 'lines+markers', x: names, y: prices,
           customdata: cd,
-          line: { color: '#ef4444', width: 2.5, shape: 'spline', dash: 'dot' },
+          line: { color: '#ef4444', width: 2.5, shape: 'linear', dash: 'dot' },
           marker: { color: '#ef4444', size: 7, line: { color: '#fff', width: 1.5 } }, yaxis: 'y2',
           hovertemplate: '<b>%{x}</b><br><span style="color:#94a3b8">%{customdata[0]} · %{customdata[1]}</span><br>Cost: <b>$%{y:.4f}/hr</b><extra></extra>',
         },
@@ -3237,7 +3259,6 @@
 
         if (!filtered.length) {
           if (radarCard) radarCard.style.display = 'none';
-          if (charts2)   charts2.style.display   = 'none';
           return;
         }
 
