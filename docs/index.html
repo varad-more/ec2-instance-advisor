@@ -3137,8 +3137,9 @@
         setSpecChartContext(`Showing all ${top.length} instances · ${catChips} · sorted by composite score`);
       }
 
-      // Sort all arrays by vCPUs ascending for linear progression on the chart
-      const sortOrder = vcpus.map((v, i) => i).sort((a, b) => vcpus[a] - vcpus[b]);
+      // Sort by vCPUs → memory → price ascending for smooth chart progression
+      const sortOrder = vcpus.map((v, i) => i).sort((a, b) =>
+        vcpus[a] - vcpus[b] || memory[a] - memory[b] || prices[a] - prices[b]);
       names   = sortOrder.map(i => names[i]);
       vcpus   = sortOrder.map(i => vcpus[i]);
       memory  = sortOrder.map(i => memory[i]);
